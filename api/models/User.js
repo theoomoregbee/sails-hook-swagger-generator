@@ -9,7 +9,8 @@ module.exports = {
 
     attributes: {
         names: {
-            type: 'string'
+            type: 'string',
+            required: true
         },
         email: {
             type: 'string',
@@ -18,6 +19,11 @@ module.exports = {
         sex: {
             type: 'string',
             enum: ["Male", "Female"]
+        },
+        ageLimit: {
+            type: 'integer',
+            min: 15,
+            max: 100
         }
 
     }
