@@ -1,0 +1,23 @@
+{
+  "name": "sails-hook-swagger-doc",
+  "version": "1.0.0",
+  "description": "This is just a sails hook for generating swagger documentation",
+  "main": "index.js",
+  "sails": {
+    "isHook": true
+  },
+  "scripts": {
+    "test": "node ./node_modules/mocha/bin/mocha test/bootstrap.test.js test/**/*.test.js"
+  },
+  "keywords": [
+    "sails",
+    "hook",
+    "swagger"
+  ],
+  "author": "Theophilus Omoregbee",
+  "license": "ISC",
+  "devDependencies": {
+    "mocha": "^3.5.0",
+    "sails": "~0.11.0"
+  }
+}
