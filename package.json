@@ -17,6 +17,7 @@
   "author": "Theophilus Omoregbee",
   "license": "ISC",
   "devDependencies": {
+    "lodash": "^4.17.4",
     "mocha": "^3.5.0",
     "sails": "~0.11.0"
   }
