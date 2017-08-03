@@ -11,6 +11,10 @@ module.exports = {
     },
     logout: function (req, res) {
 
+    },
+
+    upload: function (req, res) {
+
     }
 };
 
