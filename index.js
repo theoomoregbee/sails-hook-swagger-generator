@@ -8,7 +8,8 @@ module.exports = function (sails) {
 
         defaults: {
             __configKey__: {
-                parameters: {},
+                parameters: {},//we can add up custom parameters here
+                blueprint_parameters: {list: ['']},//we can add custom blueprint action to parameters binding here, any specified overrides default created
                 swagger: {
                     openapi: '',
                     info: {
