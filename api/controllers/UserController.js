@@ -15,6 +15,10 @@ module.exports = {
 
     upload: function (req, res) {
 
+    },
+
+    list: function (req, res) {
+
     }
 };
 
