@@ -51,6 +51,8 @@ module.exports.routes = {
         controller: 'UserController',
         action: 'login',
         swagger: {
+            summary: 'Authentication',
+            description: 'this is used to authenticate user to our api using either phoneNumber or email and password',
             body: {
                 email: {type: 'string', required: true},
                 password: {type: 'password', required: true}
