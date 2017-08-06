@@ -1,7 +1,7 @@
 {
-  "name": "sails-hook-swagger-doc",
+  "name": "sails-hook-swagger-generator",
   "version": "1.0.0",
-  "description": "This is just a sails hook for generating swagger documentation",
+  "description": "This is just a sails hook for generating swagger documentation json",
   "main": "index.js",
   "sails": {
     "isHook": true
@@ -12,7 +12,9 @@
   "keywords": [
     "sails",
     "hook",
-    "swagger"
+    "swagger",
+    "json",
+    "generator"
   ],
   "author": "Theophilus Omoregbee",
   "license": "ISC",

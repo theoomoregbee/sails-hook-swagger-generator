@@ -18,7 +18,7 @@ describe('Basic tests ::', function () {
         Sails().lift({
             hooks: {
                 // Load the hook
-                "swaggerdoc": require('../'),
+                "swaggergenerator": require('../'),
                 // Skip grunt (unless your hook uses it)
                 "grunt": false
 
