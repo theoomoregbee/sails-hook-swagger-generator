@@ -24,10 +24,12 @@ module.exports = function (sails) {
                         title: 'Swagger Json',
                         description: 'This is a generated swagger json for your sails project',
                         termsOfService: 'http://example.com/terms',
-                        contact: {name: 'Theophilus Omoregbee', url: 'github.com/theo4u', email: 'theo4u@ymail.com'},
+                        contact: {name: 'Theophilus Omoregbee', url: 'http://github.com/theo4u', email: 'theo4u@ymail.com'},
                         license: {name: 'Apache 2.0', url: 'http://www.apache.org/licenses/LICENSE-2.0.html'},
                         version: '1.0.0'
                     },
+                    host:'localhost:1337',
+                    basePath:'/',
                     externalDocs: {url: 'http://theophilus.ziippii.com'}
                 }
             }
