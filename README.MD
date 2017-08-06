@@ -1,11 +1,133 @@
-# Swagger Doc Sails Hook
-This helps to create swagger json documentation json for our sails application
+# Swagger Generator Sails Hook
+This helps to create swagger documentation json which is based entirely on swagger specification [Specifications](https://swagger.io/specification/).
 
-## installation
-`npm install sails-hook-swagger` --save
+![](screenshot/swagger-doc.gif)
+
+
+## Installation
+`npm install sails-hook-swagger-generator --save`
 
 ## Usage
-just install the library, the moment you do, thats all check your ./json folder it should be there
+Just install the library and `sails lift`, the moment you do, that's all check your **./swagger** folder, it should be there and make sure this folder is already existing.
+
+![](screenshot/nuh_uh_conan_obrien.gif)
+
+
+
+## Example
+check the **./swagger/swagger.json** for sample generated swagger documentation json, then head to [Swagger Editor](http://editor.swagger.io/)
 
 ## Configurations
+It comes with some default settings which can be override by creating **config/swaggergenerator.js**
+```javascript
+module.exports.swaggergenerator = {
+    parameters: { //we can add up custom parameters here
+        PerPageQueryParam: {
+            in: 'query',
+            name: 'perPage',
+            required: false,
+            type: 'integer',
+            description: 'This helps with pagination and when the limit is known for pagify'
+        }
+    },
+    blueprint_parameters: {list: [{$ref: '#/parameters/PerPageQueryParam'}]},//we can add custom blueprint action to parameters binding here, any specified overrides default created
+    swagger: {
+        swagger: '2.0',
+        info: {
+            title: 'Swagger Json',
+            description: 'This is a generated swagger json for your sails project',
+            termsOfService: 'http://example.com/terms',
+            contact: {name: 'Theophilus Omoregbee', url: 'http://github.com/theo4u', email: 'theo4u@ymail.com'},
+            license: {name: 'Apache 2.0', url: 'http://www.apache.org/licenses/LICENSE-2.0.html'},
+            version: '1.0.0'
+        },
+        host: 'localhost:1337',
+        basePath: '/',
+        externalDocs: {url: 'http://theophilus.ziippii.com'}
+    }
+};
+```
+* **parameters** we can create your own custom parameter to be referenced by api service methods and it's totally based on swagger specification for parameter object. Any one added here is added to the default parameters which are
+```javascript
+ //default parameters-> where, limit, skip, sort, populate, select, page
+    params.WhereQueryParam = {
+        in: 'query',
+        name: 'where',
+        required: false,
+        type: 'string',
+        description: 'This follows the standard from http://sailsjs.com/documentation/reference/blueprint-api/find-where'
+    };
+    params.LimitQueryParam = {
+        in: 'query',
+        name: 'limit',
+        required: false,
+        type: 'integer',
+        description: 'The maximum number of records to send back (useful for pagination). Defaults to ' + config.blueprints.defaultLimit
+    };
+    params.SkipQueryParam = {
+        in: 'query',
+        name: 'skip',
+        required: false,
+        type: 'integer',
+        description: 'The number of records to skip (useful for pagination).'
+    };
+    params.SortQueryParam = {
+        in: 'query',
+        name: 'sort',
+        required: false,
+        type: 'string',
+        description: 'The sort order. By default, returned records are sorted by primary key value in ascending order. e.g. ?sort=lastName%20ASC'
+    };
+
+    params.PopulateQueryParam = {
+        in: 'query',
+        name: 'populate',
+        required: false,
+        type: 'string',
+        description: 'check for better understanding -> http://sailsjs.com/documentation/reference/blueprint-api/find-where'
+    };
+
+    params.PageQueryParam = {
+        in: 'query',
+        name: 'page',
+        required: false,
+        type: 'integer',
+        description: 'This helps with pagination and when the limit is known'
+    };
+    params.SelectQueryParam = {
+        in: 'query',
+        name: 'select',
+        required: false,
+        type: 'string',
+        description: 'This helps with what to return for the user and its "," delimited'
+    };
+
+    params.TokenHeaderParam = {
+        in: 'header',
+        name: 'token',
+        required: false,
+        type: 'string',
+        description: 'Incase we want to send header inforamtion along our request'
+    };
+
+    params.IDPathParam = {
+        in: 'path',
+        name: 'id',
+        required: true,
+        type: 'string',
+        description: 'This is to identify a particular object out'
+    };
+```
+* **blueprint_parameters** is a map between blueprint action and list of parameters and it's based on referencing of a particular parameter which can be any of this *WhereQueryParam*, *LimitQueryParam*, *SkipQueryParam*, *SortQueryParam*, *PopulateQueryParam*, *PageQueryParam*, *SelectQueryParam*, *TokenHeaderParam*, *IDPathParam* and the ones created under the **parameters** above. Any array of parameter mapped to a blueprint action overrides the default mapped parameters.
+* **Swagger** object is used to hold necessary information needed by swagger to run our mock test of api services. Check swagger specification for more, incase you want to extend it.
+
+## Changelog
+
+See the different releases [here](https://github.com/theo4u/sails-hook-swagger-generator/releases)
+
+## Liscence
+
+MIT License
+
+
 
