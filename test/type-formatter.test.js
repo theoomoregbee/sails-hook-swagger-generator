@@ -41,6 +41,46 @@ describe('Type Formatter', function () {
 
             done();
         });
-    })
+    });
+
+    //for validation types
+    describe('Validation types', function () {
+        it('should contain ', function (done) {
+            expect(type_formatter).to.have.property('validation_type');
+            done();
+        });
+
+        it('should return a string among the allowed types or undefined for not allowed types', function (done) {
+            expect(type_formatter.validation_type('max')).to.be.a('string');
+            expect(type_formatter.validation_type('')).to.be.an('undefined');
+            done();
+        });
+    });
+
+    //for blueprint parameters mapping
+    describe('Blueprint parameter', function () {
+        it('should contain ', function (done) {
+            expect(type_formatter).to.have.property('blueprint_parameter');
+            done();
+        });
+
+        it('should return array of passed action or undefined for no parameter that matched the action', function (done) {
+            expect(type_formatter.blueprint_parameter('find', {})).to.be.an('array');
+            expect(type_formatter.blueprint_parameter('PerPageQueryParam', {})).to.be.an('undefined');
+            done();
+        });
+
+        it('custom map should override defaults mapping', function (done) {
+            var find = type_formatter.blueprint_parameter('find', {});
+            var custom_map = {find: [{$ref: '#/parameters/WhereQueryParam'}]};
+            var find2 = type_formatter.blueprint_parameter('find', custom_map);
+
+            assert.notStrictEqual(find, find2, 'After applying custom map both should not be same');
+            assert.strictEqual(find2, custom_map.find, 'This should be same and not find again');
+
+            done();
+        });
+    });
+
 
 });
