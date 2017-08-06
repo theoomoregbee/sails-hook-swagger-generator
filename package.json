@@ -19,6 +19,7 @@
   "author": "Theophilus Omoregbee",
   "license": "MIT",
   "devDependencies": {
+    "chai": "^4.1.1",
     "lodash": "^4.17.4",
     "mocha": "^3.5.0",
     "sails": "~0.11.0"
