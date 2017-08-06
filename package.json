@@ -17,7 +17,7 @@
     "generator"
   ],
   "author": "Theophilus Omoregbee",
-  "license": "ISC",
+  "license": "MIT",
   "devDependencies": {
     "lodash": "^4.17.4",
     "mocha": "^3.5.0",
