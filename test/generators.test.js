@@ -86,6 +86,27 @@ describe('Generators', function () {
             expect(generators).to.have.property('parameters');
             done();
         });
+
+        it('should return default parameters with custom parameters', function (done) {
+            var custom_parameters = { //we can add up custom parameters here
+                PerPageQueryParam: {
+                    in: 'query',
+                    name: 'perPage',
+                    required: false,
+                    type: 'integer',
+                    description: 'This helps with pagination and when the limit is known for pagify'
+                }
+            };
+
+            expect(generators.parameters({
+                blueprints: {defaultLimit: 30},
+                swaggerDoc: {parameters: custom_parameters}
+            }, {configKey: 'swaggerDoc'})).to.have.property('PerPageQueryParam');
+
+            done();
+        });
+
+
     });
 
     //for routes
