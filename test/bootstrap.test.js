@@ -2,6 +2,8 @@
  * Created by theophy on 02/08/2017.
  */
 var Sails = require('sails').Sails;
+var swaggerDoc = require('../lib/swaggerDoc');
+var assert = require('chai').assert;
 
 describe('Basic tests ::', function () {
 
@@ -49,6 +51,18 @@ describe('Basic tests ::', function () {
     // Test that Sails can lift with the hook in place
     it('sails does not crash on loading our hook', function () {
         return true;
+    });
+
+    describe('Swagger generator', function () {
+        it("should make sure tags don't have any other key apart from 'name'", function (done) {
+            var spec = swaggerDoc(sails, sails.hooks.swaggergenerator);
+            for (var i = 0; i < spec.tags.length; i++) {
+                assert.property(spec.tags[i], 'name', "Should contain name property");
+                assert.lengthOf(Object.keys(spec.tags[i]), 1, "Should be of length one ");
+            }
+
+            done();
+        });
     });
 
 
