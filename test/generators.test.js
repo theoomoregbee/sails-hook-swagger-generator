@@ -117,34 +117,38 @@ describe('Generators', function () {
             done();
         });
 
-        it('generated route should have this properties assuming custom route(config/route.js) is empty', function (done) {
+        var controllers = {
+            user: {
+                login: function (req, res) {
 
-            var controllers = {
-                user: {
-                    login: function (req, res) {
+                },
+                logout: function (req, res) {
 
-                    },
-                    logout: function (req, res) {
-
-                    }
                 }
-            };
+            },
+            base: {
+                clear: function (req, res) { //this is a service that does general stuff so we don't need a model for it
+
+                }
+            }
+        };
+        var models = {
+            user: {
+                attributes: {},
+                identity: 'user',
+                globalId: 'User'
+            }
+        };
+
+        var tags = generators.tags(models);
+
+        it('generated route should have this properties assuming custom route(config/route.js) is empty', function (done) {
 
             expect(generators.routes(controllers, {}).user[0]).to.have.all.keys('http_method', 'path', 'action', 'keys', 'summary', 'description');
             done();
         });
 
         it("if controller action in custom route don't generate route for it again, use the one from the custom", function (done) {
-            var controllers = {
-                user: {
-                    login: function (req, res) {
-
-                    },
-                    logout: function (req, res) {
-
-                    }
-                }
-            };
 
             expect(_.find(generators.routes(controllers, {'post /user/login': 'UserController.login'}).user, {
                 http_method: 'post',
@@ -154,36 +158,64 @@ describe('Generators', function () {
             done();
         });
 
-        it('it should generate default blueprint action routes, create, find, findOne, update, destroy', function (done) {
-            var controllers = {
-                user: {
-                    login: function (req, res) {
+        it('it should generate default blueprint action routes, create, find, findOne, update, destroy for routes with model or tag', function (done) {
 
-                    },
-                    logout: function (req, res) {
-
-                    }
-                }
-            };
-
-            expect(_.find(generators.routes(controllers, {'post /user/login': 'UserController.login'}).user, {
+            expect(_.find(generators.routes(controllers, {'post /user/login': 'UserController.login'}, tags).user, {
                 action: 'find',
                 http_method: 'get'
             })).to.be.an('object');
 
-            expect(_.find(generators.routes(controllers, {'post /user/login': 'UserController.login'}).user, {
+            expect(_.find(generators.routes(controllers, {'post /user/login': 'UserController.login'}, tags).user, {
                 action: 'findOne',
                 http_method: 'get'
             })).to.be.an('object');
 
-            expect(_.find(generators.routes(controllers, {'post /user/login': 'UserController.login'}).user, {
+            expect(_.find(generators.routes(controllers, {'post /user/login': 'UserController.login'}, tags).user, {
                 action: 'update',
                 http_method: 'put'
             })).to.be.an('object');
 
-            expect(_.find(generators.routes(controllers, {'post /user/login': 'UserController.login'}).user, {
+            expect(_.find(generators.routes(controllers, {'post /user/login': 'UserController.login'}, tags).user, {
                 action: 'create',
                 http_method: 'post'
+            })).to.be.an('object');
+
+
+            /**
+             * should not have any of these since no model for 'base'
+             */
+            expect(_.find(generators.routes(controllers, {'post /base/clear': 'BaseController.clear'}, tags).base, {
+                action: 'find',
+                http_method: 'get'
+            })).to.be.undefined;
+
+            expect(_.find(generators.routes(controllers, {'post /base/clear': 'BaseController.clear'}, tags).base, {
+                action: 'findOne',
+                http_method: 'get'
+            })).to.be.undefined;
+
+            expect(_.find(generators.routes(controllers, {'post /base/clear': 'BaseController.clear'}, tags).base, {
+                action: 'update',
+                http_method: 'put'
+            })).to.be.undefined;
+
+            expect(_.find(generators.routes(controllers, {'post /base/clear': 'BaseController.clear'}, tags).base, {
+                action: 'create',
+                http_method: 'post'
+            })).to.be.undefined;
+
+
+            done();
+        });
+
+
+        it('should allow default methods(actions) name in a controller with no model or tag but not the one created by us', function (done) {
+            controllers.base['find'] = function (req, res) {
+
+            };
+            expect(_.find(generators.routes(controllers, {'post /base/clear': 'BaseController.clear'}, tags).base, {
+                action: 'find',
+                http_method: 'get'
             })).to.be.an('object');
 
             done();
@@ -209,6 +241,11 @@ describe('Generators', function () {
                 list: function (req, res) {
 
                 }
+            },
+            base: { //a controller without model
+                clear: function (req, res) {
+
+                }
             }
         };
 
@@ -221,10 +258,15 @@ describe('Generators', function () {
                 globalId: 'User'
             }
         };
-        var generatedRoutes = generators.routes(controllers, {'get /user/phone/:phoneNumber': 'UserController.phone'});
         var tags = generators.tags(models);
+        var generatedRoutes = generators.routes(controllers, {'get /user/phone/:phoneNumber': 'UserController.phone'}, tags);
         var actual = generators.paths(generatedRoutes, tags, {list: [{$ref: '#/parameters/PerPageQueryParam'}]});
 
+        it('should not create default paths like create, find, findOne, update and destroy for routes without models', function (done) {
+            expect(actual).to.not.have.property('/base'); //for destroy, find
+            expect(actual).to.not.have.property('/base/{id}'); //for findOne, update
+            done();
+        });
 
         it('should follow the swagger standardized url format of  "/route instead of /route/ or route/"', function (done) {
             assert.containsAllDeepKeys(actual, ['/user/login', '/user/{id}'], "should have this url pattern");
