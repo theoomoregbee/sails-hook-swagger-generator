@@ -134,7 +134,7 @@ describe('Generators', function () {
             done();
         });
 
-        it("if controller action in custom route dont't generate route for it again, use the one from the custom", function (done) {
+        it("if controller action in custom route don't generate route for it again, use the one from the custom", function (done) {
             var controllers = {
                 user: {
                     login: function (req, res) {
@@ -197,5 +197,85 @@ describe('Generators', function () {
             expect(generators).to.have.property('paths');
             done();
         });
+
+        var controllers = {
+            user: {
+                login: function (req, res) {
+
+                },
+                logout: function (req, res) {
+
+                },
+                list: function (req, res) {
+
+                }
+            }
+        };
+
+        var models = {
+            user: {
+                attributes: {
+                    name: {type: 'string', required: true}
+                },
+                identity: 'user',
+                globalId: 'User'
+            }
+        };
+        var generatedRoutes = generators.routes(controllers, {'get /user/phone/:phoneNumber': 'UserController.phone'});
+        var tags = generators.tags(models);
+        var actual = generators.paths(generatedRoutes, tags, {list: [{$ref: '#/parameters/PerPageQueryParam'}]});
+
+
+        it('should follow the swagger standardized url format of  "/route instead of /route/ or route/"', function (done) {
+            assert.containsAllDeepKeys(actual, ['/user/login', '/user/{id}'], "should have this url pattern");
+            expect(actual).to.not.have.property('user/login');
+            expect(actual).to.not.have.property('/user/{id}/');
+
+            done();
+        });
+
+        it('every route must contain tags which must be the globalId of the model', function (done) {
+            assert.deepEqual(actual['/user/login'].get.tags, [models.user.globalId], "The tag must be array of the globalId ");
+            done();
+        });
+
+        it('all route should produce and consume application/json', function (done) {
+            expect(actual['/user/login'].get.produces).to.have.members(['application/json']);
+            expect(actual['/user/login'].get.consumes).to.have.members(['application/json']);
+            done();
+        });
+
+        it('should handle the different types of response', function (done) {
+            expect(actual['/user/login'].get.responses).to.have.all.keys(200, 404, 500);
+            done();
+        });
+
+        it('should custom blueprint mapping should override default parameter mapping', function (done) {
+            assert.notIncludeDeepMembers(actual['/user/list'].get.parameters, [{$ref: '#/parameters/TokenHeaderParam'}], "should not contain token header param since it was overridden");
+            done();
+        });
+
+        it('all route should hold the token header parameter, in case that routes needs authentication, if overridden above test case, it wont add', function (done) {
+            expect(actual['/user/logout'].get.parameters).to.have.deep.members([{$ref: '#/parameters/TokenHeaderParam'}]);
+            done();
+        });
+
+        it('should add form body for default blueprints actions like create and update', function (done) {
+            expect(_.find(actual['/user'].post.parameters, {name: 'body', in: 'body'})).to.be.an('object');
+            expect(_.find(actual['/user/{id}'].put.parameters, {name: 'body', in: 'body'})).to.be.an('object');
+            done();
+        });
+
+
+        it('should make sure every route keys has a corresponding path type of parameter', function (done) {
+            expect(_.find(actual['/user/phone/{phoneNumber}'].get.parameters, {
+                name: 'phoneNumber',
+                in: 'path'
+            })).to.be.an('object');
+            expect(_.find(actual['/user/{id}'].get.parameters, {$ref: '#/parameters/IDPathParam'})).to.be.an('object');
+            done();
+        });
+
     });
-});
+})
+;
