@@ -5,7 +5,9 @@ This helps to create swagger documentation json which is based entirely on swagg
 
 
 ## Installation
-`npm install sails-hook-swagger-generator --save`
+```sh
+$ npm install sails-hook-swagger-generator --save
+```
 
 ## Usage
 Just install the library and `sails lift`, the moment you do, that's all check your **./swagger** folder, it should be there and make sure this folder is already existing.
@@ -121,13 +123,42 @@ module.exports.swaggergenerator = {
 * **blueprint_parameters** is a map between blueprint action and list of parameters and it's based on referencing of a particular parameter which can be any of this *WhereQueryParam*, *LimitQueryParam*, *SkipQueryParam*, *SortQueryParam*, *PopulateQueryParam*, *PageQueryParam*, *SelectQueryParam*, *TokenHeaderParam*, *IDPathParam* and the ones created under the **parameters** above. Any array of parameter mapped to a blueprint action overrides the default mapped parameters.
 * **Swagger** object is used to hold necessary information needed by swagger to run our mock test of api services. Check swagger specification for more, incase you want to extend it.
 
+## Testing
+
+* Clone this repository
+
+* Install all development dependencies
+
+```sh
+$ npm install
+```
+* Then run test
+
+```sh
+$ npm test
+```
+
+## Contribute
+
+Fork this repo and push in your ideas.
+Do not forget to add a bit of test(s) of what value you adding.
+
+
 ## Changelog
 
 See the different releases [here](https://github.com/theo4u/sails-hook-swagger-generator/releases)
 
-## Liscence
+## Licence
 
-MIT License
+The MIT License (MIT)
+
+Copyright (c) 2017 theo4u & Contributors
+
+Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the “Software”), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 
 
