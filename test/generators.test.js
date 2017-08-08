@@ -4,6 +4,7 @@
 var generators = require("../lib/generators");
 var assert = require('chai').assert;
 var expect = require('chai').expect;
+var _ = require('lodash');
 
 
 describe('Generators', function () {
@@ -115,6 +116,79 @@ describe('Generators', function () {
             expect(generators).to.have.property('routes');
             done();
         });
+
+        it('generated route should have this properties assuming custom route(config/route.js) is empty', function (done) {
+
+            var controllers = {
+                user: {
+                    login: function (req, res) {
+
+                    },
+                    logout: function (req, res) {
+
+                    }
+                }
+            };
+
+            expect(generators.routes(controllers, {}).user[0]).to.have.all.keys('http_method', 'path', 'action', 'keys', 'summary', 'description');
+            done();
+        });
+
+        it("if controller action in custom route dont't generate route for it again, use the one from the custom", function (done) {
+            var controllers = {
+                user: {
+                    login: function (req, res) {
+
+                    },
+                    logout: function (req, res) {
+
+                    }
+                }
+            };
+
+            expect(_.find(generators.routes(controllers, {'post /user/login': 'UserController.login'}).user, {
+                http_method: 'post',
+                action: 'login'
+            })).to.be.an('object');
+
+            done();
+        });
+
+        it('it should generate default blueprint action routes, create, find, findOne, update, destroy', function (done) {
+            var controllers = {
+                user: {
+                    login: function (req, res) {
+
+                    },
+                    logout: function (req, res) {
+
+                    }
+                }
+            };
+
+            expect(_.find(generators.routes(controllers, {'post /user/login': 'UserController.login'}).user, {
+                action: 'find',
+                http_method: 'get'
+            })).to.be.an('object');
+
+            expect(_.find(generators.routes(controllers, {'post /user/login': 'UserController.login'}).user, {
+                action: 'findOne',
+                http_method: 'get'
+            })).to.be.an('object');
+
+            expect(_.find(generators.routes(controllers, {'post /user/login': 'UserController.login'}).user, {
+                action: 'update',
+                http_method: 'put'
+            })).to.be.an('object');
+
+            expect(_.find(generators.routes(controllers, {'post /user/login': 'UserController.login'}).user, {
+                action: 'create',
+                http_method: 'post'
+            })).to.be.an('object');
+
+            done();
+        });
+
     });
 
     //for paths
