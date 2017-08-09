@@ -123,6 +123,38 @@ module.exports.swaggergenerator = {
 * **blueprint_parameters** is a map between blueprint action and list of parameters and it's based on referencing of a particular parameter which can be any of this *WhereQueryParam*, *LimitQueryParam*, *SkipQueryParam*, *SortQueryParam*, *PopulateQueryParam*, *PageQueryParam*, *SelectQueryParam*, *TokenHeaderParam*, *IDPathParam* and the ones created under the **parameters** above. Any array of parameter mapped to a blueprint action overrides the default mapped parameters.
 * **Swagger** object is used to hold necessary information needed by swagger to run our mock test of api services. Check swagger specification for more, incase you want to extend it.
 
+## Custom Route Configuration
+If you want to add extra configuration to a route, it can be done via the `config/routes.js`, since sails uses any of this two route pattern
+* `'http_method route':'controller.action'` or
+* `'http_method route':{controller:'controller', action:'action'}`
+
+We can extend and add extra information on the second above for sails hook swagger generator to override default properties(which is created from the first). Adding an object with a key **swagger** will do the trick.
+```javascript
+{
+    'post /user/login': {
+        controller: 'UserController',
+            action: 'login',
+            swagger: {
+           		summary: 'Authentication',
+                description: 'This is for authentication of any user',
+                body: {
+                        username: { type: 'string', required: true },
+                        password: { type: 'password', required: true }
+                     },
+            query: [{ $ref: '#/parameters/IDPathParam' }]
+        }
+    }
+}
+```
+### Properties of swagger
+* **summary**: for adding your own custom summary, e.g Authentication
+* **description**: for giving detailed description about the api service method, e.g This is for authentication of any type of user
+* **body**: if the route is taking in form post, and it follows our normal attribute from [sails model](http://sailsjs.com/documentation/concepts/models-and-orm/attributes)
+* **query**: for any query you expecting from the user consuming the service method, you can also reference the default created above (*WhereQueryParam*, *LimitQueryParam*, *SkipQueryParam*, *SortQueryParam*, *PopulateQueryParam*, *PageQueryParam*, *SelectQueryParam*, *TokenHeaderParam*, *IDPathParam*) and add your own following the swagger specification.
+**NB** it overrides the default route params attached from the sails generator
+
+
+
 ## Testing
 
 * Clone this repository
