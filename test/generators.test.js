@@ -86,7 +86,8 @@ describe('Generators', function () {
                     attributes: {
                         name: {type: 'string'} //no required this time
                     },
-                    identity: 'user'
+                    identity: 'user',
+                    globalId: 'User'
                 }
             };
 
