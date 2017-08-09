@@ -79,6 +79,21 @@ describe('Generators', function () {
             expect(generators.definitions(models)).to.not.have.property('user');
             done();
         });
+
+        it('should not allow empty required array, instead it should be out instead of empty array -- avoiding swagger Semantic error ', function (done) {
+            var models = {
+                user: {
+                    attributes: {
+                        name: {type: 'string'} //no required this time
+                    },
+                    identity: 'user'
+                }
+            };
+
+            expect(generators.definitions(models).user).to.not.have.property('required');
+            done();
+        });
+
     });
 
     //for parameters
