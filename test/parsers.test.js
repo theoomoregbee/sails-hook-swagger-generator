@@ -23,7 +23,7 @@ describe('Parser', function () {
             done();
         });
 
-        it('should return object with just properties and required keys', function (done) {
+        it('should return object with just properties', function (done) {
             var model_attributes = {
                 name: {
                     type: 'string',
@@ -61,6 +61,27 @@ describe('Parser', function () {
 
             done();
         });
+
+        it('parsed attributes should not contain required field when no required attribute is passed ', function (done) {
+            var model_attributes = {
+                name: {
+                    type: 'string'
+                },
+                gender: {
+                    type: 'string',
+                    enum: ['Male', 'Female']
+                },
+                ageLimit: {
+                    type: 'integer',
+                    max: 100,
+                    min: 18
+                }
+            };
+            var attributes = parser.attributes(model_attributes);
+            expect(attributes).to.not.have.property('required');
+            done();
+        });
+
     });
 
     //for route parsing
