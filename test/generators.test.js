@@ -237,6 +237,19 @@ describe('Generators', function () {
             done();
         });
 
+        it('should not override default blueprints path, http_method even if found in a controller', function (done) {
+
+            controllers.user['update'] = function (req, res) {
+
+            };
+
+            expect(_.find(generators.routes(controllers, {}, tags).base, {
+                action: 'update',
+                http_method: 'put'
+            })).to.be.an('object');
+            done();
+        });
+
     });
 
     //for paths
