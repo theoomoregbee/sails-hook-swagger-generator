@@ -1,0 +1,11 @@
+language: node_js
+node_js:
+  - "6"
+notifications:
+  email: false
+branches:
+  only:
+    - master
+before_script:
+  - npm install
+
