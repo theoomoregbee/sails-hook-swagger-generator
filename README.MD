@@ -27,7 +27,7 @@ check the **./swagger/swagger.json** for sample generated swagger documentation 
 ## Configurations
 It comes with some default settings which can be override by creating **config/swaggergenerator.js**
 ```javascript
-module.exports.swaggergenerator = {
+module.exports["swagger-generator"] = {
     parameters: { //we can add up custom parameters here
         PerPageQueryParam: {
             in: 'query',
