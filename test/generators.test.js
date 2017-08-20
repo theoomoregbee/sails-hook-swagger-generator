@@ -160,13 +160,13 @@ describe('Generators', function () {
 
         it('generated route should have this properties assuming custom route(config/route.js) is empty', function (done) {
 
-            expect(generators.routes(controllers, {}).user[0]).to.have.all.keys('http_method', 'path', 'action', 'keys', 'summary', 'description');
+            expect(generators.routes(controllers, {routes: {}}).user[0]).to.have.all.keys('http_method', 'path', 'action', 'keys', 'summary', 'description');
             done();
         });
 
         it("if controller action in custom route don't generate route for it again, use the one from the custom", function (done) {
 
-            expect(_.find(generators.routes(controllers, {'post /user/login': 'UserController.login'}).user, {
+            expect(_.find(generators.routes(controllers, {routes: {'post /user/login': 'UserController.login'}}).user, {
                 http_method: 'post',
                 action: 'login'
             })).to.be.an('object');
@@ -176,22 +176,22 @@ describe('Generators', function () {
 
         it('it should generate default blueprint action routes, create, find, findOne, update, destroy for routes with model or tag', function (done) {
 
-            expect(_.find(generators.routes(controllers, {'post /user/login': 'UserController.login'}, tags).user, {
+            expect(_.find(generators.routes(controllers, {routes: {'post /user/login': 'UserController.login'}}, tags).user, {
                 action: 'find',
                 http_method: 'get'
             })).to.be.an('object');
 
-            expect(_.find(generators.routes(controllers, {'post /user/login': 'UserController.login'}, tags).user, {
+            expect(_.find(generators.routes(controllers, {routes: {'post /user/login': 'UserController.login'}}, tags).user, {
                 action: 'findOne',
                 http_method: 'get'
             })).to.be.an('object');
 
-            expect(_.find(generators.routes(controllers, {'post /user/login': 'UserController.login'}, tags).user, {
+            expect(_.find(generators.routes(controllers, {routes: {'post /user/login': 'UserController.login'}}, tags).user, {
                 action: 'update',
                 http_method: 'put'
             })).to.be.an('object');
 
-            expect(_.find(generators.routes(controllers, {'post /user/login': 'UserController.login'}, tags).user, {
+            expect(_.find(generators.routes(controllers, {routes: {'post /user/login': 'UserController.login'}}, tags).user, {
                 action: 'create',
                 http_method: 'post'
             })).to.be.an('object');
@@ -200,22 +200,22 @@ describe('Generators', function () {
             /**
              * should not have any of these since no model for 'base'
              */
-            expect(_.find(generators.routes(controllers, {'post /base/clear': 'BaseController.clear'}, tags).base, {
+            expect(_.find(generators.routes(controllers, {routes: {'post /base/clear': 'BaseController.clear'}}, tags).base, {
                 action: 'find',
                 http_method: 'get'
             })).to.be.undefined;
 
-            expect(_.find(generators.routes(controllers, {'post /base/clear': 'BaseController.clear'}, tags).base, {
+            expect(_.find(generators.routes(controllers, {routes: {'post /base/clear': 'BaseController.clear'}}, tags).base, {
                 action: 'findOne',
                 http_method: 'get'
             })).to.be.undefined;
 
-            expect(_.find(generators.routes(controllers, {'post /base/clear': 'BaseController.clear'}, tags).base, {
+            expect(_.find(generators.routes(controllers, {routes: {'post /base/clear': 'BaseController.clear'}}, tags).base, {
                 action: 'update',
                 http_method: 'put'
             })).to.be.undefined;
 
-            expect(_.find(generators.routes(controllers, {'post /base/clear': 'BaseController.clear'}, tags).base, {
+            expect(_.find(generators.routes(controllers, {routes: {'post /base/clear': 'BaseController.clear'}}, tags).base, {
                 action: 'create',
                 http_method: 'post'
             })).to.be.undefined;
@@ -229,7 +229,7 @@ describe('Generators', function () {
             controllers.base['find'] = function (req, res) {
 
             };
-            expect(_.find(generators.routes(controllers, {'post /base/clear': 'BaseController.clear'}, tags).base, {
+            expect(_.find(generators.routes(controllers, {routes: {'post /base/clear': 'BaseController.clear'}}, tags).base, {
                 action: 'find',
                 http_method: 'get'
             })).to.be.an('object');
@@ -242,10 +242,43 @@ describe('Generators', function () {
             controllers.user['update'] = function (req, res) {
             };
 
-            expect(_.find(generators.routes(controllers, {}, tags).user, {
+            expect(_.find(generators.routes(controllers, {routes: {}}, tags).user, {
                 action: 'update',
                 http_method: 'put'
             })).to.be.an('object');
+            done();
+        });
+
+
+        it('should not generate default rest routes if blueprint.rest is false', function (done) {
+
+            var config = {routes: {}, blueprints: {rest: false}};
+
+            expect(_.find(generators.routes(controllers, config, tags).user, {
+                action: 'create',
+                http_method: 'post'
+            }), "POST /user -> UserController.create").to.be.undefined;
+
+            expect(_.find(generators.routes(controllers, config, tags).user, {
+                action: 'find',
+                http_method: 'get'
+            }), "GET /user -> UserController.find").to.be.undefined;
+
+            expect(_.find(generators.routes(controllers, config, tags).user, {
+                action: 'findOne',
+                http_method: 'get'
+            }), "GET /user/:id -> UserController.findOne").to.be.undefined;
+
+            expect(_.find(generators.routes(controllers, config, tags).user, {
+                action: 'update',
+                http_method: 'put'
+            }), "PUT /user/:id -> UserController.update").to.be.undefined;
+
+            expect(_.find(generators.routes(controllers, config, tags).user, {
+                action: 'destroy',
+                http_method: 'delete'
+            }), "DELETE /user/:id -> UserController.destroy").to.be.undefined;
+
             done();
         });
 
@@ -287,7 +320,7 @@ describe('Generators', function () {
             }
         };
         var tags = generators.tags(models);
-        var generatedRoutes = generators.routes(controllers, {'get /user/phone/:phoneNumber': 'UserController.phone'}, tags);
+        var generatedRoutes = generators.routes(controllers, {routes: {'get /user/phone/:phoneNumber': 'UserController.phone'}}, tags);
         var actual = generators.paths(generatedRoutes, tags, {list: [{$ref: '#/parameters/PerPageQueryParam'}]});
 
         it('should not create default paths like create, find, findOne, update and destroy for routes without models', function (done) {
