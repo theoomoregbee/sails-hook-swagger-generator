@@ -254,27 +254,40 @@ describe('Generators', function () {
 
             var config = {routes: {}, blueprints: {rest: false}};
 
-            expect(_.find(generators.routes(controllers, config, tags).user, {
+            var controllers = {
+                user: {
+                    login: function (req, res) {
+
+                    },
+                    logout: function (req, res) {
+
+                    }
+                }
+            };
+
+            var routes = generators.routes(controllers, config, tags).user;
+
+            expect(_.find(routes, {
                 action: 'create',
                 http_method: 'post'
             }), "POST /user -> UserController.create").to.be.undefined;
 
-            expect(_.find(generators.routes(controllers, config, tags).user, {
+            expect(_.find(routes, {
                 action: 'find',
                 http_method: 'get'
             }), "GET /user -> UserController.find").to.be.undefined;
 
-            expect(_.find(generators.routes(controllers, config, tags).user, {
+            expect(_.find(routes, {
                 action: 'findOne',
                 http_method: 'get'
             }), "GET /user/:id -> UserController.findOne").to.be.undefined;
 
-            expect(_.find(generators.routes(controllers, config, tags).user, {
+            expect(_.find(routes, {
                 action: 'update',
                 http_method: 'put'
             }), "PUT /user/:id -> UserController.update").to.be.undefined;
 
-            expect(_.find(generators.routes(controllers, config, tags).user, {
+            expect(_.find(routes, {
                 action: 'destroy',
                 http_method: 'delete'
             }), "DELETE /user/:id -> UserController.destroy").to.be.undefined;
