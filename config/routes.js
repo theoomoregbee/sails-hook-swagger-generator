@@ -60,6 +60,7 @@ module.exports.routes = {
         }
     },
     'get /user/logout': 'UserController.logout',
+    '/user/me': 'UserController.me',
     'get /user/test/:phoneNumber': 'UserController.logout',
     'get /user/upload': {
         controller: 'UserController',
