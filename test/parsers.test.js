@@ -91,7 +91,7 @@ describe('Parser', function () {
             done();
         });
 
-        describe('should handle the 2 type of route pattern', function () {
+        describe('should handle the 3 type of route pattern', function () {
             var expected_route = {
                 user: [{
                     http_method: 'post',
@@ -103,6 +103,62 @@ describe('Parser', function () {
                     body: {},
                     query: []
                 }]
+            };
+
+            // Going to fix it soon to follow Sails Routes Address which means for a path allow any CRUD method (GET, PUT, POST, DELETE or PATCH) when a method is not specified
+            var expected_route2 = {
+                user: [{
+                    http_method: 'post',
+                    path: '/user/login',
+                    action: 'login',
+                    keys: [],
+                    summary: '',
+                    description: '',
+                    body: {},
+                    query: []
+                },
+                    {
+                        http_method: 'get',
+                        path: '/user/login',
+                        action: 'login',
+                        keys: [],
+                        summary: '',
+                        description: '',
+                        body: {},
+                        query: []
+                    },
+                    {
+                        http_method: 'put',
+                        path: '/user/login',
+                        action: 'login',
+                        keys: [],
+                        summary: '',
+                        description: '',
+                        body: {},
+                        query: []
+                    },
+                    {
+                        http_method: 'delete',
+                        path: '/user/login',
+                        action: 'login',
+                        keys: [],
+                        summary: '',
+                        description: '',
+                        body: {},
+                        query: []
+                    },
+                    {
+                        http_method: 'patch',
+                        path: '/user/login',
+                        action: 'login',
+                        keys: [],
+                        summary: '',
+                        description: '',
+                        body: {},
+                        query: []
+                    }
+
+                ]
             };
 
             it("should handle basic route pattern, 'method path':'controller.action'", function (done) {
@@ -120,6 +176,12 @@ describe('Parser', function () {
                 }), expected_route, "Should return exactly the above properties for each route");
                 done();
             });
+
+            it("should handle basic route pattern, 'path':'controller.action'", function (done) {
+                assert.deepEqual(parser.routes({'/user/login': 'UserController.login'}), expected_route2, "Should return exactly the above properties for each route");
+                done();
+            });
+
         });
 
 
