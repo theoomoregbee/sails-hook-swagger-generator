@@ -124,7 +124,6 @@ describe('Parser', function () {
                         keys: [],
                         summary: '',
                         description: '',
-                        body: {},
                         query: []
                     },
                     {
@@ -144,7 +143,6 @@ describe('Parser', function () {
                         keys: [],
                         summary: '',
                         description: '',
-                        body: {},
                         query: []
                     },
                     {
@@ -154,7 +152,6 @@ describe('Parser', function () {
                         keys: [],
                         summary: '',
                         description: '',
-                        body: {},
                         query: []
                     }
 
