@@ -54,7 +54,7 @@ module.exports["swagger-generator"] = {
     }
 };
 ```
-* *swaggerJsonPath* where to generate the `swagger.json` file to, default to sails.config.appPath + "/swagger/swagger.json"
+* **swaggerJsonPath** where to generate the `swagger.json` file to, default to sails.config.appPath + "/swagger/swagger.json"
 * **parameters** we can create your own custom parameter to be referenced by api service methods and it's totally based on swagger specification for parameter object. Any one added here is added to the default parameters which are
 ```javascript
  //default parameters-> where, limit, skip, sort, populate, select, page
