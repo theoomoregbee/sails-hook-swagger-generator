@@ -335,7 +335,6 @@ describe('Generators', function () {
         var tags = generators.tags(models);
         var generatedRoutes = generators.routes(controllers, {routes: {'get /user/phone/:phoneNumber': 'UserController.phone'}}, tags);
         var actual = generators.paths(generatedRoutes, tags, {list: [{$ref: '#/parameters/PerPageQueryParam'}]});
-        console.log ('>>',generatedRoutes);
 
         it('should not create default paths like create, find, findOne, update and destroy for routes without models', function (done) {
             expect(actual).to.not.have.property('/base'); //for destroy, find
