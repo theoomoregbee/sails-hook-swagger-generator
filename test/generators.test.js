@@ -295,6 +295,132 @@ describe('Generators', function () {
             done();
         });
 
+        it('should generate default rest routes with restPrefix blueprints argument', function (done) {
+
+            var config = {routes: {}, blueprints: {rest: true, restPrefix: '/api'}};
+
+            var controllers = {
+              user: {
+                login: function (req, res) {
+
+                },
+                logout: function (req, res) {
+
+                }
+              }
+            };
+
+            var routes = generators.routes(controllers, config, tags).user;
+
+            expect(_.find(routes, {
+              action: 'create',
+              http_method: 'post',
+              path: '/api/user'
+            })).to.be.not.undefined;
+
+            expect(_.find(routes, {
+              action: 'find',
+              http_method: 'get',
+              path: '/api/user'
+            })).to.be.not.undefined;
+
+            expect(_.find(routes, {
+              action: 'findOne',
+              http_method: 'get',
+              path: '/api/user/{id}'
+            })).to.be.not.undefined;
+
+            expect(_.find(routes, {
+              action: 'update',
+              http_method: 'put',
+              path: '/api/user/{id}'
+            })).to.be.not.undefined;
+
+            expect(_.find(routes, {
+              action: 'destroy',
+              http_method: 'delete',
+              path: '/api/user/{id}'
+            })).to.be.not.undefined;
+
+            done();
+        });
+
+        it('should generate default rest routes with prefix blueprints argument', function (done) {
+
+            var config = {routes: {}, blueprints: {rest: true, prefix: '/root'}};
+
+            var controllers = {
+              user: {
+                login: function (req, res) {
+
+                },
+                logout: function (req, res) {
+
+                }
+              }
+            };
+
+            var routes = generators.routes(controllers, config, tags).user;
+
+            expect(_.find(routes, {
+              action: 'create',
+              http_method: 'post',
+              path: '/root/user'
+            })).to.be.not.undefined;
+
+            expect(_.find(routes, {
+              action: 'find',
+              http_method: 'get',
+              path: '/root/user'
+            })).to.be.not.undefined;
+
+            expect(_.find(routes, {
+              action: 'findOne',
+              http_method: 'get',
+              path: '/root/user/{id}'
+            })).to.be.not.undefined;
+
+            expect(_.find(routes, {
+              action: 'update',
+              http_method: 'put',
+              path: '/root/user/{id}'
+            })).to.be.not.undefined;
+
+            expect(_.find(routes, {
+              action: 'destroy',
+              http_method: 'delete',
+              path: '/root/user/{id}'
+            })).to.be.not.undefined;
+
+            done();
+        });
+
+      it('should generate default rest routes with prefix and restPrefix blueprints argument', function (done) {
+
+        var config = {routes: {}, blueprints: {rest: true, prefix: '/root', restPrefix: '/api'}};
+
+        var controllers = {
+          user: {
+            login: function (req, res) {
+
+            },
+            logout: function (req, res) {
+
+            }
+          }
+        };
+
+        var routes = generators.routes(controllers, config, tags).user;
+
+        expect(_.find(routes, {
+          action: 'create',
+          http_method: 'post',
+          path: '/root/api/user'
+        })).to.be.not.undefined;
+
+        done();
+      });
+
     });
 
     //for paths
