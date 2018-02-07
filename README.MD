@@ -27,7 +27,7 @@ check the **./swagger/swagger.json** for sample generated swagger documentation 
 It comes with some default settings which can be override by creating **config/swaggergenerator.js**
 ```javascript
 module.exports["swagger-generator"] = {
-    swaggerJsonPath: sails.config.appPath + "/swagger/swagger.json",
+    swaggerJsonPath: "./swagger/swagger.json",
     parameters: { //we can add up custom parameters here
         PerPageQueryParam: {
             in: 'query',
