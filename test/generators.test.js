@@ -519,5 +519,96 @@ describe('Generators', function () {
         });
 
     });
+    //for custom parameter addition from routes.js
+    describe('custom parameters', function(done) {
+
+      var models = {
+        user: {
+          attributes: {
+            name: {
+              type: 'string',
+              required: true
+            }
+          },
+          identity: 'user',
+          globalId: 'User'
+        },
+      };
+
+      var controllers = {
+        user: {
+          view: function(req, res) {
+
+          },
+        },
+        base: { //a controller without model
+          clear: function(req, res) {
+
+          }
+        }
+      };
+      var swaggerObjectUser = {
+        parameters: [{ in: 'query',
+          name: 'firstName',
+          required: true,
+          type: 'string',
+          description: 'This is a custom required parameter'
+        }]
+      };
+
+      var swaggerObjectBase = {
+        parameters: [{
+          name: 'data'
+        }]
+      };
+      var tags = generators.tags(models);
+      var generatedRoutes = generators.routes(controllers, {
+        routes: {
+          'post /user/view': {
+            controller: 'UserController',
+            action: 'view',
+            swagger: swaggerObjectUser
+          },
+          'get /base/clear': {
+            controller: 'BaseController',
+            action: 'clear',
+            swagger: swaggerObjectBase
+          }
+        },
+        blueprints: {
+          rest: false
+        }
+      }, tags);
+      var actual = generators.paths(generatedRoutes, tags);
+
+      it('should contain', function(done) {
+        expect(generators).to.have.property('parameters');
+        done();
+      });
+
+      it('should increase the number of parameters after adding custom parameter', function(done) {
+        expect(actual['/user/view'].post.parameters).to.have.length(2);
+        done();
+      });
+
+      it('should override and create new parameter when blueprint is false', function(done) {
+        expect(actual['/user/view'].post.parameters).to.have.deep.members([{
+          "$ref": "#/parameters/TokenHeaderParam"
+        }, swaggerObjectUser.parameters[0]]);
+        done();
+      });
+
+      it('should generate custom parameter with default details', function(done) {
+        expect(actual['/base/clear'].get.parameters).to.have.deep.members([{
+          "$ref": "#/parameters/TokenHeaderParam"
+        }, { in: 'parameters',
+          name: 'data',
+          required: false,
+          type: 'string',
+          description: 'This is a custom param for data'
+        }]);
+        done();
+      });
+    });
 })
 ;
