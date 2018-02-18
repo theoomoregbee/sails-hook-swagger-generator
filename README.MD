@@ -180,7 +180,7 @@ $ npm test
 
 Fork this repo and push in your ideas.
 Do not forget to add a bit of test(s) of what value you adding.
-
+* stick to conventional commit message [here](https://conventionalcommits.org/) or read more [angular commit](https://github.com/angular/angular/blob/master/CONTRIBUTING.md#commit) pattern
 
 ## Changelog
 
