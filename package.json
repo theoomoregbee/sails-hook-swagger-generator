@@ -13,7 +13,7 @@
   "scripts": {
     "test": "node ./node_modules/mocha/bin/mocha test/bootstrap.test.js test/**/*.test.js",
     "travis-deploy-once": "travis-deploy-once",
-    "semantic-release": "semantic-release"
+    "semantic-release": "semantic-release pre && npm publish && semantic-release post"
   },
   "keywords": [
     "sails",
