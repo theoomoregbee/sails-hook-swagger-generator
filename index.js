@@ -7,6 +7,7 @@ module.exports = function (sails) {
     return {
 
         defaults: {
+            disabled: false,
             __configKey__: {
                 swaggerJsonPath: sails.config.appPath + "/swagger/swagger.json",
                 parameters: { //we can add up custom parameters here
