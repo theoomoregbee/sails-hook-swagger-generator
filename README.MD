@@ -1,5 +1,5 @@
 # Swagger Generator Sails Hook
-[![Travis](https://img.shields.io/travis/theo4u/sails-hook-swagger-generator.svg)]()
+[![Travis](https://img.shields.io/travis/theo4u/sails-hook-swagger-generator.svg)](https://travis-ci.org/theo4u/sails-hook-swagger-generator)
 [![npm](https://img.shields.io/npm/v/sails-hook-swagger-generator.svg)](https://www.npmjs.com/package/sails-hook-swagger-generator)
 [![npm](https://img.shields.io/npm/l/express.svg)]()
 
