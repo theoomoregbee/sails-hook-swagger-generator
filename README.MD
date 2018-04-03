@@ -1,5 +1,5 @@
 # Swagger Generator Sails Hook
-[![Travis](https://img.shields.io/travis/theo4u/sails-hook-swagger-generator.svg)]()
+[![Travis](https://img.shields.io/travis/theo4u/sails-hook-swagger-generator.svg)](https://travis-ci.org/theo4u/sails-hook-swagger-generator)
 [![npm](https://img.shields.io/npm/v/sails-hook-swagger-generator.svg)](https://www.npmjs.com/package/sails-hook-swagger-generator)
 [![npm](https://img.shields.io/npm/l/express.svg)]()
 
@@ -27,6 +27,7 @@ check the **./swagger/swagger.json** for sample generated swagger documentation 
 It comes with some default settings which can be override by creating **config/swaggergenerator.js**
 ```javascript
 module.exports["swagger-generator"] = {
+    disabled: false,
     swaggerJsonPath: "./swagger/swagger.json",
     parameters: { //we can add up custom parameters here
         PerPageQueryParam: {
@@ -54,6 +55,7 @@ module.exports["swagger-generator"] = {
     }
 };
 ```
+* **disabled** attribute is used to disable the module. (e.g you may want to disable it on production)
 * **swaggerJsonPath** where to generate the `swagger.json` file to, default to `sails.config.appPath + "/swagger/swagger.json"`
 * **parameters** we can create your own custom parameter to be referenced by api service methods and it's totally based on swagger specification for parameter object. Any one added here is added to the default parameters which are
 ```javascript
@@ -134,35 +136,24 @@ If you want to add extra configuration to a route, it can be done via the `confi
 * `'http_method route':'controller.action'` or
 * `'http_method route':{controller:'controller', action:'action'}`
 
-We can extend and add extra information on the second above for sails hook swagger generator to override default properties(which is created from the first). Adding an object with a key **swagger** will do the trick.We can also add custom personalized `parameters` if required.
-
+We can extend and add extra information on the second above for sails hook swagger generator to override default properties(which is created from the first). Adding an object with a key **swagger** will do the trick.
 ```javascript
 {
-  'post /user/login': {
-    controller: 'UserController',
-    action: 'login',
-    swagger: {
-      summary: 'Authentication',
-      description: 'This is for authentication of any user',
-      body: {
-        username: { type: 'string', required: true },
-        password: { type: 'password', required: true }
-      },
-      query: [{
-        $ref: '#/parameters/IDPathParam'
-      }],
-      parameters: [{
-        in: 'query',
-        name: 'firstName',
-        required: true,
-        type: 'string',
-        description: 'This is a custom required parameter'
-      }]
+    'post /user/login': {
+        controller: 'UserController',
+            action: 'login',
+            swagger: {
+           		summary: 'Authentication',
+                description: 'This is for authentication of any user',
+                body: {
+                        username: { type: 'string', required: true },
+                        password: { type: 'password', required: true }
+                     },
+            query: [{ $ref: '#/parameters/IDPathParam' }]
+        }
     }
-  }
 }
 ```
-
 ### Properties of swagger
 * **summary**: for adding your own custom summary, e.g Authentication
 * **description**: for giving detailed description about the api service method, e.g This is for authentication of any type of user
@@ -200,3 +191,4 @@ See the different releases [here](https://github.com/theo4u/sails-hook-swagger-g
 ## License
 
 MIT License (MIT)
+
