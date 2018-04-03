@@ -137,28 +137,41 @@ If you want to add extra configuration to a route, it can be done via the `confi
 * `'http_method route':{controller:'controller', action:'action'}`
 
 We can extend and add extra information on the second above for sails hook swagger generator to override default properties(which is created from the first). Adding an object with a key **swagger** will do the trick.
+
 ```javascript
 {
-    'post /user/login': {
-        controller: 'UserController',
-            action: 'login',
-            swagger: {
-           		summary: 'Authentication',
-                description: 'This is for authentication of any user',
-                body: {
-                        username: { type: 'string', required: true },
-                        password: { type: 'password', required: true }
-                     },
-            query: [{ $ref: '#/parameters/IDPathParam' }]
-        }
+  'post /user/login': {
+    controller: 'UserController',
+    action: 'login',
+    swagger: {
+      summary: 'Authentication',
+      description: 'This is for authentication of any user',
+      body: {
+        username: { type: 'string', required: true },
+        password: { type: 'password', required: true }
+      },
+      query: [{
+        $ref: '#/parameters/IDPathParam'
+      }],
+      parameters: [{
+        in: 'query',
+        name: 'firstName',
+        required: true,
+        type: 'string',
+        description: 'This is a custom required parameter'
+      }]
     }
+  }
 }
 ```
+
 ### Properties of swagger
 * **summary**: for adding your own custom summary, e.g Authentication
 * **description**: for giving detailed description about the api service method, e.g This is for authentication of any type of user
 * **body**: if the route is taking in form post, and it follows our normal attribute from [sails model](http://sailsjs.com/documentation/concepts/models-and-orm/attributes)
 * **query**: for any query you expecting from the user consuming the service method, you can also reference the default created above (*WhereQueryParam*, *LimitQueryParam*, *SkipQueryParam*, *SortQueryParam*, *PopulateQueryParam*, *PageQueryParam*, *SelectQueryParam*, *TokenHeaderParam*, *IDPathParam*) and add your own following the swagger specification.
+* We can also add custom personalized **parameters** if required.
+
 **NB** it overrides the default route params attached from the sails generator
 
 
@@ -191,4 +204,3 @@ See the different releases [here](https://github.com/theo4u/sails-hook-swagger-g
 ## License
 
 MIT License (MIT)
-
