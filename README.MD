@@ -189,6 +189,10 @@ $ npm install
 $ npm test
 ```
 
+## Road Map
+Since the release of v1.0.0 of [sailsjs](https://github.com/balderdashy/sails)
+* [ ] read info about a control using machine-as-action [#4](https://github.com/theo4u/sails-hook-swagger-generator/issues/4)
+
 ## Contribute
 
 Fork this repo and push in your ideas.
