@@ -459,7 +459,10 @@ describe('Generators', function () {
             }
         };
         var tags = generators.tags(models);
-        var generatedRoutes = generators.routes(controllers, {routes: {'get /user/phone/:phoneNumber': 'UserController.phone'}}, tags);
+      var generatedRoutes = generators.routes(controllers, {routes: {
+        'get /user/phone/:phoneNumber': 'UserController.phone',
+        'get /user/phone/:phoneNumber/call': 'UserController.phone'
+      }}, tags);
         var actual = generators.paths(generatedRoutes, tags, {list: [{$ref: '#/parameters/PerPageQueryParam'}]});
 
         it('should not create default paths like create, find, findOne, update and destroy for routes without models', function (done) {
@@ -511,6 +514,10 @@ describe('Generators', function () {
 
         it('should make sure every route keys has a corresponding path type of parameter', function (done) {
             expect(_.find(actual['/user/phone/{phoneNumber}'].get.parameters, {
+                name: 'phoneNumber',
+                in: 'path'
+            })).to.be.an('object');
+          expect(_.find(actual['/user/phone/{phoneNumber}/call'].get.parameters, {
                 name: 'phoneNumber',
                 in: 'path'
             })).to.be.an('object');
