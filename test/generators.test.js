@@ -2,6 +2,7 @@
  * Created by theophy on 06/08/2017.
  */
 var generators = require("../lib/generators");
+var parser = require("../lib/parsers");
 var assert = require('chai').assert;
 var expect = require('chai').expect;
 var _ = require('lodash');
@@ -421,6 +422,7 @@ describe('Generators', function () {
         done();
       });
 
+
     });
 
     //for paths
@@ -458,10 +460,25 @@ describe('Generators', function () {
                 globalId: 'User'
             }
         };
-        var tags = generators.tags(models);
+      var tags = generators.tags(models);
+      const modifiedAttr = {nameModified: {type: 'string', required: true}}
       var generatedRoutes = generators.routes(controllers, {routes: {
         'get /user/phone/:phoneNumber': 'UserController.phone',
-        'get /user/phone/:phoneNumber/call': 'UserController.phone'
+        'get /user/phone/:phoneNumber/call': 'UserController.phone',
+        'post /user': {
+            controller: 'UserController',
+            action: 'create',
+            swagger: {
+                body: modifiedAttr
+            }
+        },
+        'put /user/:id': {
+            controller: 'UserController',
+            action: 'update',
+            swagger: {
+                body: modifiedAttr
+            }
+        }
       }}, tags);
         var actual = generators.paths(generatedRoutes, tags, {list: [{$ref: '#/parameters/PerPageQueryParam'}]});
 
@@ -510,6 +527,26 @@ describe('Generators', function () {
             expect(_.find(actual['/user/{id}'].put.parameters, {name: 'body', in: 'body'})).to.be.an('object');
             done();
         });
+
+      it('should not allow multiple body param in a route', function (done){
+        const postParam = actual['/user'].post.parameters;
+        const body = [];
+        _.forEach(postParam, function (param){
+          if(param.name === 'body'){
+            body.push(param)
+          }
+        })
+        expect(body).to.have.lengthOf(1, 'Multiple body parameters are not allowed in POST')
+        const putParam = actual['/user/{id}'].put.parameters;
+        const bodyPut = [];
+        _.forEach(putParam, function (param){
+          if(param.name === 'body'){
+            bodyPut.push(param)
+          }
+        })
+        expect(bodyPut).to.have.lengthOf(1, 'Multiple body parameters are not allowed in Put')
+        done();
+      });
 
 
         it('should make sure every route keys has a corresponding path type of parameter', function (done) {
