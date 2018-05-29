@@ -101,11 +101,12 @@ describe('Parser', function () {
                     summary: '',
                     description: '',
                     body: {},
-                    query: []
+                    query: [],
+                    custom: true
                 }]
             };
 
-            // Going to fix it soon to follow Sails Routes Address which means for a path allow any CRUD method (GET, PUT, POST, DELETE or PATCH) when a method is not specified
+            // TODO: Going to fix it soon to follow Sails Routes Address which means for a path allow any CRUD method (GET, PUT, POST, DELETE or PATCH) when a method is not specified
             var expected_route2 = {
                 user: [{
                     http_method: 'post',
@@ -115,7 +116,8 @@ describe('Parser', function () {
                     summary: '',
                     description: '',
                     body: {},
-                    query: []
+                    query: [],
+                    custom: true
                 },
                     {
                         http_method: 'get',
@@ -124,7 +126,8 @@ describe('Parser', function () {
                         keys: [],
                         summary: '',
                         description: '',
-                        query: []
+                        query: [],
+                        custom: true
                     },
                     {
                         http_method: 'put',
@@ -134,7 +137,8 @@ describe('Parser', function () {
                         summary: '',
                         description: '',
                         body: {},
-                        query: []
+                        query: [],
+                        custom: true
                     },
                     {
                         http_method: 'delete',
@@ -143,7 +147,8 @@ describe('Parser', function () {
                         keys: [],
                         summary: '',
                         description: '',
-                        query: []
+                        query: [],
+                        custom: true
                     },
                     {
                         http_method: 'patch',
@@ -152,7 +157,8 @@ describe('Parser', function () {
                         keys: [],
                         summary: '',
                         description: '',
-                        query: []
+                        query: [],
+                        custom: true
                     }
 
                 ]
