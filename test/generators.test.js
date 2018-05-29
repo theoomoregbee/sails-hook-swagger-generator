@@ -463,6 +463,7 @@ describe('Generators', function () {
       var tags = generators.tags(models);
       const modifiedAttr = {nameModified: {type: 'string', required: true}}
       var generatedRoutes = generators.routes(controllers, {routes: {
+        'delete /play/:play_id/user/:user_id': 'UserController.destroy',
         'get /user/phone/:phoneNumber': 'UserController.phone',
         'get /user/phone/:phoneNumber/call': 'UserController.phone',
         'post /user': {
@@ -487,6 +488,7 @@ describe('Generators', function () {
             expect(actual).to.not.have.property('/base/{id}'); //for findOne, update
             done();
         });
+
 
         it('should follow the swagger standardized url format of  "/route instead of /route/ or route/"', function (done) {
             assert.containsAllDeepKeys(actual, ['/user/login', '/user/{id}'], "should have this url pattern");
@@ -567,6 +569,14 @@ describe('Generators', function () {
                 in: 'path'
             })).to.be.an('object');
             expect(_.find(actual['/user/{id}'].get.parameters, {$ref: '#/parameters/IDPathParam'})).to.be.an('object');
+            done();
+        });
+
+        it('should not create default paths like create, find, findOne, update and destroy for routes defined in routes.js', function (done) {
+          expect(_.find(actual['/play/{play_id}/user/{user_id}'].delete.parameters, {
+                name: 'play_id',
+                in: 'path'
+            })).to.be.an('object');
             done();
         });
 
