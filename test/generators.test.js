@@ -548,6 +548,14 @@ describe('Generators', function () {
         done();
       });
 
+        it('should override form body for default blueprints actions like create and update when specified in route.js', function (done) {
+          const postParam = _.find(actual['/user'].post.parameters, {name: 'body', in: 'body'});
+          const putParam = _.find(actual['/user/{id}'].put.parameters, {name: 'body', in: 'body'});
+          const parsedParam = parser.attributes(modifiedAttr);
+          expect(postParam.schema).to.deep.equal(parsedParam);
+          expect(putParam.schema).to.deep.equal(parsedParam);
+          done();
+        });
 
         it('should make sure every route keys has a corresponding path type of parameter', function (done) {
             expect(_.find(actual['/user/phone/{phoneNumber}'].get.parameters, {
