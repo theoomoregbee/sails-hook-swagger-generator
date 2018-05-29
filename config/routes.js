@@ -46,7 +46,15 @@ module.exports.routes = {
      * for configuration options and examples.                                  *
      *                                                                          *
      ***************************************************************************/
-
+  'post /user': {
+    controller: 'UserController',
+    action: 'create',
+    swagger: {
+      body: {
+        newVar: {type: 'string', required: true}
+      }
+    }
+  },
     'post /user/login': {
         controller: 'UserController',
         action: 'login',
