@@ -29,10 +29,7 @@ check the **./swagger/swagger.json** for sample generated swagger documentation 
 It comes with some default settings which can be override by creating **config/swaggergenerator.js**
 ```javascript
 module.exports["swagger-generator"] = {
-<<<<<<< HEAD
-=======
     disabled: false,
->>>>>>> a5e58a645333d5c8b5e1026acc83de834f1888a6
     swaggerJsonPath: "./swagger/swagger.json",
     parameters: { //we can add up custom parameters here
         PerPageQueryParam: {
@@ -60,10 +57,7 @@ module.exports["swagger-generator"] = {
     }
 };
 ```
-<<<<<<< HEAD
-=======
 * **disabled** attribute is used to disable the module. (e.g you may want to disable it on production)
->>>>>>> a5e58a645333d5c8b5e1026acc83de834f1888a6
 * **swaggerJsonPath** where to generate the `swagger.json` file to, default to `sails.config.appPath + "/swagger/swagger.json"`
 * **parameters** we can create your own custom parameter to be referenced by api service methods and it's totally based on swagger specification for parameter object. Any one added here is added to the default parameters which are
 ```javascript
