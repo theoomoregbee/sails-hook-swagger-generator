@@ -1,5 +1,4 @@
 {
-<<<<<<< HEAD
   "_from": "sails-hook-swagger-generator",
   "_id": "sails-hook-swagger-generator@2.7.0",
   "_inBundle": false,
@@ -55,47 +54,14 @@
   "repository": {
     "type": "git",
     "url": "git+https://github.com/theo4u/sails-hook-swagger-generator.git"
-=======
-  "name": "sails-hook-swagger-generator",
-  "version": "0.0.0-development",
-  "description": "This is just a sails hook for generating swagger documentation json",
-  "main": "index.js",
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/theo4u/sails-hook-swagger-generator.git"
->>>>>>> a5e58a645333d5c8b5e1026acc83de834f1888a6
   },
   "sails": {
     "isHook": true
   },
   "scripts": {
-<<<<<<< HEAD
     "semantic-release": "semantic-release pre && npm publish && semantic-release post",
     "test": "node ./node_modules/mocha/bin/mocha test/bootstrap.test.js test/**/*.test.js",
     "travis-deploy-once": "travis-deploy-once"
   },
   "version": "2.7.0"
-=======
-    "test": "node ./node_modules/mocha/bin/mocha test/bootstrap.test.js test/**/*.test.js",
-    "travis-deploy-once": "travis-deploy-once",
-    "semantic-release": "semantic-release pre && npm publish && semantic-release post"
-  },
-  "keywords": [
-    "sails",
-    "hook",
-    "swagger",
-    "json",
-    "generator"
-  ],
-  "author": "Theophilus Omoregbee",
-  "license": "MIT",
-  "devDependencies": {
-    "chai": "^4.1.1",
-    "lodash": "^4.17.4",
-    "mocha": "^3.5.0",
-    "sails": "~0.11.0",
-    "travis-deploy-once": "^4.3.4",
-    "semantic-release": "7.0.2"
-  }
->>>>>>> a5e58a645333d5c8b5e1026acc83de834f1888a6
 }
