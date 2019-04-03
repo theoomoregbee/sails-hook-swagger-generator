@@ -37,6 +37,12 @@ describe('Parser', function () {
                     type: 'integer',
                     max: 100,
                     min: 18
+                },
+                roles: {
+                  type: 'array',
+                  items: {
+                    type: 'string'
+                  }
                 }
             };
             var attributes = parser.attributes(model_attributes);
@@ -51,11 +57,13 @@ describe('Parser', function () {
             expected_properties['name'] = _.clone(formatters.attribute_type(model_attributes.name.type));
             expected_properties['gender'] = _.clone(formatters.attribute_type(model_attributes.gender.type));
             expected_properties['ageLimit'] = _.clone(formatters.attribute_type(model_attributes.ageLimit.type));
+            expected_properties['roles'] = _.clone(formatters.attribute_type(model_attributes.roles.type));
 
             //if the rules is among our allowed swagger rules
             expected_properties['gender'][formatters.validation_type('enum')] = model_attributes.gender.enum;
             expected_properties['ageLimit'][formatters.validation_type('max')] = model_attributes.ageLimit.max;
             expected_properties['ageLimit'][formatters.validation_type('min')] = model_attributes.ageLimit.min;
+            expected_properties['roles'][formatters.validation_type('items')] = model_attributes.roles.items;
 
             assert.deepEqual(attributes.properties, expected_properties, 'It should look exactly like this, following swagger specification');
 

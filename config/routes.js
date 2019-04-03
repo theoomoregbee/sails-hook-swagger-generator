@@ -77,6 +77,22 @@ module.exports.routes = {
             body: {}, //for post and put
             query: [] //for get and others
         }
+    },
+    'put /user/roles': {
+        controller: 'UserController',
+        action: 'roles',
+        swagger: {
+            summary: 'update user roles',
+            body: {
+              roles: {
+                type: 'array',
+                required: true,
+                items: {
+                  type: 'string'
+                }
+              }
+            }
+        }
     }
 
 };

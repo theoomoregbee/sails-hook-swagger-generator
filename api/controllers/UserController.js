@@ -19,6 +19,10 @@ module.exports = {
 
     list: function (req, res) {
 
-    }
+    },
+
+  roles: function (req, res)  {
+
+  }
 };
 
