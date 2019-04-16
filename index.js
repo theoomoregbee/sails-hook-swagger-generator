@@ -42,8 +42,10 @@ module.exports = function (sails) {
         },
         // Run when sails loads-- be sure and call `next()`.
         initialize: function (next) {
+          sails.after('ready', () => {
             swaggerDoc(sails, this);
-            return next();
+          });
+          next();
         }
 
     };
