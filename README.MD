@@ -161,7 +161,8 @@ We can extend and add extra information on the second above for sails hook swagg
         required: true,
         type: 'string',
         description: 'This is a custom required parameter'
-      }]
+      }],
+      excludeParameters: ['#/parameters/TokenHeaderParam']
     }
   }
 }
@@ -173,6 +174,7 @@ We can extend and add extra information on the second above for sails hook swagg
 * **body**: if the route is taking in form post, and it follows our normal attribute from [sails model](http://sailsjs.com/documentation/concepts/models-and-orm/attributes)
 * **query**: for any query you expecting from the user consuming the service method, you can also reference the default created above (*WhereQueryParam*, *LimitQueryParam*, *SkipQueryParam*, *SortQueryParam*, *PopulateQueryParam*, *PageQueryParam*, *SelectQueryParam*, *TokenHeaderParam*, *IDPathParam*) and add your own following the swagger specification.
 * We can also add custom personalized **parameters** if required.
+* **excludeParameters**: if you want to exclude some of the defaults paramters from the generated swagger json.
 
 **NB** it overrides the default route params attached from the sails generator
 
