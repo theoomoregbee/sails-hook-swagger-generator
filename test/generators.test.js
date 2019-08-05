@@ -627,7 +627,7 @@ describe('Generators', function () {
       var swaggerObjectBase = {
         parameters: [{
           name: 'data'
-        }]
+        },{$ref: '#/parameters/KeyHeaderParam'}]
       };
       var tags = generators.tags(models);
       var generatedRoutes = generators.routes(controllers, {
@@ -674,7 +674,7 @@ describe('Generators', function () {
           required: false,
           type: 'string',
           description: 'This is a custom param for data'
-        }]);
+        }, {$ref: '#/parameters/KeyHeaderParam'}]);
         done();
       });
     });
