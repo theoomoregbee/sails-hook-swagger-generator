@@ -470,7 +470,8 @@ describe('Generators', function () {
             controller: 'UserController',
             action: 'create',
             swagger: {
-                body: modifiedAttr
+              body: modifiedAttr,
+              excludeParameters: ['#/parameters/TokenHeaderParam']
             }
         },
         'put /user/:id': {
@@ -521,6 +522,11 @@ describe('Generators', function () {
 
         it('all route should hold the token header parameter, in case that routes needs authentication, if overridden above test case, it wont add', function (done) {
             expect(actual['/user/logout'].get.parameters).to.have.deep.members([{$ref: '#/parameters/TokenHeaderParam'}]);
+            done();
+        });
+
+        it('should exclude default parameters specified in excludeParamters', function (done) {
+          assert.notIncludeDeepMembers(actual['/user'].post.parameters, [{$ref: '#/parameters/TokenHeaderParam'}]);
             done();
         });
 
@@ -621,7 +627,7 @@ describe('Generators', function () {
       var swaggerObjectBase = {
         parameters: [{
           name: 'data'
-        }]
+        },{$ref: '#/parameters/KeyHeaderParam'}]
       };
       var tags = generators.tags(models);
       var generatedRoutes = generators.routes(controllers, {
@@ -668,7 +674,7 @@ describe('Generators', function () {
           required: false,
           type: 'string',
           description: 'This is a custom param for data'
-        }]);
+        }, {$ref: '#/parameters/KeyHeaderParam'}]);
         done();
       });
     });
