@@ -1,0 +1,1 @@
+export const testing = (): {face: string} => ({ face: 'string is face it' })
