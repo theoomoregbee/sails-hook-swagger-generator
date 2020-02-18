@@ -30,6 +30,7 @@
   "license": "MIT",
   "devDependencies": {
     "@rollup/plugin-typescript": "^3.0.0",
+    "@types/mocha": "^7.0.1",
     "@types/swagger-schema-official": "^2.0.20",
     "@typescript-eslint/eslint-plugin": "^2.19.2",
     "@typescript-eslint/parser": "^2.19.2",
@@ -46,5 +47,8 @@
     "travis-deploy-once": "^4.3.4",
     "tslib": "^1.10.0",
     "typescript": "^3.7.5"
+  },
+  "dependencies": {
+    "@types/swagger-jsdoc": "^3.0.2"
   }
 }

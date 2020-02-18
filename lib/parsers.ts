@@ -1,11 +1,95 @@
 /**
  * Created by theophy on 02/08/2017.
  */
-const _ = require('lodash');
-const _path = require('path');
-const swaggerJSDoc = require('swagger-jsdoc');
+import * as path from 'path';
+import { SwaggerSailsModel, SwaggerAttribute } from './interfaces';
+import swaggerJSDoc from 'swagger-jsdoc';
+import cloneDeep from 'lodash/cloneDeep';
+import get from 'lodash/get';
+import uniqByLodash from 'lodash/uniqBy';
+import { OpenApi } from '../types/openapi';
 
-const formatters = require('./type-formatter');
+declare const sails: any;
+
+const uniqBy = uniqByLodash as unknown as <T>(array: Array<T>, prop: string) => Array<T>
+
+const componentReference: Array<keyof OpenApi.Components> = [
+  "schemas",
+  "parameters",
+  "securitySchemes",
+  "requestBodies",
+  "responses",
+  "headers",
+  "examples",
+  "links",
+  "callbacks"
+]
+
+// consider all models except associative tables and 'Archive' model special case
+const removeModelExceptions = (model: SwaggerSailsModel): boolean => model.globalId && model.globalId!=='Archive'
+
+// TODO: write test for this
+// * don't mutate params
+// * should merge tags and source tag properties should always override destination if a tag is existing
+// * should merge components and source component properties should override component that is existing
+const mergeSwaggerSpec = (destination: SwaggerAttribute, source: SwaggerAttribute): SwaggerAttribute => {
+  const dest: SwaggerAttribute = cloneDeep(destination)
+  dest.tags = uniqBy([
+    ...(get(source, 'tags', [])),
+    ...(get(dest, 'tags', [])),
+  ], 'name');
+
+  dest.components = componentReference.reduce((mergedComponents, ref) => {
+    const type = get(source, `components.${ref}`);
+    if (type) {
+      mergedComponents[ref] = {
+        ...(get(dest.components, ref, {})),
+        ...type
+      }
+    }
+    return mergedComponents
+  }, {})
+  return dest
+}
+
+const loadSwaggerDocComments = (filePath: string): Promise<SwaggerAttribute>=> {
+  return new Promise((resolve, reject) => {
+    try {
+      const opts = {
+        definition: {
+          openapi: '3.0.0', // Specification (optional, defaults to swagger: '2.0')
+          info: { title: 'dummy', version: '0.0.0' },
+        },
+        apis: [filePath],
+      };
+      const specification = swaggerJSDoc(opts);
+      resolve(specification as SwaggerAttribute)
+    }catch(err){
+      reject(err)
+    }
+  });
+}
+
+export const parseModels = async (sailsConfig: Sails.Config, sailsModels: Array<SwaggerSailsModel>): {[globalId: string]: SwaggerSailsModel} => {
+  const models = sailsModels.filter(removeModelExceptions);
+  // parse swagger jsDoc comments in each of our models
+  const modelDir = sailsConfig.paths.models;
+  const swaggerComments: Array<SwaggerAttribute | undefined> = await Promise.all(models.map(model =>
+    loadSwaggerDocComments(require.resolve(path.join(modelDir, model.globalId))).catch(err => {
+      sails.log.error(`ERROR: sails-hook-swagger-generator: Error resolving/loading model ${model.globalId}: ${err.message || ''}`, err);
+      return undefined
+    })));
+ return models.reduce((parsed, model, index) => {
+   parsed[model.globalId] = model;
+   // retrieve swagger documentation from jsDoc comments and merge it with any .swagger within our model
+   const swagger = swaggerComments[index];
+   model.swagger = cloneDeep(model.swagger || {})
+   if(swagger) {
+    model.swagger = mergeSwaggerSpec(model.swagger, swagger);
+   }
+   return parsed
+ },{}) 
+}
 
 /**
  * Parses Sails model information and returns `modelInfo` objects keyed on `globalId`.
@@ -14,20 +98,20 @@ const formatters = require('./type-formatter');
  * @param {any} sailsModels the `sails.models` object
  * @returns { [globalId:string]: { tag:string, globalId:string, identity:string, primaryKey:string, attributes:[], swagger:{ _tags:[], _components:{} } } }
  */
-function parseModels(sailsConfig, sailsModels) {
+function parseModelsi(sailsConfig, sailsModels) {
 
-  let models = {};
+  const models = {};
 
-  let jsDocCache = {};
+  const jsDocCache = {};
 
   _.forEach(sailsModels, model => {
 
     // consider all models except associative tables and 'Archive' model special case
     if (!model.globalId || model.globalId == 'Archive') return;
 
-    let swagger = {};
+    const swagger = {};
 
-    let actionNames = ['findone', 'find', 'create', 'update', 'destroy', 'populate', 'add', 'remove', 'replace'];
+    const actionNames = ['findone', 'find', 'create', 'update', 'destroy', 'populate', 'add', 'remove', 'replace'];
 
     mergeSwagger(swagger, model.swagger);
 
@@ -39,8 +123,8 @@ function parseModels(sailsConfig, sailsModels) {
     });
 
     try {
-      let dir = sailsConfig.paths.models;
-      let pth = require.resolve(_path.join(dir, model.globalId));
+      const dir = sailsConfig.paths.models;
+      const pth = require.resolve(_path.join(dir, model.globalId));
       if (pth) {
         loadAndMergeJsDoc(jsDocCache, swagger, pth, model.globalId);
 
@@ -49,7 +133,7 @@ function parseModels(sailsConfig, sailsModels) {
           _.get(jsDocCache, [pth, 'paths']),
           (v, k) => {
             if(k==('/'+model.globalId)) return; // skip, handled above
-            let ba = '_' + k.substring(1);
+            const ba = '_' + k.substring(1);
             if (!swagger[ba]) swagger[ba] = {};
             mergeSwagger(swagger[ba], v);
           }
@@ -59,7 +143,7 @@ function parseModels(sailsConfig, sailsModels) {
       sails.log.error(`ERROR: sails-hook-swagger-generator: Error resolving/loading model ${model.globalId}: ${error.message || ''}`, error);
     }
 
-    let modelInfo = {
+    const modelInfo = {
       tags: swagger.tags || [model.globalId], // default name of Swagger group based on model globalId
       globalId: model.globalId, // model globalId
       identity: model.identity, // model identity
@@ -68,11 +152,11 @@ function parseModels(sailsConfig, sailsModels) {
       swagger: swagger, // model-specific swagger (see below)
     };
 
-    let defaultDescription = `Sails blueprint actions for the **${model.globalId}** model`;
+    const defaultDescription = `Sails blueprint actions for the **${model.globalId}** model`;
 
-    let tagDefs = getOrSet(swagger, '_tags', []);
+    const tagDefs = getOrSet(swagger, '_tags', []);
     modelInfo.tags.map(tagName => {
-      let existing = tagDefs.find(t => t.name == tagName);
+      const existing = tagDefs.find(t => t.name == tagName);
       if (existing) {
         if (!existing.description) existing.description = defaultDescription;
       } else {
@@ -96,9 +180,9 @@ function parseModels(sailsConfig, sailsModels) {
  */
 function parseCustomRoutes(sailsConfig) {
 
-  let customRoutes = [];
+  const customRoutes = [];
 
-  let jsDocCache = {};
+  const jsDocCache = {};
 
   _.forEach(sailsConfig.routes, (target, address) => {
 
@@ -110,7 +194,7 @@ function parseCustomRoutes(sailsConfig) {
     }
 
     // https://sailsjs.com/documentation/concepts/routes/custom-routes#?wildcards-and-dynamic-parameters
-    let { patternVariables, swaggerPath } = generateSwaggerPath(path);
+    const { patternVariables, swaggerPath } = generateSwaggerPath(path);
 
     // XXX TODO wildcard
 
@@ -166,8 +250,8 @@ function parseCustomRoutes(sailsConfig) {
 
     // load any JSDoc in config/routes.js
     try {
-      let dir = sailsConfig.paths.config;
-      let pth = require.resolve(_path.join(dir, 'routes'));
+      const dir = sailsConfig.paths.config;
+      const pth = require.resolve(_path.join(dir, 'routes'));
       if (pth) {
         loadAndMergeJsDoc(jsDocCache, actionSwagger, pth, path.substring(1), verb);
       }
@@ -184,8 +268,8 @@ function parseCustomRoutes(sailsConfig) {
       let _controller = _path.dirname(action);
       if (_controller != '.') {
         _controller = toController(_controller);
-        let _action = _path.basename(action);
-        let { status:_actionFound } = testLoadAction(sailsConfig, jsDocCache, actionSwagger, _controller, _action);
+        const _action = _path.basename(action);
+        const { status:_actionFound } = testLoadAction(sailsConfig, jsDocCache, actionSwagger, _controller, _action);
         if (_actionFound == 'loaded+found') {
           // if FooController.go-action, update details
           controller = _controller;
@@ -196,10 +280,10 @@ function parseCustomRoutes(sailsConfig) {
       }
     }
 
-    let tag = controller ? controller.substring(0, controller.length - 10) : action;
-    let actionPath = (controller ? _path.join(tag, action) : action).toLowerCase();
+    const tag = controller ? controller.substring(0, controller.length - 10) : action;
+    const actionPath = (controller ? _path.join(tag, action) : action).toLowerCase();
 
-    let routeInfo = {
+    const routeInfo = {
       middlewareType: middlewareType, // one of action|blueprint|view
       blueprintAction: undefined, // optional; one of findone|find|create|update|destroy|populate|add|remove|replace or custom
       httpMethod: verb.toLowerCase(), // one of all|get|post|put|patch|delete
@@ -247,14 +331,14 @@ function parseCustomRoutes(sailsConfig) {
 function parseAllRoutes(sailsRoutes, models, sailsConfig) {
 
   // there seems to be duplicates in the routes, so merge them here to capture maximum metadata
-  let routesByPath = {};
+  const routesByPath = {};
   _.forEach(sailsRoutes, _route => {
     if (!_route.path || !_route.verb) {
       sails.log.warn(`WARNING: sails-hook-swagger-generator: Bad route ${_route.verb} ${_route.path} (ignoring)`);
       return;
     }
-    let key = [_route.verb, _route.path].join(' ');
-    let val = _.defaults({ path: _route.path, verb: _route.verb }, _route.options);
+    const key = [_route.verb, _route.path].join(' ');
+    const val = _.defaults({ path: _route.path, verb: _route.verb }, _route.options);
     if (_.isEqual(val, routesByPath[key])) return;
     _.defaults(val, routesByPath[key]);
     routesByPath[key] = val;
@@ -272,7 +356,7 @@ function parseAllRoutes(sailsRoutes, models, sailsConfig) {
 
     if (routeObj._middlewareType) {
       // ACTION | BLUEPRINT | CORS HOOK | POLICY | VIEWS HOOK | CSRF HOOK | * HOOK
-      let match = routeObj._middlewareType.match(/^([^:]+):\s+(.+)$/);
+      const match = routeObj._middlewareType.match(/^([^:]+):\s+(.+)$/);
       if (match) {
         middlewareType = match[1].toLowerCase();
         actionName = match[2].toLowerCase();
@@ -312,12 +396,12 @@ function parseAllRoutes(sailsRoutes, models, sailsConfig) {
 
       if (routeObj.associations && routeObj.alias) {
         associationPrimaryKeyAttributeInfo = function () {
-          let _assoc = routeObj.associations.find(a => a.alias == routeObj.alias);
+          const _assoc = routeObj.associations.find(a => a.alias == routeObj.alias);
           if (!_assoc) return;
-          let _identity = _assoc.collection || _assoc.model;
-          let _modelInfo = _.find(models, model => model.identity == _identity);
+          const _identity = _assoc.collection || _assoc.model;
+          const _modelInfo = _.find(models, model => model.identity == _identity);
           if (!_modelInfo) return;
-          let ret = _.cloneDeep(_modelInfo.attributes[_modelInfo.primaryKey]);
+          const ret = _.cloneDeep(_modelInfo.attributes[_modelInfo.primaryKey]);
           ret.description = `**${_modelInfo.globalId}** record's foreign key value (**${routeObj.alias}** association${ret.description ? '; ' + ret.description : ''})`;
           return ret;
         }();
@@ -333,7 +417,7 @@ function parseAllRoutes(sailsRoutes, models, sailsConfig) {
 
     }
 
-    let routeInfo = {
+    const routeInfo = {
       middlewareType: middlewareType, // one of action|blueprint|view
       blueprintAction: blueprintAction, // optional; one of findone|find|create|update|destroy|populate|add|remove|replace or custom
       httpMethod: routeObj.verb.toLowerCase(), // one of all|get|post|put|patch|delete
@@ -369,13 +453,13 @@ function parseAllRoutes(sailsRoutes, models, sailsConfig) {
    * We now aggreggate these routes.
    */
 
-  let populateByModel = {}, addByModel = {}, removeByModel = {}, replaceByModel = {};
+  const populateByModel = {}, addByModel = {}, removeByModel = {}, replaceByModel = {};
   _routes.map(routeInfo => {
 
     // only blueprint actions
     if (routeInfo.middlewareType != 'blueprint') return;
 
-    let m = routeInfo.identity;
+    const m = routeInfo.identity;
     function addTo(ba, tgt) {
       if (routeInfo.blueprintAction != ba) return;
       if (!tgt[m]) tgt[m] = [];
@@ -393,11 +477,11 @@ function parseAllRoutes(sailsRoutes, models, sailsConfig) {
       // only blueprint actions
       if (routeInfo.middlewareType != 'blueprint') return routeInfo;
 
-      let m = routeInfo.identity;
-      let pk = routeInfo.modelInfo.primaryKey;
+      const m = routeInfo.identity;
+      const pk = routeInfo.modelInfo.primaryKey;
 
       function process(tgt) {
-        let arr = tgt[m];
+        const arr = tgt[m];
         if (!arr) return undefined; // emit aggregated routeInfo on first occurence
 
         let re = new RegExp('/{parentid}/' + routeInfo.alias + '$', 'g');
@@ -444,14 +528,14 @@ function parseAllRoutes(sailsRoutes, models, sailsConfig) {
  */
 function mergeCustomAndAllRoutes(customRoutes, allRoutes) {
 
-  let merged = allRoutes.map(ar => {
+  const merged = allRoutes.map(ar => {
 
-    let cr = customRoutes.find(_cr => _cr.path == ar.path && _cr.httpMethod == ar.httpMethod);
+    const cr = customRoutes.find(_cr => _cr.path == ar.path && _cr.httpMethod == ar.httpMethod);
     if(!cr) return ar;
 
     if(ar.middlewareType=='blueprint') {
       // if resolves to blueprint, use this merging in any Swagger documention from custom route
-      let swagger = _.cloneDeep(cr.swagger);
+      const swagger = _.cloneDeep(cr.swagger);
       mergeSwagger(swagger, ar.swagger);
       return _.assign(_.cloneDeep(ar), { swagger: swagger });
     } else if(ar.middlewareType=='action') {
@@ -465,7 +549,7 @@ function mergeCustomAndAllRoutes(customRoutes, allRoutes) {
   });
 
   customRoutes.map(cr => {
-    let r = merged.find(m => m.path == cr.path && m.httpMethod == cr.httpMethod);
+    const r = merged.find(m => m.path == cr.path && m.httpMethod == cr.httpMethod);
     if(!r) {
       sails.log.warn(`WARNING: sails-hook-swagger-generator: Sails custom route ${cr.path} NOT found as bound route (ignoring)`);
     }
@@ -481,7 +565,7 @@ function mergeCustomAndAllRoutes(customRoutes, allRoutes) {
  * @returns converted path
  */
 function toController(path) {
-  let dir = _path.dirname(path);
+  const dir = _path.dirname(path);
   let controller = _path.basename(path);
   controller = controller.charAt(0).toUpperCase() + controller.substring(1) + 'Controller';
   return _path.join(dir, controller);
@@ -499,11 +583,11 @@ function toController(path) {
  * @return { status: notfound|loaded+notfound|loaded+found|loaded+found+actions2, actions2: {} }
  */
 function testLoadAction(sailsConfig, jsDocCache, swagger, controller, action) {
-  let dir = sailsConfig.paths.controllers;
+  const dir = sailsConfig.paths.controllers;
   try {
     if (controller) {
-      let pth = _path.join(dir, controller);
-      let module = require(pth);
+      const pth = _path.join(dir, controller);
+      const module = require(pth);
       if (module[action]) {
         mergeSwagger(swagger, module[action].swagger);
         mergeSwagger(
@@ -513,7 +597,7 @@ function testLoadAction(sailsConfig, jsDocCache, swagger, controller, action) {
           _.get(module, ['swagger', '_components'], {}),
         );
 
-        let rpth = require.resolve(pth);
+        const rpth = require.resolve(pth);
         loadAndMergeJsDoc(jsDocCache, swagger, rpth, action);
 
         return { status: 'loaded+found' };
@@ -521,12 +605,12 @@ function testLoadAction(sailsConfig, jsDocCache, swagger, controller, action) {
         return { status: 'loaded+notfound' };
       }
     } else {
-      let pth = _path.join(dir, action);
-      let module = require(pth);
+      const pth = _path.join(dir, action);
+      const module = require(pth);
 
       mergeSwagger(swagger, module.swagger);
 
-      let rpth = require.resolve(pth);
+      const rpth = require.resolve(pth);
       loadAndMergeJsDoc(jsDocCache, swagger, rpth, _path.basename(action));
 
       if (_.isFunction(module)) { // standalone action
@@ -538,7 +622,7 @@ function testLoadAction(sailsConfig, jsDocCache, swagger, controller, action) {
   } catch (error) {
     return { status: 'notfound' };
   }
-};
+}
 
 /**
  * Attempts to load specified source file, parse JSDoc and merge any
@@ -557,7 +641,7 @@ function loadAndMergeJsDoc(jsDocCache, swagger, path, actionOrPath, httpMethod) 
     _swagger = jsDocCache[path];
   } else {
     try {
-      let opts = {
+      const opts = {
         definition: {
           openapi: '3.0.0', // Specification (optional, defaults to swagger: '2.0')
           info: { title: 'dummy', version: '0.0.0' },
@@ -575,7 +659,7 @@ function loadAndMergeJsDoc(jsDocCache, swagger, path, actionOrPath, httpMethod) 
   }
 
   if (_swagger) {
-    let srcSwagger = httpMethod ? _.get(_swagger, ['paths', '/' + actionOrPath, httpMethod])
+    const srcSwagger = httpMethod ? _.get(_swagger, ['paths', '/' + actionOrPath, httpMethod])
       : _.get(_swagger, ['paths', '/' + actionOrPath]);
     mergeSwagger(
       swagger,
@@ -595,11 +679,11 @@ function loadAndMergeJsDoc(jsDocCache, swagger, path, actionOrPath, httpMethod) 
  * @returns { patternVariables:string[], swaggerPath:string }
  */
 function generateSwaggerPath(path) {
-  let patternVariables = [];
-  let swaggerPath = path
+  const patternVariables = [];
+  const swaggerPath = path
     .split('/')
     .map(v => {
-      let match = v.match(/^:([^/:?]+)\??$/);
+      const match = v.match(/^:([^/:?]+)\??$/);
       if (match) {
         patternVariables.push(match[1]);
         return '{' + match[1] + '}';
@@ -618,7 +702,7 @@ function generateSwaggerPath(path) {
  * @returns {any} requested path within object
  */
 function getOrSet(object, path, defaultValue) {
-  let v = _.get(object, path);
+  const v = _.get(object, path);
   if (v !== undefined) return v;
   _.set(object, path, defaultValue);
   return defaultValue;
@@ -652,9 +736,9 @@ function mergeSwagger(destSwagger, srcSwagger, tags, components) {
     tags = _.get(srcSwagger, '_tags');
   }
   if (tags && _.isArray(tags)) {
-    let dtags = getOrSet(destSwagger, '_tags', []);
+    const dtags = getOrSet(destSwagger, '_tags', []);
     tags.map(tag => {
-      let existing = dtags.find(t => t.name == tag.name);
+      const existing = dtags.find(t => t.name == tag.name);
       if (existing) {
         _.defaults(existing, tag);
       } else {
@@ -670,7 +754,7 @@ function mergeSwagger(destSwagger, srcSwagger, tags, components) {
   if (components) {
     _.forEach(componentDefinitionReference, (_unused, refName) => {
       _.forEach(components[refName], (v, k) => {
-        let existing = _.get(destSwagger, ['_components', refName, k]);
+        const existing = _.get(destSwagger, ['_components', refName, k]);
         if (existing === undefined) _.set(destSwagger, ['_components', refName, k], _.cloneDeep(v));
       });
     });

@@ -1,16 +1,13 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 /**
  * Created by theophy on 02/08/2017.
  */
-var Sails = require('sails').Sails;
-var swaggerDoc = require('../lib/swaggerDoc');
-var assert = require('chai').assert;
-var expect = require('chai').expect;
-var _ = require('lodash');
+const Sails = require('sails').Sails;
 
 describe('Basic tests ::', function () {
 
   // Var to hold a running sails app instance
-  var sails;
+  let sails: any;
 
   // Before running any tests, attempt to lift Sails
   before(function (done) {
@@ -31,7 +28,7 @@ describe('Basic tests ::', function () {
       },
       log: { level: "error" }
 
-    }, function (err, _sails) {
+    }, function (err: any, _sails: any) {
       if (err) return done(err);
       sails = _sails;
       return done();
@@ -56,19 +53,5 @@ describe('Basic tests ::', function () {
   it('sails does not crash on loading our hook', function () {
     return true;
   });
-
-  describe('Swagger generator', function () {
-
-    it("should make sure tags only have valid properties", function (done) {
-      let hook = sails.hooks.swaggergenerator;
-      var spec = swaggerDoc(sails, hook._routes, hook);
-      for (var i = 0; i < spec.tags.length; i++) {
-        expect(_.omit(spec.tags[i], ['name', 'description', 'externalDocs']), 'invalid properties').to.be.empty;
-      }
-
-      done();
-    });
-  });
-
 
 });

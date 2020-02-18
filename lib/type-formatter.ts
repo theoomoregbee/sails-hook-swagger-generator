@@ -1,3 +1,6 @@
+import { BlueprintActionTemplates, Modifiers, Action2Response, Defaults } from './interfaces';
+
+/* eslint-disable @typescript-eslint/camelcase */
 /**
  * Created by theophy on 02/08/2017.
  *
@@ -8,7 +11,7 @@
  * this is used to map our sails types with the allowed type defintions based on swagger specification
  * @type {{integer: {common_name: string, type: string, format: string, comments: string}, long: {common_name: string, type: string, format: string, comments: string}, float: {common_name: string, type: string, format: string}, double: {common_name: string, type: string, format: string}, string: {common_name: string, type: string}, byte: {common_name: string, type: string, format: string, comments: string}, binary: {common_name: string, type: string, format: string, comments: string}, boolean: {common_name: string, type: string}, date: {common_name: string, type: string, format: string, comments: string}, datetime: {common_name: string, type: string, format: string, comments: string}, password: {common_name: string, type: string, format: string, comments: string}}}
  */
-var swaggerTypes = {
+export const swaggerTypes = {
   integer: { common_name: 'integer', type: 'integer', format: 'int32', /* comments: 'signed 32 bits' */ },
   long: { common_name: 'long', type: 'integer', format: 'int64', /* comments: 'signed 64 bits' */ },
   float: { common_name: 'float', type: 'number', format: 'float' },
@@ -30,7 +33,7 @@ var swaggerTypes = {
 /**
  * Defines allowed Sails model attribute definition values, and provides mapping to Swagger/OpenAPI names
  */
-var sailAttributePropertiesMap = {
+export const sailAttributePropertiesMap = {
   allowNull: 'nullable',
   defaultsTo: 'default',
   description: 'description',
@@ -40,9 +43,8 @@ var sailAttributePropertiesMap = {
 
 /**
  * this is used to hold on to the different types of validation sails offers with the value as the swagger specification
- * @type {{max: string, min: string, maxLength: string, minLength: string, regex: string, isIn: string}}
  */
-var validationsMap = {
+export const validationsMap: Record<keyof Sails.AttributeValidation, string> = {
   max: 'maximum',
   min: 'minimum',
   maxLength: 'maxLength',
@@ -67,7 +69,7 @@ var validationsMap = {
  * These templates may be modfied / added to using the `updateBlueprintActionTemplates` config option
  * e.g. to support custom blueprint actions/routes.
  */
-var blueprintActionTemplates = {
+export const blueprintActionTemplates: BlueprintActionTemplates = {
   findone: {
     summary: 'Get {globalId} (find one)',
     description: 'Look up the **{globalId}** record with the specified ID.',
@@ -81,7 +83,7 @@ var blueprintActionTemplates = {
     resultDescription: 'Responds with a single **{globalId}** record as a JSON dictionary',
     notFoundDescription: 'Response denoting **{globalId}** record with specified ID **NOT** found',
     // if functions, each called with (blueprintActionTemplate, routeInfo, pathEntry)
-    modifiers: ['addSelectQueryParam', 'addOmitQueryParam', 'addPopulateQueryParam', 'addResultOfModel', 'addResultNotFound'],
+    modifiers: [Modifiers.ADD_SELECT_QUERY_PARAM, Modifiers.ADD_OMIT_QUERY_PARAM, Modifiers.ADD_POPULATE_QUERY_PARAM, Modifiers.ADD_RESULT_OF_MODEL, Modifiers.ADD_RESULT_NOT_FOUND],
   },
   find: {
     summary: 'List {globalId} (find where)',
@@ -98,7 +100,7 @@ var blueprintActionTemplates = {
       { $ref: '#/components/parameters/SortQueryParam' },
     ],
     resultDescription: 'Responds with a paged list of **{globalId}** records that match the specified criteria',
-    modifiers: ['addSelectQueryParam', 'addOmitQueryParam', 'addPopulateQueryParam', 'addResultOfArrayOfModels'],
+    modifiers:[Modifiers.ADD_SELECT_QUERY_PARAM, Modifiers.ADD_OMIT_QUERY_PARAM, Modifiers.ADD_POPULATE_QUERY_PARAM, Modifiers.ADD_RESULT_OF_MODEL]
   },
   create: {
     summary: 'Create {globalId}',
@@ -109,7 +111,7 @@ var blueprintActionTemplates = {
     },
     parameters: [],
     resultDescription: 'Responds with a JSON dictionary representing the newly created **{globalId}** instance',
-    modifiers: ['addModelBodyParam', 'addResultOfModel', 'addResultValidationError'],
+    modifiers: [Modifiers.ADD_MODEL_BODY_PARAM, Modifiers.ADD_RESULT_OF_MODEL, Modifiers.ADD_RESULT_VALIDATION_ERROR]
   },
   update: {
     summary: 'Update {globalId}',
@@ -123,7 +125,7 @@ var blueprintActionTemplates = {
     ],
     resultDescription: 'Responds with the newly updated **{globalId}** record as a JSON dictionary',
     notFoundDescription: 'Cannot update, **{globalId}** record with specified ID **NOT** found',
-    modifiers: ['addModelBodyParam', 'addResultOfModel', 'addResultValidationError', 'addResultNotFound'],
+    modifiers: [Modifiers.ADD_MODEL_BODY_PARAM, Modifiers.ADD_RESULT_OF_MODEL, Modifiers.ADD_RESULT_VALIDATION_ERROR, Modifiers.ADD_RESULT_NOT_FOUND]
   },
   destroy: {
     summary: 'Delete {globalId} (destroy)',
@@ -137,7 +139,7 @@ var blueprintActionTemplates = {
     ],
     resultDescription: 'Responds with a JSON dictionary representing the destroyed **{globalId}** instance',
     notFoundDescription: 'Cannot destroy, **{globalId}** record with specified ID **NOT** found',
-    modifiers: ['addResultOfModel', 'addResultNotFound'],
+    modifiers: [Modifiers.ADD_RESULT_OF_MODEL, Modifiers.ADD_RESULT_NOT_FOUND],
   },
   populate: {
     summary: 'Populate association for {globalId}',
@@ -155,7 +157,7 @@ var blueprintActionTemplates = {
     ],
     resultDescription: 'Responds with the list of associated records as JSON dictionaries',
     notFoundDescription: 'Cannot populate, **{globalId}** record with specified ID **NOT** found',
-    modifiers: ['addAssociationPathParam', 'addSelectQueryParam', 'addOmitQueryParam', 'addAssociationResultOfArray', 'addResultNotFound'],
+    modifiers: [Modifiers.ADD_ASSOCIATION_PATH_PARAM, Modifiers.ADD_SELECT_QUERY_PARAM, Modifiers.ADD_OMIT_QUERY_PARAM, Modifiers.ADD_ASSOCIATION_RESULT_OF_ARRAY, Modifiers.ADD_RESULT_NOT_FOUND],
   },
   add: {
     summary: 'Add to for {globalId}',
@@ -169,7 +171,7 @@ var blueprintActionTemplates = {
     ],
     resultDescription: 'Responds with the newly updated **{globalId}** record as a JSON dictionary',
     notFoundDescription: 'Cannot perform add to, **{globalId}** record OR **FK record** with specified ID **NOT** found',
-    modifiers: ['addAssociationPathParam', 'addAssociationFKPathParam', 'addResultOfModel', 'addResultNotFound'],
+    modifiers: [Modifiers.ADD_ASSOCIATION_PATH_PARAM, Modifiers.ADD_ASSOCIATION_FK_PATH_PARAM,Modifiers.ADD_RESULT_OF_MODEL, Modifiers.ADD_RESULT_NOT_FOUND],
   },
   remove: {
     summary: 'Remove from for {globalId}',
@@ -183,7 +185,7 @@ var blueprintActionTemplates = {
     ],
     resultDescription: 'Responds with the newly updated **{globalId}** record as a JSON dictionary',
     notFoundDescription: 'Cannot perform remove from, **{globalId}** record OR **FK record** with specified ID **NOT** found',
-    modifiers: ['addAssociationPathParam', 'addAssociationFKPathParam', 'addResultOfModel', 'addResultNotFound'],
+    modifiers: [Modifiers.ADD_ASSOCIATION_PATH_PARAM, Modifiers.ADD_ASSOCIATION_FK_PATH_PARAM, Modifiers.ADD_RESULT_OF_MODEL, Modifiers.ADD_RESULT_NOT_FOUND]
   },
   replace: {
     summary: 'Replace for {globalId}',
@@ -197,14 +199,14 @@ var blueprintActionTemplates = {
     ],
     resultDescription: 'Responds with the newly updated **{globalId}** record as a JSON dictionary',
     notFoundDescription: 'Cannot replace, **{globalId}** record with specified ID **NOT** found',
-    modifiers: ['addAssociationPathParam', 'addFksBodyParam', 'addResultOfModel', 'addResultNotFound'],
+    modifiers: [Modifiers.ADD_ASSOCIATION_PATH_PARAM, Modifiers.ADD_FKS_BODY_PARAM, Modifiers.ADD_RESULT_OF_MODEL, Modifiers.ADD_RESULT_NOT_FOUND],
   },
 };
 
 /**
  * Defines standard parameters for generated Swagger for each Sails blueprint action routes.
  */
-var blueprintParameterTemplates = {
+export const blueprintParameterTemplates = {
   AttributeFilterParam: {
     in: 'query',
     name: '_*_',
@@ -253,7 +255,7 @@ var blueprintParameterTemplates = {
 /**
  * Defines standard Sails responses as used within actions2 actions.
  */
-var actions2Responses = {
+export const actions2Responses: Action2Response = {
   success: { statusCode: '200', description: 'Success' },
   badRequest: { statusCode: '400', description: 'Bad request' },
   forbidden: { statusCode: '403', description: 'Forbidden' },
@@ -264,25 +266,10 @@ var actions2Responses = {
 /**
  * Default values for produces/consumes and responses for custom actions.
  */
-let defaults = {
+export const defaults: Defaults = {
   responses: {
     '200': { description: 'The requested resource' },
     '404': { description: 'Resource not found' },
     '500': { description: 'Internal server error' }
   }
-};
-
-module.exports = {
-
-  swaggerTypes: swaggerTypes,
-  sailAttributePropertiesMap: sailAttributePropertiesMap,
-  validationsMap: validationsMap,
-
-  blueprintActionTemplates: blueprintActionTemplates,
-  blueprintParameterTemplates: blueprintParameterTemplates,
-
-  actions2Responses: actions2Responses,
-
-  defaults: defaults,
-
 };

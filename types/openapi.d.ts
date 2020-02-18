@@ -7,16 +7,17 @@ import { Schema, Reference, Header, Tag, Security } from 'swagger-schema-officia
 
 declare namespace OpenApi {
 
+    type EmptyObject = {}
 
-    interface Info {
+    export interface Info {
         title: string;
         version: string;
         description?: string;
         termsOfService?: string;
         contact?: {
-          name?: string;
-          url?: string;
-          email?: string;
+            name?: string;
+            url?: string;
+            email?: string;
         };
         license?: {
             name: string;
@@ -24,34 +25,34 @@ declare namespace OpenApi {
         };
     }
 
-    interface Server  {
+    export interface Server {
         url: string;
         description?: string;
-        variables?: Array<string|{enum?: Array<string>; default: string; description?: string}>;
+        variables?: Array<string | { enum?: Array<string>; default: string; description?: string }>;
     }
 
-    interface ExternalDoc {
+    export interface ExternalDoc {
         description?: string;
         url: string;
     }
 
-    interface Parameter {
+    export interface Parameter {
         name: string;
         in: string;
         description?: string;
         required?: boolean;
         deprecated?: boolean;
         allowEmptyValue?: boolean;
-    } 
+    }
 
-    interface Example {
+    export interface Example {
         summary?: string;
         description?: string;
         value?: any;
         externalValue?: string;
     }
 
-    interface Encoding {
+    export interface Encoding {
         contentType?: string;
         headers?: Map<string, Header | Reference>;
         style?: string;
@@ -59,20 +60,20 @@ declare namespace OpenApi {
         allowReserved?: boolean;
     }
 
-    interface MediaType {
+    export interface MediaType {
         schema?: Schema | Reference;
         example?: any;
-        examples?: Map<string, Example|Reference>;
+        examples?: Map<string, Example | Reference>;
         encoding?: Map<string, Encoding>;
 
     }
 
-    interface RequestBody {
+    export interface RequestBody {
         description?: string;
-        content: Map<string, MediaType>;        
+        content: Map<string, MediaType>;
     }
 
-    interface Link {
+    export interface Link {
         operationRef?: string;
         operationId?: string;
         parameters?: Map<string, any>;
@@ -81,14 +82,14 @@ declare namespace OpenApi {
         server: Server;
     }
 
-    interface Response {
+    export interface Response {
         description: string;
         headers?: Map<string, Header | Reference>;
         content?: Map<string, MediaType>;
         links?: Map<string, Link | Reference>;
     }
 
-    interface Operation {
+    export interface Operation {
         tags?: Array<string>;
         summary?: string;
         description?: string;
@@ -101,7 +102,7 @@ declare namespace OpenApi {
         security?: Array<Security>;
     }
 
-    interface Path {
+    export interface Path {
         $ref?: string;
         summary?: string;
         description: string;
@@ -117,22 +118,24 @@ declare namespace OpenApi {
         parameters: Array<Parameter | Reference>;
     }
 
-    interface Paths {
+    export interface Paths {
         [path: string]: Path;
     }
 
-    interface Components {
-        schemas?: Map<string, Schema|Reference>;
-        responses?: Map<string, Response | Reference>;
-        parameters?: Map<string, Parameter|Reference>;
-        examples?: Map<string, Example | Reference>;
-        requestBodies?: Map<string, RequestBody | Reference>;
-        headers?: Map<string, Header | Reference>;
-        securitySchems?: Map<string, Security | Reference>;
-        links?: Map<string, Link | Reference>;
+
+    export interface Components {
+        schemas?: Map<string, Schema | Reference> | EmptyObject;
+        responses?: Map<string, Response | Reference> | EmptyObject;
+        parameters?: Map<string, Parameter | Reference> | EmptyObject;
+        examples?: Map<string, Example | Reference> | EmptyObject;
+        requestBodies?: Map<string, RequestBody | Reference> | EmptyObject;
+        headers?: Map<string, Header | Reference> | EmptyObject;
+        securitySchemes?: Map<string, Security | Reference> | EmptyObject;
+        links?: Map<string, Link | Reference> | EmptyObject;
+        callbacks?: Map<string, Path | Reference> | EmptyObject;
     }
 
-    interface OpenApi {
+    export interface OpenApi {
         openapi: string;
         info: Info;
         servers: Array<Server>;
@@ -140,5 +143,6 @@ declare namespace OpenApi {
         components?: Components;
         security?: Array<Security>;
         tags?: Array<Tag>;
+        externalDocs: ExternalDoc;
     }
 }

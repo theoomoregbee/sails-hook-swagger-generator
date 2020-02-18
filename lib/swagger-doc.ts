@@ -1,31 +1,31 @@
-'use strict';
-
-const _ = require('lodash');
-const fs = require('fs');
+import * as fs from 'fs';
+import { SwaggerGenerator, SwaggerSailsModel } from './interfaces';
+import cloneDeep from 'lodash/cloneDeep';
+import { blueprintActionTemplates as bluePrintTemplates, defaults as defaultsResponses } from './type-formatter';
+import { parseModels } from './parsers';
 
 const parsers = require('./parsers');
 const generators = require('./generators');
-const formatters = require("./type-formatter");
 
-export default function (sails, sailsRoutes, context) {
+export default  (sails: Sails.Sails, sailsRoutes: Array<Sails.Route>, context: Sails.Hook<SwaggerGenerator>): void => {
 
-  let hookConfig = sails.config[context.configKey];
+  const hookConfig: SwaggerGenerator = sails.config[context.configKey];
 
-  if (hookConfig.disabled === true) {
+  if (hookConfig.disabled) {
     return;
   }
 
-  let blueprintActionTemplates = _.cloneDeep(formatters.blueprintActionTemplates);
+  let blueprintActionTemplates = cloneDeep(bluePrintTemplates);
   if (hookConfig.updateBlueprintActionTemplates) {
-    hookConfig.updateBlueprintActionTemplates(blueprintActionTemplates);
+    blueprintActionTemplates = hookConfig.updateBlueprintActionTemplates(blueprintActionTemplates);
   }
 
-  let specifications = _.cloneDeep(hookConfig.swagger);
+  const specifications = cloneDeep(hookConfig.swagger);
 
-  let defaults = hookConfig.defaults || formatters.defaults;
+  const defaults = hookConfig.defaults || defaultsResponses;
 
-  let models = parsers.parseModels(sails.config, sails.models);
-  let customRoutes = parsers.parseCustomRoutes(sails.config);
+  const models = parseModels(sails.config, sails.models as Array<SwaggerSailsModel>);
+  const customRoutes = parsers.parseCustomRoutes(sails.config);
   let allRoutes = parsers.parseAllRoutes(sailsRoutes, models, sails.config);
 
   // remove globally excluded routes
@@ -50,7 +50,7 @@ export default function (sails, sailsRoutes, context) {
   _.defaults(specifications.components.parameters, formatters.blueprintParameterTemplates);
 
   // clean up of specification, removing unreferenced tags
-  let referencedTags = new Set();
+  const referencedTags = new Set();
   _.forEach(specifications.paths, (pathDef, path) => {
     _.forEach(pathDef, (def, httpMethod) => {
       if (def.tags) def.tags.map(tag => referencedTags.add(tag))
@@ -60,7 +60,7 @@ export default function (sails, sailsRoutes, context) {
 
   if (hookConfig.postProcess) hookConfig.postProcess(specifications);
 
-  let destPath = sails.config[context.configKey].swaggerJsonPath;
+  const destPath = sails.config[context.configKey].swaggerJsonPath;
   try {
     fs.writeFileSync(destPath, JSON.stringify(specifications, null, 2));
   } catch(e) {
@@ -71,4 +71,4 @@ export default function (sails, sailsRoutes, context) {
 
   return specifications;
 
-};
+}

@@ -6,5 +6,7 @@ module.exports = {
       file: './index.js',
       format: 'cjs'
     },
-    plugins: [typescript()]
+    plugins: [typescript({compilerOptions: {
+      typeRoots: ["./types", "./node_modules/@types"]
+    }})]
   };

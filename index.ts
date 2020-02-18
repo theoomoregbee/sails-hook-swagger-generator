@@ -1,8 +1,11 @@
 import * as path from 'path';
 import swaggerDoc from './lib/swaggerDoc';
+import { SwaggerGenerator } from './lib/interfaces';
 
-export default (sails) => {
+
+export default (sails: Sails.Sails): Sails.Hook<SwaggerGenerator> => {
   const routes = [];
+  
 
   return {
 
