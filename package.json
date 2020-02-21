@@ -11,8 +11,9 @@
     "isHook": true
   },
   "scripts": {
+    "tsc": "tsc",
     "lint": "eslint . --ext .ts",
-    "build": "npm run lint && rollup -c",
+    "build": "npm run lint && tsc",
     "pretest": "npm run lint && npm run build",
     "test": "node ./node_modules/mocha/bin/mocha test/bootstrap.test.js test/**/*.test.js",
     "travis-deploy-once": "travis-deploy-once",
@@ -29,7 +30,6 @@
   "author": "Theophilus Omoregbee",
   "license": "MIT",
   "devDependencies": {
-    "@rollup/plugin-typescript": "^3.0.0",
     "@types/mocha": "^7.0.1",
     "@types/swagger-schema-official": "^2.0.20",
     "@typescript-eslint/eslint-plugin": "^2.19.2",
@@ -38,7 +38,6 @@
     "eslint": "^6.8.0",
     "lodash": "^4.17.4",
     "mocha": "^3.5.0",
-    "rollup": "^1.31.1",
     "sails": "^1.1.0",
     "sails-disk": "^1.1.2",
     "sails-hook-orm": "^2.1.1",
@@ -46,9 +45,11 @@
     "swagger-jsdoc": "^3.4.0",
     "travis-deploy-once": "^4.3.4",
     "tslib": "^1.10.0",
-    "typescript": "^3.7.5"
+    "typescript": "^3.8.2"
   },
   "dependencies": {
+    "@types/chai": "^4.2.9",
+    "@types/lodash": "^4.14.149",
     "@types/swagger-jsdoc": "^3.0.2"
   }
 }
