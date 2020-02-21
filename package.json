@@ -2,7 +2,7 @@
   "name": "sails-hook-swagger-generator",
   "version": "0.0.0-development",
   "description": "This is just a sails hook for generating swagger documentation json",
-  "main": "index.js",
+  "main": "build/index.js",
   "repository": {
     "type": "git",
     "url": "https://github.com/theo4u/sails-hook-swagger-generator.git"
