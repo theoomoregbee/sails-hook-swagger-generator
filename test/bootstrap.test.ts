@@ -3,6 +3,7 @@
  * Created by theophy on 02/08/2017.
  */
 const Sails = require('sails').Sails;
+import swaggergenerator from '..'
 
 describe('Basic tests ::', function () {
 
@@ -22,7 +23,7 @@ describe('Basic tests ::', function () {
       },
       hooks: {
         // Load the hook
-        swaggergenerator: require('../'),
+        swaggergenerator,
         // Skip grunt (unless your hook uses it)
         grunt: false
       },

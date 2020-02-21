@@ -14,7 +14,7 @@
     "tsc": "tsc",
     "lint": "eslint . --ext .ts",
     "build": "npm run lint && tsc",
-    "dev": "nodemon -e ts --ignore '**/*.js' --exec \"npm run tsc\"",
+    "dev": "nodemon -e ts --ignore '**/*.js' --exec \"npm run test\"",
     "pretest": "npm run lint && npm run build",
     "test": "node ./node_modules/mocha/bin/mocha build/test/bootstrap.test.js build/test/**/*.test.js",
     "travis-deploy-once": "travis-deploy-once",

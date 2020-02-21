@@ -35,7 +35,7 @@ export default (sails: Sails.Sails): Sails.Hook<SwaggerGenerator> => {
       }
     },
     // Run when sails loads-- be sure and call `next()`.
-    initialize: function (next) {
+    initialize: function (next): void {
 
       // https://github.com/balderdashy/sails/blob/master/lib/EVENTS.md#routerbind
       sails.on('router:bind', (routeObj) => {
