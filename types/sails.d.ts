@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 declare namespace Sails {
 
     type Callback<T, K> = (arg: T) => K
@@ -8,13 +9,13 @@ declare namespace Sails {
         paths: {
             models: string;
         };
+        [key: string]: any;
     }
 
     export interface Route {
         path: string;
         target: Function;
         verb: string;
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         options: Record<string, any>;
     }
 
@@ -34,7 +35,6 @@ declare namespace Sails {
         min?: number;
         maxLength?: number;
         minLength?: number;
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         regex: any;
         isIn: Array<string>;
     }

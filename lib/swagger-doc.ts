@@ -1,15 +1,17 @@
 import * as fs from 'fs';
 import { SwaggerGenerator, SwaggerSailsModel } from './interfaces';
-import cloneDeep from 'lodash/cloneDeep';
+import * as lodash from 'lodash';
 import { blueprintActionTemplates as bluePrintTemplates, defaults as defaultsResponses } from './type-formatter';
 import { parseModels } from './parsers';
 
-const parsers = require('./parsers');
-const generators = require('./generators');
+const cloneDeep = lodash.cloneDeep
+
+// const parsers = require('./parsers');
+// const generators = require('./generators');
 
 export default  (sails: Sails.Sails, sailsRoutes: Array<Sails.Route>, context: Sails.Hook<SwaggerGenerator>): void => {
 
-  const hookConfig: SwaggerGenerator = sails.config[context.configKey];
+  const hookConfig: SwaggerGenerator = sails.config[context.configKey!];
 
   if (hookConfig.disabled) {
     return;
@@ -24,6 +26,7 @@ export default  (sails: Sails.Sails, sailsRoutes: Array<Sails.Route>, context: S
 
   const defaults = hookConfig.defaults || defaultsResponses;
 
+  /*
   const models = parseModels(sails.config, sails.models as Array<SwaggerSailsModel>);
   const customRoutes = parsers.parseCustomRoutes(sails.config);
   let allRoutes = parsers.parseAllRoutes(sailsRoutes, models, sails.config);
@@ -70,5 +73,5 @@ export default  (sails: Sails.Sails, sailsRoutes: Array<Sails.Route>, context: S
   sails.log.info('Swagger generated successfully');
 
   return specifications;
-
+*/
 }
