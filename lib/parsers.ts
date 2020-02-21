@@ -28,10 +28,6 @@ const componentReference: Array<keyof OpenApi.Components> = [
 // consider all models except associative tables and 'Archive' model special case
 const removeModelExceptions = (model: SwaggerSailsModel): boolean => !!model.globalId && model.globalId !== 'Archive'
 
-// TODO: write test for this
-// * don't mutate params
-// * should merge tags and source tag properties should always override destination if a tag is existing
-// * should merge components and source component properties should override component that is existing
 export const mergeSwaggerSpec = (destination: SwaggerAttribute, source: SwaggerAttribute): SwaggerAttribute => {
   const dest: SwaggerAttribute = cloneDeep(destination)
   dest.tags = uniqBy([
@@ -48,7 +44,7 @@ export const mergeSwaggerSpec = (destination: SwaggerAttribute, source: SwaggerA
       }
     }
     return mergedComponents
-  }, {} as OpenApi.Components)
+  }, dest.components || {})
   return dest
 }
 
