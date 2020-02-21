@@ -15,7 +15,7 @@
     "lint": "eslint . --ext .ts",
     "build": "npm run lint && tsc",
     "pretest": "npm run lint && npm run build",
-    "test": "node ./node_modules/mocha/bin/mocha test/bootstrap.test.js test/**/*.test.js",
+    "test": "node ./node_modules/mocha/bin/mocha build/test/bootstrap.test.js build/test/**/*.test.js",
     "travis-deploy-once": "travis-deploy-once",
     "semantic-release": "semantic-release pre && npm publish && semantic-release post"
   },
@@ -31,6 +31,7 @@
   "license": "MIT",
   "devDependencies": {
     "@types/mocha": "^7.0.1",
+    "@types/node": "^13.7.4",
     "@types/swagger-schema-official": "^2.0.20",
     "@typescript-eslint/eslint-plugin": "^2.19.2",
     "@typescript-eslint/parser": "^2.19.2",
