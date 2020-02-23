@@ -62,11 +62,12 @@ module.exports = {
 
   swagger: {
 
-    _findone: {
-      description: '_Alternate description_: Look up the **User** record with the specified ID.'
+    actions: {
+      findone: {
+        description: '_Alternate description_: Look up the **User** record with the specified ID.'
+      }
     },
-
-    _tags: [
+    tags: [
       {
         name: 'User (ORM duplicate)',
         externalDocs: {
@@ -75,7 +76,9 @@ module.exports = {
         }
       }
     ],
-
+    components: {
+      parameters: []
+    }
   }
 
 };

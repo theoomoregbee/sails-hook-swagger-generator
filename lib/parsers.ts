@@ -2,11 +2,13 @@
  * Created by theophy on 02/08/2017.
  */
 import * as path from 'path';
-import { SwaggerSailsModel, SwaggerAttribute } from './interfaces';
+import { SwaggerSailsModel, SwaggerAttribute, SwaggerAction } from './interfaces';
 import swaggerJSDoc from 'swagger-jsdoc';
 import cloneDeep from 'lodash/cloneDeep';
+import mapKeys from 'lodash/mapKeys';
 import get from 'lodash/get';
 import uniqByLodash from 'lodash/uniqBy';
+import uniq from 'lodash/uniq';
 import { OpenApi } from '../types/openapi';
 
 declare const sails: any;
@@ -48,7 +50,24 @@ export const mergeSwaggerSpec = (destination: SwaggerAttribute, source: SwaggerA
   return dest
 }
 
-const loadSwaggerDocComments = (filePath: string): Promise<SwaggerAttribute>=> {
+export const mergeSwaggerPaths = (dest: SwaggerAction | undefined, sourcePaths: SwaggerAction): SwaggerAction => {
+  // strip off leading '/' from both source and destination swagger action, swagger-doc returns paths with leading /path-name: {}
+  const swaggerActions = mapKeys(cloneDeep(dest || {}), (_, key) => key.replace(/^\//, ''));
+  const paths = mapKeys(cloneDeep(sourcePaths), (_, key) => key.replace(/^\//, ''));
+  // unique action keys
+  const actions = uniq(Object.keys(swaggerActions).concat(Object.keys(paths)))
+  return actions.reduce((merged, key) => {
+    const destination = swaggerActions[key];
+    const source = paths[key];
+    merged[key] = {
+      ...(destination || {}),
+      ...(source || {})
+    }
+    return merged
+  }, {} as SwaggerAction)
+}
+
+export const loadSwaggerDocComments = (filePath: string): Promise<OpenApi.OpenApi>=> {
   return new Promise((resolve, reject) => {
     try {
       const opts = {
@@ -59,34 +78,49 @@ const loadSwaggerDocComments = (filePath: string): Promise<SwaggerAttribute>=> {
         apis: [filePath],
       };
       const specification = swaggerJSDoc(opts);
-      resolve(specification as SwaggerAttribute)
+      resolve(specification as OpenApi.OpenApi)
     }catch(err){
       reject(err)
     }
   });
 }
 
-// TODO: test cases
-// 1. remove exception model
-// 2. key models by their globalIds
-// 3. Load swagger doc and merge with existing model swagger (integration test with mergeSwaggerSpec )
 export const parseModels = async (sailsConfig: Sails.Config, sailsModels: Array<SwaggerSailsModel>): Promise<{[globalId: string]: SwaggerSailsModel}> => {
   const models = sailsModels.filter(removeModelExceptions);
   // parse swagger jsDoc comments in each of our models
   const modelDir = sailsConfig.paths.models;
-  const swaggerComments: Array<SwaggerAttribute | undefined> = await Promise.all(models.map(model =>
+  const swaggerComments: Array<OpenApi.OpenApi | undefined> = await Promise.all(models.map(model =>
     loadSwaggerDocComments(require.resolve(path.join(modelDir, model.globalId))).catch(err => {
       sails.log.error(`ERROR: sails-hook-swagger-generator: Error resolving/loading model ${model.globalId}: ${err.message || ''}`, err);
       return undefined
     })));
- return models.reduce((parsed, model, index) => {
-   parsed[model.globalId] = model;
-   // retrieve swagger documentation from jsDoc comments and merge it with any .swagger within our model
-   const swagger = swaggerComments[index];
-   model.swagger = cloneDeep(model.swagger || {})
-   if(swagger) {
-    model.swagger = mergeSwaggerSpec(model.swagger, swagger);
-   }
-   return parsed
- },{} as {[globalId: string]: SwaggerSailsModel}) 
+
+    const parseTagsComponents = (model: SwaggerSailsModel, index: number) => {
+      // retrieve swagger documentation from jsDoc comments and merge it with any .swagger within our model
+      const swagger = swaggerComments[index];
+      model.swagger = cloneDeep(model.swagger || {})
+      if (swagger) {
+        model.swagger = mergeSwaggerSpec(model.swagger, swagger);
+      }
+      return model
+    }
+
+    const parseSwaggerDocPaths = (model: SwaggerSailsModel, index: number) => {
+      // parse and merge swagger.actions and swagger-doc path 
+      const swagger = swaggerComments[index] 
+      if(swagger){
+        const paths = swagger.paths || {}
+        model.swagger.actions = mergeSwaggerPaths(model.swagger.actions!, paths)
+      }
+
+      return model
+    }
+
+  return models
+    .map(parseTagsComponents)
+    .map(parseSwaggerDocPaths)
+    .reduce((parsed, model) => {
+      parsed[model.globalId] = model;
+      return parsed
+    }, {} as { [globalId: string]: SwaggerSailsModel })
 }

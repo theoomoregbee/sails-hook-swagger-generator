@@ -30,10 +30,14 @@ export interface SwaggerGenerator {
       responses: {[statusCode: string]: {description: string}};
   }
 
+  export interface SwaggerAction {
+      [path: string]: OpenApi.Path;
+  }
+
   export interface SwaggerAttribute {
       tags?: Array<Tag>;
       components?: OpenApi.Components;
-      actions?: Record<string, Omit<SwaggerAttribute, 'actions'>>;
+      actions?: SwaggerAction;
   }
 
   export interface SwaggerSailsModel extends Omit<Sails.Model, 'attributes'> {

@@ -114,8 +114,8 @@ declare namespace OpenApi {
         head?: Operation;
         patch?: Operation;
         trace?: Operation;
-        servers: Array<Server>;
-        parameters: Array<Parameter | Reference>;
+        servers?: Array<Server>;
+        parameters?: Array<Parameter | Reference>;
     }
 
     export interface Paths {
