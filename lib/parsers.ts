@@ -85,7 +85,7 @@ export const loadSwaggerDocComments = (filePath: string): Promise<OpenApi.OpenAp
   });
 }
 
-export const parseModels = async (sailsConfig: Sails.Config, sailsModels: Array<SwaggerSailsModel>): Promise<{[globalId: string]: SwaggerSailsModel}> => {
+export const parseModels = async (sailsConfig: Sails.Config, sailsModels: Array<SwaggerSailsModel> = []): Promise<{[globalId: string]: SwaggerSailsModel}> => {
   const models = sailsModels.filter(removeModelExceptions);
   // parse swagger jsDoc comments in each of our models
   const modelDir = sailsConfig.paths.models;

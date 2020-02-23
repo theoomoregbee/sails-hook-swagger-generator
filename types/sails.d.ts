@@ -57,7 +57,7 @@ declare namespace Sails {
         config: Config;
         on: (event: string, callback: Callback<Route, void>) => void;
         after: (event: string, callback: Function) => void;
-        models: Array<Model>;
+        models: Record<string, Model>;
     }
    
 }

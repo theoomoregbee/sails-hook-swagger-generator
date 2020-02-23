@@ -6,10 +6,7 @@ import { parseModels } from './parsers';
 
 const cloneDeep = lodash.cloneDeep
 
-// const parsers = require('./parsers');
-// const generators = require('./generators');
-
-export default  (sails: Sails.Sails, sailsRoutes: Array<Sails.Route>, context: Sails.Hook<SwaggerGenerator>): void => {
+export default  async (sails: Sails.Sails, sailsRoutes: Array<Sails.Route>, context: Sails.Hook<SwaggerGenerator>): Promise<void> => {
 
   const hookConfig: SwaggerGenerator = sails.config[context.configKey!];
 
@@ -26,8 +23,8 @@ export default  (sails: Sails.Sails, sailsRoutes: Array<Sails.Route>, context: S
 
   const defaults = hookConfig.defaults || defaultsResponses;
 
+  const models = await parseModels(sails.config, Object.keys(sails.models).map(key => sails.models[key]) as Array<SwaggerSailsModel>);
   /*
-  const models = parseModels(sails.config, sails.models as Array<SwaggerSailsModel>);
   const customRoutes = parsers.parseCustomRoutes(sails.config);
   let allRoutes = parsers.parseAllRoutes(sailsRoutes, models, sails.config);
 
