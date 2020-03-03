@@ -68,3 +68,22 @@ type ResponseType = 'success' | 'badRequest' | 'forbidden' | 'notFound' | 'error
 export type Action2Response = {
     [type in ResponseType]: {statusCode: string; description: string} 
 }
+
+type HTTPMethodVerb = 'all' | 'get' | 'post' | 'put' | 'patch' | 'delete'
+
+export interface SwaggerRouteInfo {
+    middlewareType: string;
+    blueprintAction?:  BluePrintAction;
+    httpMethod: HTTPMethodVerb;
+    path: string;
+    swaggerPath: string;
+    identity?: string;
+    model?: SwaggerSailsModel;
+    controller?: string;
+    tags: Array<Tag>;
+    actionPath: string;
+    actionName: string;
+    actionType: 'controller' | 'standalone' | 'actions2';
+    actionFound: 'notfound'|'loaded+notfound'|'loaded+found'|'implicit';
+    actions2?: string;
+}

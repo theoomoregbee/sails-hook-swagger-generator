@@ -87,7 +87,6 @@ export const normalizeRouteControllerName = (name?: string): string | undefined 
 
 // see: https://sailsjs.com/documentation/concepts/routes/custom-routes#?controller-action-target-syntax
 export const normalizeRouteControllerTarget = (target: string | Sails.RouteControllerTarget): { controller?: string; action: string } => {
-
     if (typeof target === 'string') {
         // for foo.myGoAction and FooController.myGoAction
         const dotParams = target.split('.');
@@ -110,4 +109,8 @@ export const normalizeRouteControllerTarget = (target: string | Sails.RouteContr
     }
 
     throw new TypeError(`Unable to normalize route: ${target}, see: https://sailsjs.com/documentation/concepts/routes/custom-routes for allowed routes pattern`)
+}
+
+export const getActionPath = (sailsConfig: Sails.Config, target: { action: string; controller?: string }): string => {
+    return ''
 }

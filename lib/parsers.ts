@@ -85,10 +85,7 @@ export const parseCustomRoutes = (sailsConfig: Sails.Config): Array<SwaggerRoute
 
     // Parse 2: Route target
     const routerTarget = sailsConfig.routes[routeAddress];
-    // if(typeof routerTarget === 'string') {
-      
-    // }
-
+  
   }
    return [] 
 }
