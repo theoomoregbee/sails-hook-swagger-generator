@@ -1,6 +1,6 @@
 import path from 'path';
 import { expect } from 'chai';
-import { mergeSwaggerSpec, mergeSwaggerPaths, loadSwaggerDocComments } from '../lib/utils';
+import { mergeSwaggerSpec, mergeSwaggerPaths, loadSwaggerDocComments, normalizeRouteControllerName, normalizeRouteControllerTarget } from '../lib/utils';
 
 const sailsConfig = {
     paths: {
@@ -95,6 +95,49 @@ describe ('Utils', () => {
             expect(doc.openapi).equal('3.0.0');
             done()
         });
+    })
+
+    describe('normalizeRouteControllerName', ()=>{
+        it('should normalize undefined route controller name to undefined', done => {
+            expect(normalizeRouteControllerName(undefined)).to.undefined;
+            done();
+        })
+        it('should normalize route controller name from foo to FooController', done => {
+            expect(normalizeRouteControllerName('foo')).to.equal('FooController');
+            done();
+        })
+        it('should normalize route controller name from FooController to FooController', done => {
+            expect(normalizeRouteControllerName('FooController')).to.equal('FooController');
+            done();
+        })
+    })
+
+    describe('normalizeRouteControllerTarget', () => {
+        it('should normalize FooController.myGoAction', done => {
+            expect(normalizeRouteControllerTarget('FooController.myGoAction')).to.deep.equal({controller: 'FooController', action: 'myGoAction'})
+            done();
+        })
+        it('should normalize foo.myGoAction', done => {
+            expect(normalizeRouteControllerTarget('foo.myGoAction')).to.deep.equal({controller: 'FooController', action: 'myGoAction'})
+            done();
+        })
+        it('should normalize foo/go-action', done => {
+            expect(normalizeRouteControllerTarget('foo/go-action')).to.deep.equal({action: 'foo/go-action'})
+            done();
+        })
+        it(`should normalize {action: 'index'}`, done => {
+            expect(normalizeRouteControllerTarget({action: 'index'})).to.deep.equal({action: 'index', controller: undefined})
+            done();
+        })
+        it(`should normalize {action: 'foo/go-action'}`, done => {
+            expect(normalizeRouteControllerTarget({ action: 'foo/go-action' })).to.deep.equal({ action: 'foo/go-action', controller: undefined })
+            done();
+        })
+
+        it('should throw type error if route target is not among the accepted pattern', done => {
+            expect(() => normalizeRouteControllerTarget('something-bind')).throw()
+            done()
+        })
     })
 
 })

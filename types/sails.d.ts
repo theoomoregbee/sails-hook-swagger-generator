@@ -4,11 +4,19 @@ declare namespace Sails {
     type Callback<T, K> = (arg: T) => K
 
 
+    export interface RouteControllerTarget {
+        controller?: string;
+        action: string;
+    }
+
+    export type RouteTarget = string | RouteControllerTarget | { view: string } | { response: string }
+
     export interface Config {
         appPath: string;
         paths: {
             models: string;
         };
+        routes: Record<string, string | RouteTarget>;
         [key: string]: any;
     }
 

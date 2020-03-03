@@ -77,5 +77,37 @@ export const loadSwaggerDocComments = (filePath: string): Promise<OpenApi.OpenAp
         }
     });
 }
-  
 
+export const normalizeRouteControllerName = (name?: string): string | undefined => {
+    if (name && !name.endsWith('Controller')) {
+        return `${name.charAt(0).toUpperCase()}${name.substring(1)}Controller`
+    }
+    return name
+}
+
+// see: https://sailsjs.com/documentation/concepts/routes/custom-routes#?controller-action-target-syntax
+export const normalizeRouteControllerTarget = (target: string | Sails.RouteControllerTarget): { controller?: string; action: string } => {
+
+    if (typeof target === 'string') {
+        // for foo.myGoAction and FooController.myGoAction
+        const dotParams = target.split('.');
+        if (dotParams.length > 1) {
+            const controller = normalizeRouteControllerName(dotParams[0])
+            const action = dotParams[1]
+            return { controller, action }
+        }
+
+        // foo/go-action
+        const slashParams = target.split('/');
+        if (slashParams.length > 1) {
+            return { action: target }
+        }
+    } else {
+        return {
+            controller: normalizeRouteControllerName(target.controller),
+            action: target.action
+        }
+    }
+
+    throw new TypeError(`Unable to normalize route: ${target}, see: https://sailsjs.com/documentation/concepts/routes/custom-routes for allowed routes pattern`)
+}
