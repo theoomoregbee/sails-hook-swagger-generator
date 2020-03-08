@@ -56,7 +56,8 @@ export const parseModels = async (sailsConfig: Sails.Config, sailsModels: Array<
 }
 
 export const parseCustomRoutes = (sailsConfig: Sails.Config): Array<SwaggerRouteInfo>  => {
-  for(const routeAddress in sailsConfig.routes){
+  const routes = removeViewRoutes(sailsConfig.routes)
+  for(const routeAddress in routes){
     // Parse 1: Route Address
     // see https://sailsjs.com/documentation/concepts/routes/custom-routes#?route-address
     let [verb, path] = routeAddress.split(/\s+/)

@@ -97,6 +97,20 @@ describe ('Utils', () => {
         });
     })
 
+    describe('removeViewRoutes', () => {
+        it('should remove route targets with views', done => {
+            expect(removeViewRoutes({
+                'path/:id': 'address.foo',
+                'get users/:id': { action: 'index' },
+                'get users/me': { view: 'brochure/about' }
+            })).to.deep.equal({
+                'path/:id': 'address.foo',
+                'get users/:id': { action: 'index' },
+            })
+            done();
+        })
+    })
+
     describe('normalizeRouteControllerName', ()=>{
         it('should normalize undefined route controller name to undefined', done => {
             expect(normalizeRouteControllerName(undefined)).to.undefined;

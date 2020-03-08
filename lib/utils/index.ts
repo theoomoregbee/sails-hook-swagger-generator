@@ -78,6 +78,17 @@ export const loadSwaggerDocComments = (filePath: string): Promise<OpenApi.OpenAp
     });
 }
 
+export const removeViewRoutes = (routes: Record<string, Sails.RouteTarget>): Record<string, Sails.RouteTarget>=> {
+    return Object.keys(routes).reduce((cleanedRoutes, routeAddress)=> {
+        const target = routes[routeAddress];
+        const isView = !!get(target, 'view'); 
+           if(!isView){
+               cleanedRoutes[routeAddress]= target
+        }
+        return cleanedRoutes
+    }, {} as Record<string, Sails.RouteTarget>)
+}
+
 export const normalizeRouteControllerName = (name?: string): string | undefined => {
     if (name && !name.endsWith('Controller')) {
         return `${name.charAt(0).toUpperCase()}${name.substring(1)}Controller`
