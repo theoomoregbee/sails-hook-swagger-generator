@@ -2,11 +2,11 @@
  * Created by theophy on 02/08/2017.
  */
 import * as path from 'path';
-import { SwaggerSailsModel, SwaggerRouteInfo } from './interfaces';
+import { SwaggerSailsModel, SwaggerRouteInfo, SwaggerSailsRouteControllerTarget, HTTPMethodVerb } from './interfaces';
 import cloneDeep from 'lodash/cloneDeep';
 import { OpenApi } from '../types/openapi';
 import { generateSwaggerPath } from './generators';
-import { loadSwaggerDocComments, mergeSwaggerSpec, mergeSwaggerPaths } from './utils';
+import { loadSwaggerDocComments, mergeSwaggerSpec, mergeSwaggerPaths, removeViewRoutes, normalizeRouteControllerTarget } from './utils';
 
 declare const sails: any;
 
@@ -56,11 +56,12 @@ export const parseModels = async (sailsConfig: Sails.Config, sailsModels: Array<
 }
 
 export const parseCustomRoutes = (sailsConfig: Sails.Config): Array<SwaggerRouteInfo>  => {
-  const routes = removeViewRoutes(sailsConfig.routes)
+  const routes = removeViewRoutes(sailsConfig.routes) as Record<string, string | SwaggerSailsRouteControllerTarget>;
+  const customRoutes: SwaggerRouteInfo[] = []
   for(const routeAddress in routes){
     // Parse 1: Route Address
     // see https://sailsjs.com/documentation/concepts/routes/custom-routes#?route-address
-    let [verb, path] = routeAddress.split(/\s+/)
+    let [verb, path] = routeAddress.split(/\s+/) 
     if (!path) {
       path = verb
       verb = 'all'
@@ -85,8 +86,25 @@ export const parseCustomRoutes = (sailsConfig: Sails.Config): Array<SwaggerRoute
     // https://sailsjs.com/documentation/concepts/actions-and-controllers#?actions-2
 
     // Parse 2: Route target
-    const routerTarget = sailsConfig.routes[routeAddress];
-  
+    const routeTarget = normalizeRouteControllerTarget(routes[routeAddress]);
+
+    const routeInfo: SwaggerRouteInfo = {
+      verb: verb as HTTPMethodVerb,
+      path,
+      swaggerPath:swaggerPathParams.path,
+      variables: swaggerPathParams.variables,
+      middlewareType: '',
+      ...routeTarget
+    }
+
+    console.log('route-target is', routeTarget)
+    if (verb !== 'all') {
+      customRoutes.push(routeInfo);
+    } else {
+      ['get', 'post', 'put', 'patch', 'delete'].map(v => {
+        customRoutes.push(_.defaults({ httpMethod: v }, _.cloneDeep(routeInfo)));
+      });
+    }
   }
-   return [] 
+  return customRoutes
 }

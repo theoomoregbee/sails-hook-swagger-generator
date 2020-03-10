@@ -39,7 +39,9 @@ export default (sails: Sails.Sails): Sails.Hook<SwaggerGenerator> => {
 
       // https://github.com/balderdashy/sails/blob/master/lib/EVENTS.md#routerbind
       sails.on('router:bind', (routeObj) => {
-        routes.push(routeObj);
+        if (!routes.find(route => route.path === routeObj.path && route.verb === routeObj.verb)) {
+          routes.push(routeObj);
+        }
       });
 
       sails.after('ready', () => {

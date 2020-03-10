@@ -1,6 +1,6 @@
 import path from 'path';
 import { expect } from 'chai';
-import { mergeSwaggerSpec, mergeSwaggerPaths, loadSwaggerDocComments, normalizeRouteControllerName, normalizeRouteControllerTarget } from '../lib/utils';
+import { mergeSwaggerSpec, mergeSwaggerPaths, loadSwaggerDocComments, normalizeRouteControllerName, normalizeRouteControllerTarget, removeViewRoutes } from '../lib/utils';
 
 const sailsConfig = {
     paths: {
@@ -140,11 +140,11 @@ describe ('Utils', () => {
             done();
         })
         it(`should normalize {action: 'index'}`, done => {
-            expect(normalizeRouteControllerTarget({action: 'index'})).to.deep.equal({action: 'index', controller: undefined})
+            expect(normalizeRouteControllerTarget({action: 'index'})).to.deep.equal({action: 'index', controller: undefined, swagger: undefined})
             done();
         })
         it(`should normalize {action: 'foo/go-action'}`, done => {
-            expect(normalizeRouteControllerTarget({ action: 'foo/go-action' })).to.deep.equal({ action: 'foo/go-action', controller: undefined })
+            expect(normalizeRouteControllerTarget({ action: 'foo/go-action' })).to.deep.equal({ action: 'foo/go-action', controller: undefined, swagger: undefined })
             done();
         })
 

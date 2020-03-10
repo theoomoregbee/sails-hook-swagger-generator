@@ -1,4 +1,4 @@
-import { SwaggerAttribute, SwaggerAction } from '../interfaces';
+import { SwaggerAttribute, SwaggerAction, SwaggerSailsRouteControllerTarget } from '../interfaces';
 import swaggerJSDoc from 'swagger-jsdoc';
 import cloneDeep from 'lodash/cloneDeep';
 import { OpenApi } from '../../types/openapi';
@@ -97,14 +97,14 @@ export const normalizeRouteControllerName = (name?: string): string | undefined 
 }
 
 // see: https://sailsjs.com/documentation/concepts/routes/custom-routes#?controller-action-target-syntax
-export const normalizeRouteControllerTarget = (target: string | Sails.RouteControllerTarget): { controller?: string; action: string } => {
+export const normalizeRouteControllerTarget = (target: string | SwaggerSailsRouteControllerTarget): SwaggerSailsRouteControllerTarget => {
     if (typeof target === 'string') {
         // for foo.myGoAction and FooController.myGoAction
         const dotParams = target.split('.');
         if (dotParams.length > 1) {
             const controller = normalizeRouteControllerName(dotParams[0])
             const action = dotParams[1]
-            return { controller, action }
+            return { controller, action  }
         }
 
         // foo/go-action
@@ -115,13 +115,14 @@ export const normalizeRouteControllerTarget = (target: string | Sails.RouteContr
     } else {
         return {
             controller: normalizeRouteControllerName(target.controller),
-            action: target.action
+            action: target.action,
+            swagger: target.swagger
         }
     }
 
     throw new TypeError(`Unable to normalize route: ${target}, see: https://sailsjs.com/documentation/concepts/routes/custom-routes for allowed routes pattern`)
 }
 
-export const getActionPath = (sailsConfig: Sails.Config, target: { action: string; controller?: string }): string => {
-    return ''
-}
+// export const getActionPath = (sailsConfig: Sails.Config, normalisedTarget: SwaggerSailsRouteControllerTarget  ): string => {
+//     return ''
+// }
