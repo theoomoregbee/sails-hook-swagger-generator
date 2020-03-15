@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { OpenApi } from '../types/openapi';
 import { Reference, Tag } from 'swagger-schema-official';
 
@@ -75,8 +76,24 @@ export type Action2Response = {
 
 export type HTTPMethodVerb = 'all' | 'get' | 'post' | 'put' | 'patch' | 'delete'
 
+export interface ParsedCustomRoute {
+    verb: HTTPMethodVerb;
+    path: string;
+    swaggerPath: string; // with :id converted to {id}
+    variables: string[];
+    controller?: string;
+    action: string;
+    swagger?: OpenApi.Operation; 
+}
+
+
+export enum MiddlewareType {
+    BLUEPRINT = 'BLUEPRINT',
+    ACTION = 'ACTION'
+}
+
 export interface SwaggerRouteInfo {
-    middlewareType: 'action'| 'blueprint';
+    middlewareType: MiddlewareType;
     verb: HTTPMethodVerb;
     path: string;
     swaggerPath: string; // with :id converted to {id}
@@ -88,16 +105,24 @@ export interface SwaggerRouteInfo {
     swagger?: OpenApi.Operation; 
 }
 
-export interface ParsedCustomRoute {
-    verb: HTTPMethodVerb;
-    path: string;
-    swaggerPath: string; // with :id converted to {id}
-    variables: string[];
-    controller?: string;
-    action: string;
-    swagger?: OpenApi.Operation; 
+// (present for blueprints only); alias attributeInfo for association PK
+export interface AssociationPrimaryKeyAttribute {
+    [name: string]: any;
+    description: string;
 }
 
-// export interface ParsedBindRoute {
-
-// }
+export interface ParsedBindRoute {
+    controller: string | undefined;
+    tags: Array<Tag>;
+    action: string;
+    verb: HTTPMethodVerb; 
+    middlewareType: MiddlewareType;
+    path: string;
+    swaggerPath: string;
+    variables: string[];
+    swagger: OpenApi.Operation | undefined; 
+    model: SwaggerSailsModel;
+    associations: string[];
+    alias?: string;
+    associationPrimaryKeyAttribute: AssociationPrimaryKeyAttribute | undefined; 
+}

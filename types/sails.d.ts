@@ -20,17 +20,20 @@ declare namespace Sails {
         [key: string]: any;
     }
 
+
+    export interface RouteOption {
+        model?: string;
+        action: string;
+        _middlewareType: string;
+        associations: { alias: string; collection: string; model: string }[];
+        alias?: string;
+    }
+
     export interface Route {
         path: string;
         target: Function;
         verb: string;
-        options: {
-            model?: string;
-            action: string;
-            _middlewareType: string;
-            associations: any[];
-            alias?: string;
-        };
+        options: RouteOption; 
     }
 
     export interface Hook<T> {
@@ -72,6 +75,9 @@ declare namespace Sails {
         on: (event: string, callback: Callback<Route, void>) => void;
         after: (event: string, callback: Function) => void;
         models: Record<string, Model>;
+        log: {
+            warn: (value: string) => void;
+        };
     }
    
 }

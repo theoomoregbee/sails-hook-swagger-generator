@@ -2,12 +2,14 @@
  * Created by theophy on 02/08/2017.
  */
 import * as path from 'path';
-import { SwaggerSailsModel, SwaggerRouteInfo, SwaggerSailsRouteControllerTarget, HTTPMethodVerb, ParsedCustomRoute } from './interfaces';
+import { SwaggerSailsModel, SwaggerRouteInfo, SwaggerSailsRouteControllerTarget, HTTPMethodVerb, ParsedCustomRoute, ParsedBindRoute, AssociationPrimaryKeyAttribute, MiddlewareType } from './interfaces';
 import cloneDeep from 'lodash/cloneDeep';
+import get from 'lodash/get';
 import { OpenApi } from '../types/openapi';
 import { generateSwaggerPath } from './generators';
-import { loadSwaggerDocComments, mergeSwaggerSpec, mergeSwaggerPaths, removeViewRoutes, normalizeRouteControllerTarget } from './utils';
+import { loadSwaggerDocComments, mergeSwaggerSpec, mergeSwaggerPaths, removeViewRoutes, normalizeRouteControllerTarget, getAllowedMiddlewareRoutes, normalizeRouteControllerName } from './utils';
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 declare const sails: any;
 
 
@@ -107,6 +109,61 @@ export const parseCustomRoutes = (sailsConfig: Sails.Config): Array<ParsedCustom
   return customRoutes
 }
 
-// export const parseBindRoutes = (routes: Array<Sails.Route>, models: {[globalId: string]: SwaggerSailsModel} , sailsConfig: Sails.Config) => {
+const getAssociationPrimaryKeyAttribute = (routeOptions: Sails.RouteOption, models: { [globalId: string]: SwaggerSailsModel }): AssociationPrimaryKeyAttribute | undefined => {
+  const associations = routeOptions.associations || [] 
+  const association = associations.find(item => item.alias === routeOptions.alias);
+  if(!association){
+    return 
+  }
+  const identity = association.collection || association.model;
+  const model = models[identity];
+  if(!model) {
+    return
+  }
+  const associationInfo = get(model.attributes, `[${model.primaryKey}]`, { description: '' });
+  return {
+    ...associationInfo,
+    description: `**${model.globalId}** record's foreign key value (**${routeOptions.alias}** association${associationInfo.description ? '; ' + associationInfo.description : ''})`
+  }
+}
 
-// }
+export const parseBindRoutes = (boundRoutes: Array<Sails.Route>, models: { [globalId: string]: SwaggerSailsModel }, sails: Sails.Sails): ParsedBindRoute[] => {
+  const routes = getAllowedMiddlewareRoutes(boundRoutes);
+
+  const parsedRoutes: ParsedBindRoute[] = routes.map(route => {
+    const routeOptions = route.options;
+    let identity = routeOptions.model;
+    const _middlewareType = routeOptions._middlewareType as string;
+    const [middlewareType, actionName = ''] = _middlewareType.split(':') as [MiddlewareType, string];
+    const blueprintAction = actionName.toLowerCase();
+    if (!identity && routeOptions.action) {
+      // custom blueprint actions may not have model name explicitly specified --> extract from action
+      [identity] = routeOptions.action.split('/');
+    }
+
+    const model = models[identity!];
+    if (!model) {
+      sails.log.warn(`WARNING: sails-hook-swagger-generator: Ignoring unregconised shadow/implicit route ${route.path} (type ${middlewareType}) referencing unknown model ${identity}`);
+      return;
+    }
+    const controller = normalizeRouteControllerName(model.globalId);
+    const tags = get(model.swagger, 'tags', []);
+    const swagger = get(model.swagger.actions, `${blueprintAction}.${route.verb}`) as OpenApi.Operation | undefined;
+    const associationPrimaryKeyAttribute = routeOptions.associations && routeOptions.alias ? getAssociationPrimaryKeyAttribute(routeOptions, models) : undefined;
+    const swaggerPathParams = generateSwaggerPath(route.path);
+    return {
+      ...swaggerPathParams,
+      verb: route.verb,
+      path: route.path,
+      model,
+      action: blueprintAction,
+      controller,
+      tags,
+      swagger,
+      associationPrimaryKeyAttribute
+    }
+  }).filter((route): route is ParsedBindRoute => !!route)
+
+
+  return parsedRoutes
+}

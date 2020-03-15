@@ -1,4 +1,4 @@
-import { SwaggerAttribute, SwaggerAction, SwaggerSailsRouteControllerTarget } from '../interfaces';
+import { SwaggerAttribute, SwaggerAction, SwaggerSailsRouteControllerTarget, MiddlewareType } from '../interfaces';
 import swaggerJSDoc from 'swagger-jsdoc';
 import cloneDeep from 'lodash/cloneDeep';
 import { OpenApi } from '../../types/openapi';
@@ -89,9 +89,13 @@ export const removeViewRoutes = (routes: Record<string, Sails.RouteTarget>): Rec
     }, {} as Record<string, Sails.RouteTarget>)
 }
 
-// export const getAllowedMiddlewareRoutes = (routes: Array<Sails.Route>): Array<Sails.Route> => {
-//     return routes.map.filter(route => route.options.)
-// }
+export const getAllowedMiddlewareRoutes = (routes: Array<Sails.Route>): Array<Sails.Route> => {
+    return routes.filter(route => {
+        const middlewareType = get(route, 'options._middlewareType', '') as string;
+        const [type] = middlewareType.split(':')
+        return type === MiddlewareType.BLUEPRINT
+    })
+}
 
 export const normalizeRouteControllerName = (name?: string): string | undefined => {
     if (name && !name.endsWith('Controller')) {

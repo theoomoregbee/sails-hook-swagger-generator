@@ -2,7 +2,7 @@ import * as fs from 'fs';
 import { SwaggerGenerator, SwaggerSailsModel } from './interfaces';
 import * as lodash from 'lodash';
 import { blueprintActionTemplates as bluePrintTemplates, defaults as defaultsResponses } from './type-formatter';
-import { parseModels, parseCustomRoutes } from './parsers';
+import { parseModels, parseCustomRoutes, parseBindRoutes } from './parsers';
 
 const cloneDeep = lodash.cloneDeep
 
@@ -28,7 +28,8 @@ export default  async (sails: Sails.Sails, sailsRoutes: Array<Sails.Route>, cont
 
   const customRoutes = parseCustomRoutes(sails.config);
   // console.log('sails routes custom', JSON.stringify(customRoutes))
-  // const allRoutes = parseBindRoutes(sailsRoutes, models, sails.config);
+  const allRoutes = parseBindRoutes(sailsRoutes, models, sails);
+  console.log('all routes', allRoutes);
   /*
   // remove globally excluded routes
   allRoutes = allRoutes.filter(r => {
