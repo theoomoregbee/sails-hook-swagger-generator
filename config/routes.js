@@ -74,7 +74,7 @@ module.exports.routes = {
                 email: { type: 'string' },
                 password: { type: 'string', format: 'password' }
               },
-              required: [ 'email', 'password' ],
+              required: ['email', 'password'],
             },
           },
         },
@@ -87,7 +87,8 @@ module.exports.routes = {
 
   'get /user/logout': 'UserController.logout',
   'get /user/list': 'UserController.list',
-  'get /user/list2': 'UserController.list2',
+  'get /user/list2': 'user.list2',
+  'all /user/list3': 'user.list3',
 
   'get /actions2': 'subdir/actions2',
 
@@ -135,7 +136,7 @@ module.exports.routes = {
                   items: { type: 'string' }
                 }
               },
-              required: [ 'roles' ]
+              required: ['roles']
             }
           },
         },

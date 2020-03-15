@@ -1,15 +1,20 @@
 import { expect } from 'chai';
-import {  parseModels } from '../lib/parsers';
+import {  parseModels, parseCustomRoutes } from '../lib/parsers';
 import { SwaggerSailsModel } from '../lib/interfaces';
+import parsedRoutesFixture from './fixtures/parsedRoutes.json';
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const userModel = require('../../api/models/User');
+// eslint-disable-next-line @typescript-eslint/no-var-requires
+const routes = require('../../config/routes');
 
 
 const sailsConfig = {
     paths: {
         models: '../../api/models'
-    }
+    },
+    routes: routes.routes,
+    appPath: ''
 }
 
 describe ('Parsers', () => {
@@ -56,6 +61,14 @@ describe ('Parsers', () => {
             expect(parsedModels.User.swagger.tags, 'should merge tags from swagger doc with Model.swagger.tags').to.deep.equal(expectedTags);
             expect(parsedModels.User.swagger.components, 'should merge components from swagger doc with Model.swagger.components').to.deep.equal({parameters: []});
             expect(parsedModels.User.swagger.actions, 'should convert and merge swagger doc path param to actions').to.contains.keys('findone', 'find');
+            done()
+        })
+    })
+
+    describe('parseCustomRoutes', () => {
+        it('should parse routes from config/routes.js or sails.routes', done => {
+            const actual = parseCustomRoutes(sailsConfig);
+            expect(JSON.stringify(actual)).to.equal(JSON.stringify(parsedRoutesFixture));
             done()
         })
     })

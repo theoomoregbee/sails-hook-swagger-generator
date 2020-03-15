@@ -81,9 +81,23 @@ export interface SwaggerRouteInfo {
     path: string;
     swaggerPath: string; // with :id converted to {id}
     variables: string[];
-    identity?: string;
-    model?: SwaggerSailsModel;
+    identity: string;
+    model: SwaggerSailsModel;
     controller?: string;
     action: string;
     swagger?: OpenApi.Operation; 
 }
+
+export interface ParsedCustomRoute {
+    verb: HTTPMethodVerb;
+    path: string;
+    swaggerPath: string; // with :id converted to {id}
+    variables: string[];
+    controller?: string;
+    action: string;
+    swagger?: OpenApi.Operation; 
+}
+
+// export interface ParsedBindRoute {
+
+// }

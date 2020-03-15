@@ -24,12 +24,12 @@ export default  async (sails: Sails.Sails, sailsRoutes: Array<Sails.Route>, cont
   const defaults = hookConfig.defaults || defaultsResponses;
 
   const models = await parseModels(sails.config, Object.keys(sails.models).map(key => sails.models[key]) as Array<SwaggerSailsModel>);
-  console.log('sails routes', JSON.stringify(sailsRoutes))
+  // console.log('sails routes', JSON.stringify(sailsRoutes))
 
   const customRoutes = parseCustomRoutes(sails.config);
+  // console.log('sails routes custom', JSON.stringify(customRoutes))
+  // const allRoutes = parseBindRoutes(sailsRoutes, models, sails.config);
   /*
-  let allRoutes = parsers.parseAllRoutes(sailsRoutes, models, sails.config);
-
   // remove globally excluded routes
   allRoutes = allRoutes.filter(r => {
     if (r.path == '/__getcookie') return false;

@@ -89,6 +89,10 @@ export const removeViewRoutes = (routes: Record<string, Sails.RouteTarget>): Rec
     }, {} as Record<string, Sails.RouteTarget>)
 }
 
+// export const getAllowedMiddlewareRoutes = (routes: Array<Sails.Route>): Array<Sails.Route> => {
+//     return routes.map.filter(route => route.options.)
+// }
+
 export const normalizeRouteControllerName = (name?: string): string | undefined => {
     if (name && !name.endsWith('Controller')) {
         return `${name.charAt(0).toUpperCase()}${name.substring(1)}Controller`

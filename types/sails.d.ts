@@ -24,7 +24,13 @@ declare namespace Sails {
         path: string;
         target: Function;
         verb: string;
-        options: Record<string, any>;
+        options: {
+            model?: string;
+            action: string;
+            _middlewareType: string;
+            associations: any[];
+            alias?: string;
+        };
     }
 
     export interface Hook<T> {
