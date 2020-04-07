@@ -151,6 +151,11 @@ export const parseBindRoutes = (boundRoutes: Array<Sails.Route>, models: { [glob
     const swagger = get(model.swagger.actions, `${blueprintAction}.${route.verb}`) as OpenApi.Operation | undefined;
     const associationPrimaryKeyAttribute = routeOptions.associations && routeOptions.alias ? getAssociationPrimaryKeyAttribute(routeOptions, models) : undefined;
     const swaggerPathParams = generateSwaggerPath(route.path);
+
+    if(model.primaryKey !== 'id') {
+      swaggerPathParams.path = swaggerPathParams.path.replace('{id}', `{${model.primaryKey}}`);
+    }
+
     return {
       ...swaggerPathParams,
       verb: route.verb,
@@ -166,4 +171,8 @@ export const parseBindRoutes = (boundRoutes: Array<Sails.Route>, models: { [glob
 
 
   return parsedRoutes
+}
+
+export const mergeCustomAndBindRoutes = (customRoutes: ParsedCustomRoute[], boundRoutes: ParsedBindRoute[]) => {
+  return 
 }
