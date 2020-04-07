@@ -1,5 +1,5 @@
 import { expect } from 'chai';
-import {  parseModels, parseCustomRoutes } from '../lib/parsers';
+import {  parseModels, parseCustomRoutes, parseBindRoutes } from '../lib/parsers';
 import { SwaggerSailsModel } from '../lib/interfaces';
 import parsedRoutesFixture from './fixtures/parsedRoutes.json';
 
@@ -69,6 +69,15 @@ describe ('Parsers', () => {
         it('should parse routes from config/routes.js or sails.routes', done => {
             const actual = parseCustomRoutes(sailsConfig);
             expect(JSON.stringify(actual)).to.equal(JSON.stringify(parsedRoutesFixture));
+            done()
+        })
+    })
+
+    describe('parseBindRoutes', () => {
+        it('should parse routes from sails router:bind event', done => {
+            // use fixture and check if the returned has some of the things we expected
+            // const actual = parseBindRoutes(sailsConfig);
+            // expect(JSON.stringify(actual)).to.equal(JSON.stringify(parsedRoutesFixture));
             done()
         })
     })

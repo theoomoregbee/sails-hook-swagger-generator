@@ -76,6 +76,17 @@ export type Action2Response = {
 
 export type HTTPMethodVerb = 'all' | 'get' | 'post' | 'put' | 'patch' | 'delete'
 
+export enum MiddlewareType {
+    BLUEPRINT = 'BLUEPRINT',
+    ACTION = 'ACTION'
+}
+
+// (present for blueprints only); alias attributeInfo for association PK
+export interface AssociationPrimaryKeyAttribute {
+    [name: string]: any;
+    description: string;
+}
+
 export interface ParsedCustomRoute {
     verb: HTTPMethodVerb;
     path: string;
@@ -86,10 +97,19 @@ export interface ParsedCustomRoute {
     swagger?: OpenApi.Operation; 
 }
 
-
-export enum MiddlewareType {
-    BLUEPRINT = 'BLUEPRINT',
-    ACTION = 'ACTION'
+export interface ParsedBindRoute {
+    controller: string | undefined;
+    tags: Array<Tag>;
+    action: string;
+    verb: HTTPMethodVerb; 
+    path: string;
+    variables: string[];
+    swagger: OpenApi.Operation | undefined; 
+    model: SwaggerSailsModel;
+    associations: Sails.RouteAssociation[];
+    alias?: string;
+    aliases: string[];
+    associationsPrimaryKeyAttribute: AssociationPrimaryKeyAttribute[]; 
 }
 
 export interface SwaggerRouteInfo {
@@ -103,26 +123,4 @@ export interface SwaggerRouteInfo {
     controller?: string;
     action: string;
     swagger?: OpenApi.Operation; 
-}
-
-// (present for blueprints only); alias attributeInfo for association PK
-export interface AssociationPrimaryKeyAttribute {
-    [name: string]: any;
-    description: string;
-}
-
-export interface ParsedBindRoute {
-    controller: string | undefined;
-    tags: Array<Tag>;
-    action: string;
-    verb: HTTPMethodVerb; 
-    middlewareType: MiddlewareType;
-    path: string;
-    swaggerPath: string;
-    variables: string[];
-    swagger: OpenApi.Operation | undefined; 
-    model: SwaggerSailsModel;
-    associations: string[];
-    alias?: string;
-    associationPrimaryKeyAttribute: AssociationPrimaryKeyAttribute | undefined; 
 }

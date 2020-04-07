@@ -21,11 +21,17 @@ declare namespace Sails {
     }
 
 
+    export interface RouteAssociation {
+        alias: string;
+        collection: string;
+        model: string;
+    }
+
     export interface RouteOption {
         model?: string;
         action: string;
         _middlewareType: string;
-        associations: { alias: string; collection: string; model: string }[];
+        associations: RouteAssociation[];
         alias?: string;
     }
 

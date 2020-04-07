@@ -2,12 +2,12 @@
  * Created by theophy on 02/08/2017.
  */
 import * as path from 'path';
-import { SwaggerSailsModel, SwaggerRouteInfo, SwaggerSailsRouteControllerTarget, HTTPMethodVerb, ParsedCustomRoute, ParsedBindRoute, AssociationPrimaryKeyAttribute, MiddlewareType } from './interfaces';
+import { SwaggerSailsModel, SwaggerSailsRouteControllerTarget, HTTPMethodVerb, ParsedCustomRoute, ParsedBindRoute, AssociationPrimaryKeyAttribute, MiddlewareType } from './interfaces';
 import cloneDeep from 'lodash/cloneDeep';
 import get from 'lodash/get';
 import { OpenApi } from '../types/openapi';
 import { generateSwaggerPath } from './generators';
-import { loadSwaggerDocComments, mergeSwaggerSpec, mergeSwaggerPaths, removeViewRoutes, normalizeRouteControllerTarget, getAllowedMiddlewareRoutes, normalizeRouteControllerName } from './utils';
+import { loadSwaggerDocComments, mergeSwaggerSpec, mergeSwaggerPaths, removeViewRoutes, normalizeRouteControllerTarget, getBlueprintAllowedMiddlewareRoutes, normalizeRouteControllerName } from './utils';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 declare const sails: any;
@@ -109,7 +109,7 @@ export const parseCustomRoutes = (sailsConfig: Sails.Config): Array<ParsedCustom
   return customRoutes
 }
 
-const getAssociationPrimaryKeyAttribute = (routeOptions: Sails.RouteOption, models: { [globalId: string]: SwaggerSailsModel }): AssociationPrimaryKeyAttribute | undefined => {
+const getAssociationPrimaryKeyAttribute = (routeOptions: ParsedBindRoute, models: { [globalId: string]: SwaggerSailsModel }): AssociationPrimaryKeyAttribute | undefined => {
   const associations = routeOptions.associations || [] 
   const association = associations.find(item => item.alias === routeOptions.alias);
   if(!association){
@@ -127,8 +127,66 @@ const getAssociationPrimaryKeyAttribute = (routeOptions: Sails.RouteOption, mode
   }
 }
 
+type GroupAggregatedModelRoutes = { [identity: string]: ParsedBindRoute[] } 
+const groupAggregatedModelRoutes = (routes: ParsedBindRoute[], type: 'populate' | 'add' | 'remove' | 'replace') => {
+  return routes.filter(route => route.action === type)
+    .reduce((grouped, route) => {
+      const identity = route.model.identity;
+      if (!grouped[identity]) {
+        grouped[identity] = []
+      }
+      grouped[identity].push(route);
+      return grouped
+    }, {} as GroupAggregatedModelRoutes);
+}
+
+
+ /*
+   * Sails returns individual routes for each association:
+   * - /api/v1/quote/:parentid/supplier/:childid
+   * - /api/v1/quote/:parentid/items/:childid
+   *
+   * We now aggreggate these routes.
+   */
+const aggregateAssociationRoutes = (blueprintRoutes: ParsedBindRoute[], models: { [globalId: string]: SwaggerSailsModel }): Array<ParsedBindRoute|undefined>  => {
+ type AggregationRoutesModel = {
+    [name in 'populateByModel' | 'addByModel' | 'removeByModel' | 'replaceByModel']: GroupAggregatedModelRoutes;
+  };
+
+  const aggregatedRoutesByModel: AggregationRoutesModel = {
+    populateByModel: groupAggregatedModelRoutes(blueprintRoutes, 'populate'),
+    addByModel: groupAggregatedModelRoutes(blueprintRoutes, 'add'),
+    removeByModel: groupAggregatedModelRoutes(blueprintRoutes, 'remove'),
+    replaceByModel: groupAggregatedModelRoutes(blueprintRoutes, 'replace'),
+  }
+
+  const processAggregationModelRoutes = (route: ParsedBindRoute, byModel: keyof AggregationRoutesModel): ParsedBindRoute | undefined => { 
+    const byModelRoutes = aggregatedRoutesByModel[byModel][route.model.identity];
+    if(!byModelRoutes){
+      return undefined
+    }
+    
+    const primaryKey = route.model.primaryKey;
+    route.path = route.path.replace(new RegExp(`/{parentid}/${route.alias}$`, 'g'), `/{${primaryKey}}/{association}`);
+    route.path = route.path.replace(new RegExp(`/{parentid}/${route.alias}/{childid}$`, 'g'), `/{${primaryKey}}/{association}/{fk}`);
+
+    const associationPrimaryKeyAttribute = (r: ParsedBindRoute) =>  r.associations && r.alias ? getAssociationPrimaryKeyAttribute(r, models) : undefined;
+    route.aliases = byModelRoutes.map(r => r.alias).filter((alias): alias is string => !!alias)
+    route.associationsPrimaryKeyAttribute = byModelRoutes.map(associationPrimaryKeyAttribute).filter((attr): attr is AssociationPrimaryKeyAttribute => !!attr)
+    return route
+  }
+
+  return blueprintRoutes.map(route => {
+    if(route.action === 'populate') return processAggregationModelRoutes(route, 'populateByModel')
+    if(route.action === 'add') return processAggregationModelRoutes(route, 'addByModel')
+    if(route.action === 'remove') return processAggregationModelRoutes(route, 'removeByModel')
+    if(route.action === 'replace') return processAggregationModelRoutes(route, 'replaceByModel')
+    return route
+  });
+}
+
 export const parseBindRoutes = (boundRoutes: Array<Sails.Route>, models: { [globalId: string]: SwaggerSailsModel }, sails: Sails.Sails): ParsedBindRoute[] => {
-  const routes = getAllowedMiddlewareRoutes(boundRoutes);
+  const routes = getBlueprintAllowedMiddlewareRoutes(boundRoutes);
 
   const parsedRoutes: ParsedBindRoute[] = routes.map(route => {
     const routeOptions = route.options;
@@ -149,7 +207,7 @@ export const parseBindRoutes = (boundRoutes: Array<Sails.Route>, models: { [glob
     const controller = normalizeRouteControllerName(model.globalId);
     const tags = get(model.swagger, 'tags', []);
     const swagger = get(model.swagger.actions, `${blueprintAction}.${route.verb}`) as OpenApi.Operation | undefined;
-    const associationPrimaryKeyAttribute = routeOptions.associations && routeOptions.alias ? getAssociationPrimaryKeyAttribute(routeOptions, models) : undefined;
+  
     const swaggerPathParams = generateSwaggerPath(route.path);
 
     if(model.primaryKey !== 'id') {
@@ -158,21 +216,31 @@ export const parseBindRoutes = (boundRoutes: Array<Sails.Route>, models: { [glob
 
     return {
       ...swaggerPathParams,
-      verb: route.verb,
+      verb: route.verb as HTTPMethodVerb,
       path: route.path,
       model,
       action: blueprintAction,
       controller,
       tags,
       swagger,
-      associationPrimaryKeyAttribute
-    }
+      aliases: [],
+      alias: routeOptions.alias,
+      associations: routeOptions.associations,
+      associationsPrimaryKeyAttribute: []
+    } as ParsedBindRoute
   }).filter((route): route is ParsedBindRoute => !!route)
 
 
-  return parsedRoutes
+  return aggregateAssociationRoutes(parsedRoutes, models)
+    .filter((route): route is ParsedBindRoute => !!route)
 }
 
+/**
+ * merges both customRoutes and bound routes, the .swagger 
+ * attached to customRoutes takes precedence over boundRoutes
+ * @param customRoutes 
+ * @param boundRoutes 
+ */
 export const mergeCustomAndBindRoutes = (customRoutes: ParsedCustomRoute[], boundRoutes: ParsedBindRoute[]) => {
   return 
 }
