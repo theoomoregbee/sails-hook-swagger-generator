@@ -92,9 +92,7 @@ export const parseCustomRoutes = (sailsConfig: Sails.Config): Array<ParsedCustom
 
     const parsedRoute: ParsedCustomRoute = {
       verb: verb as HTTPMethodVerb,
-      path,
-      swaggerPath:swaggerPathParams.path,
-      variables: swaggerPathParams.variables,
+      ...swaggerPathParams,
       ...routeTarget
     }
 
@@ -236,11 +234,15 @@ export const parseBindRoutes = (boundRoutes: Array<Sails.Route>, models: { [glob
 }
 
 /**
- * merges both customRoutes and bound routes, the .swagger 
+ * Merge both custom and bound routes, we only need 
+ * .swagger,.action and .controller props from custom
+ * merge the others with bound routes
  * attached to customRoutes takes precedence over boundRoutes
+ * 
+ * TODO: clean up custom routes parsing to not care about 
  * @param customRoutes 
  * @param boundRoutes 
  */
 export const mergeCustomAndBindRoutes = (customRoutes: ParsedCustomRoute[], boundRoutes: ParsedBindRoute[]) => {
-  return 
+  return boundRoutes 
 }

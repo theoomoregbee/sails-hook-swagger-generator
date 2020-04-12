@@ -1,8 +1,7 @@
 [
     {
         "verb": "delete",
-        "path": "/clients/:client_id/user/:id",
-        "swaggerPath": "/clients/{client_id}/user/{id}",
+        "path": "/clients/{client_id}/user/{id}",
         "variables": [
             "client_id",
             "id"
@@ -13,7 +12,6 @@
     {
         "verb": "post",
         "path": "/user",
-        "swaggerPath": "/user",
         "variables": [],
         "controller": "UserController",
         "action": "create"
@@ -21,7 +19,6 @@
     {
         "verb": "post",
         "path": "/user/login",
-        "swaggerPath": "/user/login",
         "variables": [],
         "controller": "UserController",
         "action": "login",
@@ -59,7 +56,6 @@
     {
         "verb": "get",
         "path": "/user/logout",
-        "swaggerPath": "/user/logout",
         "variables": [],
         "controller": "UserController",
         "action": "logout"
@@ -67,7 +63,6 @@
     {
         "verb": "get",
         "path": "/user/list",
-        "swaggerPath": "/user/list",
         "variables": [],
         "controller": "UserController",
         "action": "list"
@@ -75,7 +70,6 @@
     {
         "verb": "get",
         "path": "/user/list2",
-        "swaggerPath": "/user/list2",
         "variables": [],
         "controller": "UserController",
         "action": "list2"
@@ -83,7 +77,6 @@
     {
         "verb": "get",
         "path": "/user/list3",
-        "swaggerPath": "/user/list3",
         "variables": [],
         "controller": "UserController",
         "action": "list3"
@@ -91,7 +84,6 @@
     {
         "verb": "post",
         "path": "/user/list3",
-        "swaggerPath": "/user/list3",
         "variables": [],
         "controller": "UserController",
         "action": "list3"
@@ -99,7 +91,6 @@
     {
         "verb": "put",
         "path": "/user/list3",
-        "swaggerPath": "/user/list3",
         "variables": [],
         "controller": "UserController",
         "action": "list3"
@@ -107,7 +98,6 @@
     {
         "verb": "patch",
         "path": "/user/list3",
-        "swaggerPath": "/user/list3",
         "variables": [],
         "controller": "UserController",
         "action": "list3"
@@ -115,7 +105,6 @@
     {
         "verb": "delete",
         "path": "/user/list3",
-        "swaggerPath": "/user/list3",
         "variables": [],
         "controller": "UserController",
         "action": "list3"
@@ -123,14 +112,12 @@
     {
         "verb": "get",
         "path": "/actions2",
-        "swaggerPath": "/actions2",
         "variables": [],
         "action": "subdir/actions2"
     },
     {
         "verb": "get",
-        "path": "/user/test/:phoneNumber",
-        "swaggerPath": "/user/test/{phoneNumber}",
+        "path": "/user/test/{phoneNumber}",
         "variables": [
             "phoneNumber"
         ],
@@ -143,7 +130,6 @@
     {
         "verb": "get",
         "path": "/user/upload",
-        "swaggerPath": "/user/upload",
         "variables": [],
         "controller": "UserController",
         "action": "upload",
@@ -169,7 +155,6 @@
     {
         "verb": "put",
         "path": "/user/roles",
-        "swaggerPath": "/user/roles",
         "variables": [],
         "controller": "UserController",
         "action": "roles",

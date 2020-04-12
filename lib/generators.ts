@@ -15,5 +15,5 @@ export const  generateSwaggerPath = (path: string): {variables: string[]; path: 
         return v;
       })
       .join('/');
-    return { variables, path: swaggerPath };
+  return { path: swaggerPath, variables };
   }

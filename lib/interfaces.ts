@@ -90,7 +90,6 @@ export interface AssociationPrimaryKeyAttribute {
 export interface ParsedCustomRoute {
     verb: HTTPMethodVerb;
     path: string;
-    swaggerPath: string; // with :id converted to {id}
     variables: string[];
     controller?: string;
     action: string;
@@ -112,15 +111,4 @@ export interface ParsedBindRoute {
     associationsPrimaryKeyAttribute: AssociationPrimaryKeyAttribute[]; 
 }
 
-export interface SwaggerRouteInfo {
-    middlewareType: MiddlewareType;
-    verb: HTTPMethodVerb;
-    path: string;
-    swaggerPath: string; // with :id converted to {id}
-    variables: string[];
-    identity: string;
-    model: SwaggerSailsModel;
-    controller?: string;
-    action: string;
-    swagger?: OpenApi.Operation; 
-}
+export type SwaggerRouteInfo = ParsedBindRoute
