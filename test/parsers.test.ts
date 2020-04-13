@@ -83,7 +83,7 @@ describe ('Parsers', () => {
         })
     })
 
-    describe('parseBindRoutes',  () => {
+    describe('parseBindRoutes:sails router:bind event',  () => {
         const boundRoutes = [
             {
                 "path": "/user",
@@ -155,11 +155,15 @@ describe ('Parsers', () => {
                 }
               }
         ];
-        it('should parse routes from sails router:bind event',  async() => {
+        it('Should only parse blueprint routes',  async () => {
             const parsedModels = await parseModels(sails as unknown as Sails.Sails, sailsConfig as Sails.Config, models as unknown as SwaggerSailsModel[])
             const actual = parseBindRoutes(boundRoutes as unknown as Sails.Route[], parsedModels, sails as unknown as Sails.Sails);
-            expect(actual.every(route => bluerprintActions.includes(route.action as BluePrintAction)), 'Should only parse blueprint routes');
-            expect(actual.every(route => !!route.model), 'Should only parse blueprint routes with model');
+            expect(actual.every(route => bluerprintActions.includes(route.action as BluePrintAction))).to.be.true;
+        })
+        it('Should contain route model',  async () => {
+            const parsedModels = await parseModels(sails as unknown as Sails.Sails, sailsConfig as Sails.Config, models as unknown as SwaggerSailsModel[])
+            const actual = parseBindRoutes(boundRoutes as unknown as Sails.Route[], parsedModels, sails as unknown as Sails.Sails);
+            expect(actual.every(route => !!route.model), 'Should return model for all routes');
             const updateUserRoute = actual.find(route => route.action === 'update');
             expect(!!updateUserRoute?.model, 'should parse blueprint routes and auto add model to routes without model').to.be.true;
             expect(updateUserRoute?.path, 'should convert sails path param to swagger param with :id to {id}').to.equal('/user/{id}');
