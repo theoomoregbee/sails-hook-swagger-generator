@@ -2,7 +2,7 @@
  * Created by theophy on 02/08/2017.
  */
 import * as path from 'path';
-import { SwaggerSailsModel, SwaggerSailsRouteControllerTarget, HTTPMethodVerb, ParsedCustomRoute, ParsedBindRoute, AssociationPrimaryKeyAttribute, MiddlewareType } from './interfaces';
+import { SwaggerSailsModel, SwaggerSailsRouteControllerTarget, HTTPMethodVerb, ParsedCustomRoute, ParsedBindRoute, AssociationPrimaryKeyAttribute, MiddlewareType, SwaggerRouteInfo } from './interfaces';
 import cloneDeep from 'lodash/cloneDeep';
 import get from 'lodash/get';
 import { OpenApi } from '../types/openapi';
@@ -243,6 +243,22 @@ export const parseBindRoutes = (boundRoutes: Array<Sails.Route>, models: { [glob
  * @param customRoutes 
  * @param boundRoutes 
  */
-export const mergeCustomAndBindRoutes = (customRoutes: ParsedCustomRoute[], boundRoutes: ParsedBindRoute[]) => {
-  return boundRoutes 
+export const mergeCustomAndBindRoutes = (customRoutes: ParsedCustomRoute[], boundRoutes: ParsedBindRoute[]): SwaggerRouteInfo[] => {
+  const merged = boundRoutes.map(route => {
+    const customRoute = customRoutes.find(croute => croute.path === route.path && croute.verb === route.verb);
+    if (customRoute) {
+      route.swagger = customRoute.swagger;
+      route.action = customRoute.action;
+      route.controller = customRoute.controller;
+    }
+    return route
+  });
+
+  customRoutes.forEach(customRoute => {
+    if (!merged.find(mergedRoute => mergedRoute.path === customRoute.path && mergedRoute.verb === customRoute.verb)){
+      sails.log.warn(`WARNING: sails-hook-swagger-generator: Sails custom route ${customRoute.path} NOT found as bound route (ignoring)`);
+    }
+  });
+
+  return merged
 }
