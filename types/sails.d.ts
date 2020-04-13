@@ -83,6 +83,7 @@ declare namespace Sails {
         models: Record<string, Model>;
         log: {
             warn: (value: string) => void;
+            error: (value: string, err: any) => void;
         };
     }
    

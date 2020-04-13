@@ -7,10 +7,12 @@ export const  generateSwaggerPath = (path: string): {variables: string[]; path: 
     const swaggerPath = path
       .split('/')
       .map(v => {
+        // TODO: update this to accept optional route param e.g id?
+        // simply remove the ? in [^/:?]
         const match = v.match(/^:([^/:?]+)\??$/);
         if (match) {
           variables.push(match[1]);
-          return '{' + match[1] + '}';
+          return `{${match[1]}}`;
         }
         return v;
       })

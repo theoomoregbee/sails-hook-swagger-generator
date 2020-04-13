@@ -1,4 +1,4 @@
-import { SwaggerAttribute, SwaggerAction, SwaggerSailsRouteControllerTarget, MiddlewareType } from '../interfaces';
+import { SwaggerAttribute, SwaggerAction, SwaggerSailsRouteControllerTarget, MiddlewareType, BluePrintAction } from '../interfaces';
 import swaggerJSDoc from 'swagger-jsdoc';
 import cloneDeep from 'lodash/cloneDeep';
 import { OpenApi } from '../../types/openapi';
@@ -22,6 +22,8 @@ const componentReference: Array<keyof OpenApi.Components> = [
     "links",
     "callbacks"
 ]
+
+export const bluerprintActions: Array<BluePrintAction> = ['findone', 'find', 'create', 'update', 'destroy', 'populate', 'add', 'remove', 'replace'];
 
 export const mergeSwaggerSpec = (destination: SwaggerAttribute, source: SwaggerAttribute): SwaggerAttribute => {
     const dest: SwaggerAttribute = cloneDeep(destination)
@@ -89,7 +91,7 @@ export const removeViewRoutes = (routes: Record<string, Sails.RouteTarget>): Rec
     }, {} as Record<string, Sails.RouteTarget>)
 }
 
-export const getAllowedMiddlewareRoutes = (routes: Array<Sails.Route>): Array<Sails.Route> => {
+export const getBlueprintAllowedMiddlewareRoutes = (routes: Array<Sails.Route>): Array<Sails.Route> => {
     return routes.filter(route => {
         const middlewareType = get(route, 'options._middlewareType', '') as string;
         const [type] = middlewareType.split(':')
@@ -130,6 +132,11 @@ export const normalizeRouteControllerTarget = (target: string | SwaggerSailsRout
 
     throw new TypeError(`Unable to normalize route: ${target}, see: https://sailsjs.com/documentation/concepts/routes/custom-routes for allowed routes pattern`)
 }
+
+// HOW to check for  standalone action
+// see ttps://sailsjs.com/documentation/concepts/routes/custom-routes#?controller-action-target-syntax 
+// check if the file exist in api/controllers/{action='foo/go-action'|'index'}.js if so it means return true
+// const isStandAloneAction = (): boolean => {}
 
 // export const getActionPath = (sailsConfig: Sails.Config, normalisedTarget: SwaggerSailsRouteControllerTarget  ): string => {
 //     return ''

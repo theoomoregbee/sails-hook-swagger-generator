@@ -9,15 +9,11 @@ import { OpenApi } from '../types/openapi';
 import { generateSwaggerPath } from './generators';
 import { loadSwaggerDocComments, mergeSwaggerSpec, mergeSwaggerPaths, removeViewRoutes, normalizeRouteControllerTarget, getBlueprintAllowedMiddlewareRoutes, normalizeRouteControllerName } from './utils';
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-declare const sails: any;
-
-
 // consider all models except associative tables and 'Archive' model special case
 const removeModelExceptions = (model: SwaggerSailsModel): boolean => !!model.globalId && model.globalId !== 'Archive'
 
 
-export const parseModels = async (sailsConfig: Sails.Config, sailsModels: Array<SwaggerSailsModel> = []): Promise<{[globalId: string]: SwaggerSailsModel}> => {
+export const parseModels = async (sails: Sails.Sails, sailsConfig: Sails.Config, sailsModels: Array<SwaggerSailsModel> = []): Promise<{[globalId: string]: SwaggerSailsModel}> => {
   const models = sailsModels.filter(removeModelExceptions);
   // parse swagger jsDoc comments in each of our models
   const modelDir = sailsConfig.paths.models;
@@ -52,7 +48,7 @@ export const parseModels = async (sailsConfig: Sails.Config, sailsModels: Array<
     .map(parseTagsComponents)
     .map(parseSwaggerDocPaths)
     .reduce((parsed, model) => {
-      parsed[model.globalId] = model;
+      parsed[model.globalId.toLowerCase()] = model;
       return parsed
     }, {} as { [globalId: string]: SwaggerSailsModel })
 }
@@ -191,7 +187,7 @@ export const parseBindRoutes = (boundRoutes: Array<Sails.Route>, models: { [glob
     let identity = routeOptions.model;
     const _middlewareType = routeOptions._middlewareType as string;
     const [middlewareType, actionName = ''] = _middlewareType.split(':') as [MiddlewareType, string];
-    const blueprintAction = actionName.toLowerCase();
+    const blueprintAction = actionName.toLowerCase().trim();
     if (!identity && routeOptions.action) {
       // custom blueprint actions may not have model name explicitly specified --> extract from action
       [identity] = routeOptions.action.split('/');
@@ -208,14 +204,13 @@ export const parseBindRoutes = (boundRoutes: Array<Sails.Route>, models: { [glob
   
     const swaggerPathParams = generateSwaggerPath(route.path);
 
-    if(model.primaryKey !== 'id') {
+    if(model.primaryKey && model.primaryKey !== 'id') {
       swaggerPathParams.path = swaggerPathParams.path.replace('{id}', `{${model.primaryKey}}`);
     }
 
     return {
       ...swaggerPathParams,
       verb: route.verb as HTTPMethodVerb,
-      path: route.path,
       model,
       action: blueprintAction,
       controller,
@@ -243,7 +238,7 @@ export const parseBindRoutes = (boundRoutes: Array<Sails.Route>, models: { [glob
  * @param customRoutes 
  * @param boundRoutes 
  */
-export const mergeCustomAndBindRoutes = (customRoutes: ParsedCustomRoute[], boundRoutes: ParsedBindRoute[]): SwaggerRouteInfo[] => {
+export const mergeCustomAndBindRoutes = (sails: Sails.Sails, customRoutes: ParsedCustomRoute[], boundRoutes: ParsedBindRoute[]): SwaggerRouteInfo[] => {
   const merged = boundRoutes.map(route => {
     const customRoute = customRoutes.find(croute => croute.path === route.path && croute.verb === route.verb);
     if (customRoute) {

@@ -1,7 +1,9 @@
+/* eslint-disable @typescript-eslint/no-empty-function */
 import { expect } from 'chai';
 import {  parseModels, parseCustomRoutes, parseBindRoutes } from '../lib/parsers';
-import { SwaggerSailsModel } from '../lib/interfaces';
+import { SwaggerSailsModel, BluePrintAction } from '../lib/interfaces';
 import parsedRoutesFixture from './fixtures/parsedRoutes.json';
+import { bluerprintActions } from '../lib/utils';
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const userModel = require('../../api/models/User');
@@ -17,26 +19,34 @@ const sailsConfig = {
     appPath: ''
 }
 
+const sails = {
+    log: {
+        warn: () => {},
+        error: ()=> {}
+    },
+    config: sailsConfig
+}
+
 describe ('Parsers', () => {
+    const models = [
+
+        {
+            globalId: 'User',
+            ...userModel
+        },
+        {
+            attributes: {}
+        },
+        {
+            globalId: 'Archive'
+        }
+    ]
 
     describe ('parseModels', async () => {
-        const models = [
-
-            {
-                globalId: 'User',
-                ...userModel
-            },
-            {
-                attributes: {}
-            },
-            {
-                globalId: 'Archive'
-            }
-        ]
-        const parsedModels = await parseModels(sailsConfig as Sails.Config, models as unknown as SwaggerSailsModel[])
+        const parsedModels = await parseModels(sails as unknown as Sails.Sails, sails.config as Sails.Config, models as unknown as SwaggerSailsModel[])
         it(`should only consider all models except associative tables and 'Archive' model special case `, done => {
             expect(Object.keys(parsedModels).length).to.equal(1);
-            expect(parsedModels['User'],'key parsed models with their globalId').to.be.ok;
+            expect(parsedModels['user'],'key parsed models with their globalId').to.be.ok;
             done()
         })
 
@@ -58,27 +68,101 @@ describe ('Parsers', () => {
                     }
                 }
             ]
-            expect(parsedModels.User.swagger.tags, 'should merge tags from swagger doc with Model.swagger.tags').to.deep.equal(expectedTags);
-            expect(parsedModels.User.swagger.components, 'should merge components from swagger doc with Model.swagger.components').to.deep.equal({parameters: []});
-            expect(parsedModels.User.swagger.actions, 'should convert and merge swagger doc path param to actions').to.contains.keys('findone', 'find');
+            expect(parsedModels.user.swagger.tags, 'should merge tags from swagger doc with Model.swagger.tags').to.deep.equal(expectedTags);
+            expect(parsedModels.user.swagger.components, 'should merge components from swagger doc with Model.swagger.components').to.deep.equal({parameters: []});
+            expect(parsedModels.user.swagger.actions, 'should convert and merge swagger doc path param to actions').to.contains.keys('findone', 'find');
             done()
         })
     })
 
     describe('parseCustomRoutes', () => {
         it('should parse routes from config/routes.js or sails.routes', done => {
-            const actual = parseCustomRoutes(sailsConfig);
+            const actual = parseCustomRoutes(sails.config);
             expect(JSON.stringify(actual)).to.equal(JSON.stringify(parsedRoutesFixture));
             done()
         })
     })
 
-    describe('parseBindRoutes', () => {
-        it('should parse routes from sails router:bind event', done => {
-            // use fixture and check if the returned has some of the things we expected
-            // const actual = parseBindRoutes(sailsConfig);
-            // expect(JSON.stringify(actual)).to.equal(JSON.stringify(parsedRoutesFixture));
-            done()
+    describe('parseBindRoutes',  () => {
+        const boundRoutes = [
+            {
+                "path": "/user",
+                "verb": "get",
+                "options": {
+                  "model": "user",
+                  "associations": [],
+                  "detectedVerb": {
+                    "verb": "",
+                    "original": "/user",
+                    "path": "/user"
+                  },
+                  "action": "user/find",
+                  "_middlewareType": "BLUEPRINT: find",
+                  "skipRegex": []
+                }
+              },
+              {
+                "path": "/user/:id",
+                "verb": "get",
+                "options": {
+                  "model": "user",
+                  "associations": [],
+                  "autoWatch": true,
+                  "detectedVerb": {
+                    "verb": "",
+                    "original": "/user/:id",
+                    "path": "/user/:id"
+                  },
+                  "action": "user/findone",
+                  "_middlewareType": "BLUEPRINT: findone",
+                  "skipRegex": [
+                    {}
+                  ],
+                  "skipAssets": true
+                }
+              },
+              {
+                "path": "/user/:id",
+                "verb": "put",
+                "options": {
+                  "associations": [],
+                  "autoWatch": true,
+                  "detectedVerb": {
+                    "verb": "",
+                    "original": "/user/:id",
+                    "path": "/user/:id"
+                  },
+                  "action": "user/update",
+                  "_middlewareType": "BLUEPRINT: update",
+                  "skipRegex": [
+                    {}
+                  ],
+                  "skipAssets": true
+                }
+              },
+              {
+                "path": "/actions2",
+                "verb": "get",
+                "options": {
+                  "detectedVerb": {
+                    "verb": "",
+                    "original": "/actions2",
+                    "path": "/actions2"
+                  },
+                  "action": "subdir/actions2",
+                  "_middlewareType": "ACTION: subdir/actions2",
+                  "skipRegex": []
+                }
+              }
+        ];
+        it('should parse routes from sails router:bind event',  async() => {
+            const parsedModels = await parseModels(sails as unknown as Sails.Sails, sailsConfig as Sails.Config, models as unknown as SwaggerSailsModel[])
+            const actual = parseBindRoutes(boundRoutes as unknown as Sails.Route[], parsedModels, sails as unknown as Sails.Sails);
+            expect(actual.every(route => bluerprintActions.includes(route.action as BluePrintAction)), 'Should only parse blueprint routes');
+            expect(actual.every(route => !!route.model), 'Should only parse blueprint routes with model');
+            const updateUserRoute = actual.find(route => route.action === 'update');
+            expect(!!updateUserRoute?.model, 'should parse blueprint routes and auto add model to routes without model').to.be.true;
+            expect(updateUserRoute?.path, 'should convert sails path param to swagger param with :id to {id}').to.equal('/user/{id}');
         })
     })
 
