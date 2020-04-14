@@ -2,7 +2,7 @@ import * as fs from 'fs';
 import { SwaggerGenerator, SwaggerSailsModel } from './interfaces';
 import * as lodash from 'lodash';
 import { blueprintActionTemplates as bluePrintTemplates, defaults as defaultsResponses } from './type-formatter';
-import { parseModels, parseCustomRoutes, parseBindRoutes } from './parsers';
+import { parseModels, parseCustomRoutes, parseBindRoutes, mergeCustomAndBindRoutes } from './parsers';
 
 const cloneDeep = lodash.cloneDeep
 
@@ -23,22 +23,17 @@ export default  async (sails: Sails.Sails, sailsRoutes: Array<Sails.Route>, cont
 
   const defaults = hookConfig.defaults || defaultsResponses;
 
-  const models = await parseModels(sails.config, Object.keys(sails.models).map(key => sails.models[key]) as Array<SwaggerSailsModel>);
-  // console.log('sails routes', JSON.stringify(sailsRoutes))
+  const models = await parseModels(sails, sails.config, Object.keys(sails.models).map(key => sails.models[key]) as Array<SwaggerSailsModel>);
 
   const customRoutes = parseCustomRoutes(sails.config);
-  // console.log('sails routes custom', JSON.stringify(customRoutes))
-  const allRoutes = parseBindRoutes(sailsRoutes, models, sails);
-  console.log('all routes', allRoutes);
-  /*
+  let allRoutes = parseBindRoutes(sailsRoutes, models, sails);
+
   // remove globally excluded routes
-  allRoutes = allRoutes.filter(r => {
-    if (r.path == '/__getcookie') return false;
-    return true;
-  });
+  allRoutes = allRoutes.filter(route => route.path !== '/__getcookie')
 
-  let routes = parsers.mergeCustomAndAllRoutes(customRoutes, allRoutes);
+  const routes = mergeCustomAndBindRoutes(customRoutes, allRoutes, models);
 
+  /*
   if (hookConfig.includeRoute) {
     routes = routes.filter(r => hookConfig.includeRoute(r));
   }

@@ -10,7 +10,7 @@ export interface SwaggerGenerator {
     defaults?: Defaults;
 }
 
-type BluePrintAction = 'findone' | 'find' | 'create' | 'update' | 'destroy' | 'populate' | 'add' | 'remove' | 'replace'
+export type BluePrintAction = 'findone' | 'find' | 'create' | 'update' | 'destroy' | 'populate' | 'add' | 'remove' | 'replace'
 
 export enum Modifiers {
     ADD_POPULATE_QUERY_PARAM = 'addPopulateQueryParam',
@@ -111,4 +111,20 @@ export interface ParsedBindRoute {
     associationsPrimaryKeyAttribute: AssociationPrimaryKeyAttribute[]; 
 }
 
-export type SwaggerRouteInfo = ParsedBindRoute
+export interface SwaggerRouteInfo {
+    tags: Array<Tag>;
+    model?: SwaggerSailsModel;
+    swagger?: OpenApi.Operation | undefined;
+
+    controller?: string | undefined;
+    action: string;
+
+    verb: HTTPMethodVerb;
+    path: string;
+    variables: string[];
+
+    associations: Sails.RouteAssociation[];
+    alias?: string;
+    aliases: string[];
+    associationsPrimaryKeyAttribute: AssociationPrimaryKeyAttribute[];
+}

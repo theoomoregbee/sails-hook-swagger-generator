@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-empty-function */
 import { expect } from 'chai';
-import {  parseModels, parseCustomRoutes, parseBindRoutes } from '../lib/parsers';
+import {  parseModels, parseCustomRoutes, parseBindRoutes, mergeCustomAndBindRoutes } from '../lib/parsers';
 import { SwaggerSailsModel, BluePrintAction } from '../lib/interfaces';
 import parsedRoutesFixture from './fixtures/parsedRoutes.json';
 import { bluerprintActions } from '../lib/utils';
@@ -41,6 +41,78 @@ describe ('Parsers', () => {
             globalId: 'Archive'
         }
     ]
+
+    const boundRoutes = [
+        {
+            "path": "/user",
+            "verb": "get",
+            "options": {
+              "model": "user",
+              "associations": [],
+              "detectedVerb": {
+                "verb": "",
+                "original": "/user",
+                "path": "/user"
+              },
+              "action": "user/find",
+              "_middlewareType": "BLUEPRINT: find",
+              "skipRegex": []
+            }
+          },
+          {
+            "path": "/user/:id",
+            "verb": "get",
+            "options": {
+              "model": "user",
+              "associations": [],
+              "autoWatch": true,
+              "detectedVerb": {
+                "verb": "",
+                "original": "/user/:id",
+                "path": "/user/:id"
+              },
+              "action": "user/findone",
+              "_middlewareType": "BLUEPRINT: findone",
+              "skipRegex": [
+                {}
+              ],
+              "skipAssets": true
+            }
+          },
+          {
+            "path": "/user/:id",
+            "verb": "put",
+            "options": {
+              "associations": [],
+              "autoWatch": true,
+              "detectedVerb": {
+                "verb": "",
+                "original": "/user/:id",
+                "path": "/user/:id"
+              },
+              "action": "user/update",
+              "_middlewareType": "BLUEPRINT: update",
+              "skipRegex": [
+                {}
+              ],
+              "skipAssets": true
+            }
+          },
+          {
+            "path": "/actions2",
+            "verb": "get",
+            "options": {
+              "detectedVerb": {
+                "verb": "",
+                "original": "/actions2",
+                "path": "/actions2"
+              },
+              "action": "subdir/actions2",
+              "_middlewareType": "ACTION: subdir/actions2",
+              "skipRegex": []
+            }
+          }
+    ];
 
     describe ('parseModels', async () => {
         const parsedModels = await parseModels(sails as unknown as Sails.Sails, sails.config as Sails.Config, models as unknown as SwaggerSailsModel[])
@@ -83,78 +155,8 @@ describe ('Parsers', () => {
         })
     })
 
-    describe('parseBindRoutes:sails router:bind event',  () => {
-        const boundRoutes = [
-            {
-                "path": "/user",
-                "verb": "get",
-                "options": {
-                  "model": "user",
-                  "associations": [],
-                  "detectedVerb": {
-                    "verb": "",
-                    "original": "/user",
-                    "path": "/user"
-                  },
-                  "action": "user/find",
-                  "_middlewareType": "BLUEPRINT: find",
-                  "skipRegex": []
-                }
-              },
-              {
-                "path": "/user/:id",
-                "verb": "get",
-                "options": {
-                  "model": "user",
-                  "associations": [],
-                  "autoWatch": true,
-                  "detectedVerb": {
-                    "verb": "",
-                    "original": "/user/:id",
-                    "path": "/user/:id"
-                  },
-                  "action": "user/findone",
-                  "_middlewareType": "BLUEPRINT: findone",
-                  "skipRegex": [
-                    {}
-                  ],
-                  "skipAssets": true
-                }
-              },
-              {
-                "path": "/user/:id",
-                "verb": "put",
-                "options": {
-                  "associations": [],
-                  "autoWatch": true,
-                  "detectedVerb": {
-                    "verb": "",
-                    "original": "/user/:id",
-                    "path": "/user/:id"
-                  },
-                  "action": "user/update",
-                  "_middlewareType": "BLUEPRINT: update",
-                  "skipRegex": [
-                    {}
-                  ],
-                  "skipAssets": true
-                }
-              },
-              {
-                "path": "/actions2",
-                "verb": "get",
-                "options": {
-                  "detectedVerb": {
-                    "verb": "",
-                    "original": "/actions2",
-                    "path": "/actions2"
-                  },
-                  "action": "subdir/actions2",
-                  "_middlewareType": "ACTION: subdir/actions2",
-                  "skipRegex": []
-                }
-              }
-        ];
+    describe('parseBindRoutes: sails router:bind event',  () => {
+        
         it('Should only parse blueprint routes',  async () => {
             const parsedModels = await parseModels(sails as unknown as Sails.Sails, sailsConfig as Sails.Config, models as unknown as SwaggerSailsModel[])
             const actual = parseBindRoutes(boundRoutes as unknown as Sails.Route[], parsedModels, sails as unknown as Sails.Sails);
@@ -170,4 +172,16 @@ describe ('Parsers', () => {
         })
     })
 
+    describe('mergeCustomAndBindRoutes', () => {
+        it('should merge both custom and bound routes', async () => {
+            const parsedModels = await parseModels(sails as unknown as Sails.Sails, sailsConfig as Sails.Config, models as unknown as SwaggerSailsModel[])
+            const parsedBoundRoutes = parseBindRoutes(boundRoutes as unknown as Sails.Route[], parsedModels, sails as unknown as Sails.Sails);
+            const parsedCustomRoutes = parseCustomRoutes(sails.config);
+            const mergedRoutes = mergeCustomAndBindRoutes(parsedCustomRoutes, parsedBoundRoutes, parsedModels);
+            expect(mergedRoutes
+                .filter(route => route.controller && route.controller.includes('Controller'))
+                .every(route => !!route.model), 'should attach model to custom routes with controller routes if existing').to.be.true;
+            expect(mergedRoutes.length, 'merge both custom and bound routes').to.equal(18)
+        })
+    })
 })

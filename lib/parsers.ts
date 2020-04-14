@@ -228,18 +228,39 @@ export const parseBindRoutes = (boundRoutes: Array<Sails.Route>, models: { [glob
     .filter((route): route is ParsedBindRoute => !!route)
 }
 
+const toSwaggerRoute = (customRoute: ParsedCustomRoute, models: { [globalId: string]: SwaggerSailsModel }): SwaggerRouteInfo => {
+
+  const route: SwaggerRouteInfo = {
+    ...customRoute,
+    tags: [],
+    aliases: [],
+    associations: [],
+    associationsPrimaryKeyAttribute: []
+  }
+
+  // use controller name as model identity name 
+  if(customRoute.controller){
+    const [identity = ''] = customRoute.controller.split('Controller');
+    const model = models[identity.toLowerCase()];
+    route.model = model;
+    route.tags = get(model, 'swagger.tags', []);
+  }
+
+  return route
+}
+
 /**
  * Merge both custom and bound routes, we only need 
  * .swagger,.action and .controller props from custom
  * merge the others with bound routes
  * attached to customRoutes takes precedence over boundRoutes
  * 
- * TODO: clean up custom routes parsing to not care about 
  * @param customRoutes 
  * @param boundRoutes 
  */
-export const mergeCustomAndBindRoutes = (sails: Sails.Sails, customRoutes: ParsedCustomRoute[], boundRoutes: ParsedBindRoute[]): SwaggerRouteInfo[] => {
-  const merged = boundRoutes.map(route => {
+export const mergeCustomAndBindRoutes = (customRoutes: ParsedCustomRoute[], boundRoutes: ParsedBindRoute[], models: { [globalId: string]: SwaggerSailsModel }): SwaggerRouteInfo[] => {
+  // blueprints routes from bound routes
+  const merged: SwaggerRouteInfo[] = boundRoutes.map(route => {
     const customRoute = customRoutes.find(croute => croute.path === route.path && croute.verb === route.verb);
     if (customRoute) {
       route.swagger = customRoute.swagger;
@@ -249,9 +270,10 @@ export const mergeCustomAndBindRoutes = (sails: Sails.Sails, customRoutes: Parse
     return route
   });
 
+  // custom routes not in above blueprint routes
   customRoutes.forEach(customRoute => {
-    if (!merged.find(mergedRoute => mergedRoute.path === customRoute.path && mergedRoute.verb === customRoute.verb)){
-      sails.log.warn(`WARNING: sails-hook-swagger-generator: Sails custom route ${customRoute.path} NOT found as bound route (ignoring)`);
+    if (!merged.find(mergedRoute => mergedRoute.path === customRoute.path && mergedRoute.verb === customRoute.verb)) {
+      merged.push(toSwaggerRoute(customRoute, models))
     }
   });
 
