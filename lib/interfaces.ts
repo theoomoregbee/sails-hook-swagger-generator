@@ -3,6 +3,7 @@ import { OpenApi } from '../types/openapi';
 import { Reference, Tag } from 'swagger-schema-official';
 
 export interface SwaggerGenerator {
+    includeRoute?: (route: SwaggerRouteInfo) => boolean;
     disabled?: boolean;
     swaggerJsonPath: string;
     swagger: Omit<OpenApi.OpenApi, 'paths'>;
@@ -47,6 +48,11 @@ export interface SwaggerSailsModel extends Omit<Sails.Model, 'attributes'> {
         externalDocs?: OpenApi.ExternalDoc;
         example?: string;
     }>;
+    swagger: SwaggerAttribute;
+}
+
+export interface SwaggerSailsController extends Sails.Controller  {
+    name: string; // controller name
     swagger: SwaggerAttribute;
 }
 
