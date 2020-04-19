@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-empty-function */
 import { expect } from 'chai';
-import {  parseModels, parseCustomRoutes, parseBindRoutes, mergeCustomAndBindRoutes } from '../lib/parsers';
+import {  parseModels, parseCustomRoutes, parseBindRoutes, mergeCustomAndBindRoutes, parseControllers } from '../lib/parsers';
 import { SwaggerSailsModel, BluePrintAction } from '../lib/interfaces';
 import parsedRoutesFixture from './fixtures/parsedRoutes.json';
 import { bluerprintActions } from '../lib/utils';
@@ -13,7 +13,8 @@ const routes = require('../../config/routes');
 
 const sailsConfig = {
     paths: {
-        models: '../../api/models'
+        models: '../../api/models',
+        controllers: '../../api/controllers'
     },
     routes: routes.routes,
     appPath: ''
@@ -114,15 +115,15 @@ describe ('Parsers', () => {
           }
     ];
 
-    describe ('parseModels', async () => {
-        const parsedModels = await parseModels(sails as unknown as Sails.Sails, sails.config as Sails.Config, models as unknown as SwaggerSailsModel[])
-        it(`should only consider all models except associative tables and 'Archive' model special case `, done => {
+    describe ('parseModels', () => {
+        it(`should only consider all models except associative tables and 'Archive' model special case `, async () => {
+          const parsedModels = await parseModels(sails as unknown as Sails.Sails, sails.config as Sails.Config, models as unknown as SwaggerSailsModel[])
             expect(Object.keys(parsedModels).length).to.equal(1);
             expect(parsedModels['user'],'key parsed models with their globalId').to.be.ok;
-            done()
         })
 
-        it('should load and merge swagger specification in /models/{globalId} with the model.swagger attribute', done => {
+        it('should load and merge swagger specification in /models/{globalId} with the model.swagger attribute', async () => {
+          const parsedModels = await parseModels(sails as unknown as Sails.Sails, sails.config as Sails.Config, models as unknown as SwaggerSailsModel[])
             const expectedTags = [
                 {
                     "name": "User (ORM)",
@@ -143,7 +144,6 @@ describe ('Parsers', () => {
             expect(parsedModels.user.swagger.tags, 'should merge tags from swagger doc with Model.swagger.tags').to.deep.equal(expectedTags);
             expect(parsedModels.user.swagger.components, 'should merge components from swagger doc with Model.swagger.components').to.deep.equal({parameters: []});
             expect(parsedModels.user.swagger.actions, 'should convert and merge swagger doc path param to actions').to.contains.keys('findone', 'find');
-            done()
         })
     })
 
@@ -184,4 +184,24 @@ describe ('Parsers', () => {
             expect(mergedRoutes.length, 'merge both custom and bound routes').to.equal(18)
         })
     })
+
+    describe ('parseControllers', () => {
+      
+      it('should load and merge swagger specification in /controllers/{name} with the controller.swagger attribute', async () => {
+        const parsedControllers = await parseControllers(sails as unknown as Sails.Sails, ['UserController'])
+        const expectedTags = [
+          {
+            name: 'Auth Mgt',
+            description: 'User management and login'
+          },
+          {
+            name: 'User List',
+            description: 'Group just for user list operation',
+          }
+        ]
+          expect(parsedControllers.UserController.swagger.tags, 'should merge tags from swagger doc with Controller.swagger.tags').to.deep.equal(expectedTags);
+          expect(parsedControllers.UserController.swagger.components, 'should merge components from swagger doc with Controller.swagger.components').to.deep.equal({parameters: []});
+          expect(parsedControllers.UserController.swagger.actions, 'should convert and merge swagger doc path param to actions').to.contains.keys('list', 'logout');
+      })
+  })
 })

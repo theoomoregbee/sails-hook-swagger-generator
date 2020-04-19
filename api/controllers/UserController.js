@@ -17,7 +17,7 @@ function list2(req, res) {
 }
 
 list2.swagger = {
-  tags: [ 'User List' ],
+  tags: ['User List'],
   description: 'Return a user list (alternate)'
 }
 
@@ -71,16 +71,21 @@ module.exports = {
   },
 
   swagger: {
-    _list: {
-      tags: ['User List'],
-      description: 'Return a user list'
+    actions: {
+      list: {
+        tags: ['User List'],
+        description: 'Return a user list'
+      },
     },
-    _tags: [
+    tags: [
       {
         name: 'User List',
         description: 'Group just for user list operation',
       }
     ],
+    components: {
+      parameters: [],
+    },
   },
 
 };

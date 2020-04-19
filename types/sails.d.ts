@@ -15,6 +15,7 @@ declare namespace Sails {
         appPath: string;
         paths: {
             models: string;
+            controllers: string;
         };
         routes: Record<string, string | RouteTarget>;
         [key: string]: any;
@@ -76,7 +77,10 @@ declare namespace Sails {
         attributes: Record<string, AttributeValue>;
     }
 
+    export type Controller = Record<string, any>;
+
     export interface Sails {
+        controllers: any;
         config: Config;
         on: (event: string, callback: Callback<Route, void>) => void;
         after: (event: string, callback: Function) => void;

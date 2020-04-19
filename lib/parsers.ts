@@ -2,9 +2,10 @@
  * Created by theophy on 02/08/2017.
  */
 import * as path from 'path';
-import { SwaggerSailsModel, SwaggerSailsRouteControllerTarget, HTTPMethodVerb, ParsedCustomRoute, ParsedBindRoute, AssociationPrimaryKeyAttribute, MiddlewareType, SwaggerRouteInfo } from './interfaces';
+import { SwaggerSailsModel, SwaggerSailsRouteControllerTarget, HTTPMethodVerb, ParsedCustomRoute, ParsedBindRoute, AssociationPrimaryKeyAttribute, MiddlewareType, SwaggerRouteInfo, SwaggerSailsController } from './interfaces';
 import cloneDeep from 'lodash/cloneDeep';
 import get from 'lodash/get';
+import uniqBy from 'lodash/uniqBy';
 import { OpenApi } from '../types/openapi';
 import { generateSwaggerPath } from './generators';
 import { loadSwaggerDocComments, mergeSwaggerSpec, mergeSwaggerPaths, removeViewRoutes, normalizeRouteControllerTarget, getBlueprintAllowedMiddlewareRoutes, normalizeRouteControllerName } from './utils';
@@ -34,7 +35,7 @@ export const parseModels = async (sails: Sails.Sails, sailsConfig: Sails.Config,
     }
 
     const parseSwaggerDocPaths = (model: SwaggerSailsModel, index: number) => {
-      // parse and merge swagger.actions and swagger-doc path 
+      // parse and merge swagger.actions and swagger-doc path (and take them as precendence) 
       const swagger = swaggerComments[index] 
       if(swagger){
         const paths = swagger.paths || {}
@@ -278,4 +279,73 @@ export const mergeCustomAndBindRoutes = (customRoutes: ParsedCustomRoute[], boun
   });
 
   return merged
+}
+
+
+export const parseControllers = async (sails: Sails.Sails, controllerNames: string[]): Promise<{[name: string]: SwaggerSailsController}> => {
+  const controllerDir = sails.config.paths.controllers!;
+  const swaggerDocComments: Array<OpenApi.OpenApi | undefined> = await Promise.all(controllerNames.map(name =>
+    loadSwaggerDocComments(require.resolve(path.join(controllerDir, name))).catch(err => {
+      sails.log.error(`ERROR: sails-hook-swagger-generator: Error resolving/loading controller ${name}: ${err.message || ''}`, err);
+      return undefined
+    })));
+  const parseController = (name: string): SwaggerSailsController => {
+    let swagger = {}
+    try {
+      const controllerPath = path.join(controllerDir, name)
+      // eslint-disable-next-line @typescript-eslint/no-var-requires
+      const controller = require(controllerPath);
+      if(controller){
+        swagger = controller.swagger
+      }      
+    } catch (err) {
+      sails.log.error(`ERROR: sails-hook-swagger-generator: Error resolving/loading controller ${name}: ${err.message || ''}`, err);
+    }
+
+    return { name, swagger }
+  }
+
+  const parseTagsComponents = (controller: SwaggerSailsController, index: number) => {
+    // retrieve swagger documentation from jsDoc comments and merge it with any .swagger within our controller
+    const swagger = swaggerDocComments[index];
+    controller.swagger = cloneDeep(controller.swagger || {})
+    if (swagger) {
+      controller.swagger = mergeSwaggerSpec(controller.swagger, swagger);
+    }
+    return controller
+  }
+
+  const parseSwaggerDocPaths = (controller: SwaggerSailsController, index: number) => {
+    // parse and merge swagger.actions and swagger-doc path (and take them as precendence) 
+    const swagger = swaggerDocComments[index] 
+    if(swagger){
+      const paths = swagger.paths || {}
+      controller.swagger.actions = mergeSwaggerPaths(controller.swagger.actions!, paths)
+    }
+
+    return controller
+  }
+
+  
+  return controllerNames
+    .map(parseController)
+    .map(parseTagsComponents)
+    .map(parseSwaggerDocPaths)
+    .reduce((parsed, controller) => {
+      parsed[controller.name] = controller;
+      return parsed
+    }, {} as { [name: string]: SwaggerSailsController })
+}
+
+
+// load swagger js doc for routes without .swagger search 
+// controller for swagger jsdoc or action files
+export const loadRoutesSwaggerJsDoc = (routesInfo: SwaggerRouteInfo[], sailsConfig: Sails.Config) => {
+  const routes = routesInfo.filter(route => !route.swagger)
+  const uniqueControllers = uniqBy(routes, 'controller')
+    .map(route => route.controller)
+    .filter(controller => !!controller);
+    
+    // const controllers = parseControllers(uniqueControllers); 
+    
 }
