@@ -2,7 +2,7 @@
  * Created by theophy on 02/08/2017.
  */
 import * as path from 'path';
-import { SwaggerSailsModel, SwaggerSailsRouteControllerTarget, HTTPMethodVerb, ParsedCustomRoute, ParsedBindRoute, AssociationPrimaryKeyAttribute, MiddlewareType, SwaggerRouteInfo, SwaggerSailsController } from './interfaces';
+import { SwaggerSailsModel, SwaggerSailsRouteControllerTarget, HTTPMethodVerb, ParsedCustomRoute, ParsedBindRoute, AssociationPrimaryKeyAttribute, MiddlewareType, SwaggerRouteInfo, SwaggerSailsController, SwaggerAction } from './interfaces';
 import cloneDeep from 'lodash/cloneDeep';
 import get from 'lodash/get';
 import uniqBy from 'lodash/uniqBy';
@@ -39,7 +39,7 @@ export const parseModels = async (sails: Sails.Sails, sailsConfig: Sails.Config,
       const swagger = swaggerComments[index] 
       if(swagger){
         const paths = swagger.paths || {}
-        model.swagger.actions = mergeSwaggerPaths(model.swagger.actions!, paths)
+        model.swagger.actions = mergeSwaggerPaths(model.swagger.actions!, paths as SwaggerAction)
       }
 
       return model
@@ -320,7 +320,7 @@ export const parseControllers = async (sails: Sails.Sails, controllerNames: stri
     const swagger = swaggerDocComments[index] 
     if(swagger){
       const paths = swagger.paths || {}
-      controller.swagger.actions = mergeSwaggerPaths(controller.swagger.actions!, paths)
+      controller.swagger.actions = mergeSwaggerPaths(controller.swagger.actions!, paths as SwaggerAction)
     }
 
     return controller
@@ -336,7 +336,6 @@ export const parseControllers = async (sails: Sails.Sails, controllerNames: stri
       return parsed
     }, {} as { [name: string]: SwaggerSailsController })
 }
-
 
 // load swagger js doc for routes without .swagger search 
 // controller for swagger jsdoc or action files

@@ -23,26 +23,33 @@ module.exports = {
   },
 
   swagger: {
-    tags: [ 'Actions2 Group' ],
-    responses: {
-      '200': {
-        content: {
-          'application/json': {
-            schema: { type: 'number', default: 123, },
-          },
+    actions: {
+      actions2: {
+        tags: ['Actions2 Group'],
+        description: 'Return a user list',
+        responses: {
+          '200': {
+            content: {
+              'application/json': {
+                schema: { type: 'number', default: 123, },
+              },
+            },
+          }
         },
-      }
+      },
     },
-    _tags: [
+    tags: [
       {
         name: 'Actions2 Group',
         description: 'A test actions2 group',
       },
     ],
+    components: {
+      parameters: [],
+    },
   },
 
-  fn: async function ({userId}) {
-
+  fn: async function ({ userId }) {
     return {
       message: 'TEST ACTIONS2 (foobar) ' + userId,
     };

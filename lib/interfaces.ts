@@ -33,7 +33,7 @@ export interface Defaults {
 }
 
 export interface SwaggerAction {
-    [path: string]: OpenApi.Path;
+    [name: string]: OpenApi.Operation;
 }
 
 export interface SwaggerAttribute {
