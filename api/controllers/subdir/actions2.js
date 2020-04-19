@@ -1,3 +1,10 @@
+/**
+ * @swagger
+ * tags:
+ *   name: Action2 Mgt
+ *   description: Action2 testing
+ */
+
 module.exports = {
 
   friendlyName: 'Friendly',

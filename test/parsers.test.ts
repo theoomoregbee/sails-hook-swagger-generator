@@ -203,5 +203,22 @@ describe ('Parsers', () => {
           expect(parsedControllers.UserController.swagger.components, 'should merge components from swagger doc with Controller.swagger.components').to.deep.equal({parameters: []});
           expect(parsedControllers.UserController.swagger.actions, 'should convert and merge swagger doc path param to actions').to.contains.keys('list', 'logout');
       })
+
+      it('Action2: should load and merge swagger specification in /controllers/{action2-name} with the action2.swagger attribute', async () => {
+        const parsedControllers = await parseControllers(sails as unknown as Sails.Sails, ['subdir/actions2'])
+        const expectedTags = [
+          {
+            name: 'Action2 Mgt',
+            description: 'Action2 testing'
+          },
+          {
+            name: 'Actions2 Group',
+            description: 'A test actions2 group',
+          }
+        ]
+          expect(parsedControllers['subdir/actions2'].swagger.tags, 'should merge tags from swagger doc with Action2.swagger.tags').to.deep.equal(expectedTags);
+          expect(parsedControllers['subdir/actions2'].swagger.components, 'should merge components from swagger doc with Action2.swagger.components').to.deep.equal({parameters: []});
+          expect(parsedControllers['subdir/actions2'].swagger.actions, 'should convert and merge swagger doc path param to actions').to.contains.keys('actions2');
+      })
   })
 })
