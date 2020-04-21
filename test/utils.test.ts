@@ -1,6 +1,6 @@
 import path from 'path';
 import { expect } from 'chai';
-import { mergeSwaggerSpec, mergeSwaggerPaths, loadSwaggerDocComments, normalizeRouteControllerName, normalizeRouteControllerTarget, removeViewRoutes } from '../lib/utils';
+import { mergeSwaggerSpec, mergeSwaggerPaths, loadSwaggerDocComments, normalizeRouteControllerName, normalizeRouteControllerTarget, removeViewRoutes, getSwaggerAction } from '../lib/utils';
 import { SwaggerAction } from '../lib/interfaces';
 
 const sailsConfig = {
@@ -151,6 +151,22 @@ describe ('Utils', () => {
 
         it('should throw type error if route target is not among the accepted pattern', done => {
             expect(() => normalizeRouteControllerTarget('something-bind')).throw()
+            done()
+        })
+    })
+
+    describe('getSwaggerAction', () => {
+        it('should not throw if model or controller is undefined', done => {
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            const object: any = undefined
+            expect(getSwaggerAction(object, 'example/action')).to.equal(undefined);
+            done()
+        })
+        it('should return action if it exist in either model or controller', done => {
+            const action = { ke: 'string' } 
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            const object: any = { swagger: { actions: { action } } } 
+            expect(getSwaggerAction(object, 'action')).to.deep.equal(action);
             done()
         })
     })

@@ -7,7 +7,7 @@ import cloneDeep from 'lodash/cloneDeep';
 import get from 'lodash/get';
 import { OpenApi } from '../types/openapi';
 import { generateSwaggerPath } from './generators';
-import { loadSwaggerDocComments, mergeSwaggerSpec, mergeSwaggerPaths, removeViewRoutes, normalizeRouteControllerTarget, getBlueprintAllowedMiddlewareRoutes, normalizeRouteControllerName } from './utils';
+import { loadSwaggerDocComments, mergeSwaggerSpec, mergeSwaggerPaths, removeViewRoutes, normalizeRouteControllerTarget, getBlueprintAllowedMiddlewareRoutes, normalizeRouteControllerName, getSwaggerAction } from './utils';
 
 // consider all models except associative tables and 'Archive' model special case
 const removeModelExceptions = (model: SwaggerSailsModel): boolean => !!model.globalId && model.globalId !== 'Archive'
@@ -283,11 +283,19 @@ export const mergeCustomAndBindRoutes = (customRoutes: ParsedCustomRoute[], boun
 
 export const parseControllers = async (sails: Sails.Sails, controllerNames: string[]): Promise<NameKeyMap<SwaggerSailsController>> => {
   const controllerDir = sails.config.paths.controllers!;
-  const swaggerDocComments: Array<OpenApi.OpenApi | undefined> = await Promise.all(controllerNames.map(name =>
-    loadSwaggerDocComments(require.resolve(path.join(controllerDir, name))).catch(err => {
+  const swaggerDocComments: Array<OpenApi.OpenApi | undefined> = await Promise.all(controllerNames.map(async name => {
+    let filePath
+    try {
+      filePath = require.resolve(path.join(controllerDir, name))
+    } catch (err) {
       sails.log.error(`ERROR: sails-hook-swagger-generator: Error resolving/loading controller ${name}: ${err.message || ''}`, err);
       return undefined
-    })));
+    }
+    return loadSwaggerDocComments(filePath).catch(err => {
+      sails.log.error(`ERROR: sails-hook-swagger-generator: Error resolving/loading controller ${name}: ${err.message || ''}`, err);
+      return undefined
+    })
+  }));
   const parseController = (name: string): SwaggerSailsController => {
     let swagger = {}
     try {
@@ -336,7 +344,15 @@ export const parseControllers = async (sails: Sails.Sails, controllerNames: stri
     }, {} as NameKeyMap<SwaggerSailsController>)
 }
 
-// load swagger js doc for routes without .swagger search 
-// controller for swagger jsdoc or action files
-export const loadRoutesSwaggerJsDoc = (routesInfo: SwaggerRouteInfo[],  controllers: SwaggerSailsController[], action2s: SwaggerSailsController[]) => {
+export const loadRoutesSwaggerJsDoc = (routesInfo: SwaggerRouteInfo[],  controllers: NameKeyMap<SwaggerSailsController>, action2s: NameKeyMap<SwaggerSailsController>): SwaggerRouteInfo[] => {
+  return routesInfo.map(route => {
+    if (route.swagger) {
+      return route
+    }
+     route.swagger = getSwaggerAction(controllers[route.controller!], route.action);
+     if(!route.swagger) {
+       route.swagger = getSwaggerAction(action2s[route.action], route.action); 
+     }
+    return route
+  })
 }

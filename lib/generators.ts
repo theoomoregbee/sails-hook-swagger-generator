@@ -1,3 +1,5 @@
+import { SwaggerSailsModel } from './interfaces';
+
 /**
  * Maps from a Sails route path of the form `/path/:id` to a
  * Swagger path of the form `/path/{id}`. and the path variables
@@ -19,3 +21,13 @@ export const  generateSwaggerPath = (path: string): {variables: string[]; path: 
       .join('/');
   return { path: swaggerPath, variables };
   }
+
+  /**
+   * Generate Swagger schema content describing specified Sails models.
+   * @see https://swagger.io/docs/specification/data-models/
+   * @param models parsed Sails models as per `parsers.parseModels()` 
+   * @returns 
+   */
+export const generateSchemas = (models: { [globalId: string]: SwaggerSailsModel }) => {
+  return null
+}

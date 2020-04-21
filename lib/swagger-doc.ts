@@ -1,8 +1,10 @@
 import * as fs from 'fs';
 import { SwaggerGenerator, SwaggerSailsModel } from './interfaces';
 import * as lodash from 'lodash';
+import uniqBy from 'lodash/uniqBy';
 import { blueprintActionTemplates as bluePrintTemplates, defaults as defaultsResponses } from './type-formatter';
-import { parseModels, parseCustomRoutes, parseBindRoutes, mergeCustomAndBindRoutes } from './parsers';
+import { parseModels, parseCustomRoutes, parseBindRoutes, mergeCustomAndBindRoutes, parseControllers, loadRoutesSwaggerJsDoc } from './parsers';
+import { getAction2Paths } from './utils';
 
 const cloneDeep = lodash.cloneDeep
 
@@ -31,17 +33,30 @@ export default  async (sails: Sails.Sails, sailsRoutes: Array<Sails.Route>, cont
   // remove globally excluded routes
   allRoutes = allRoutes.filter(route => route.path !== '/__getcookie')
 
-  const routes = mergeCustomAndBindRoutes(customRoutes, allRoutes, models);
+  let routes = mergeCustomAndBindRoutes(customRoutes, allRoutes, models);
 
-  /*
   if (hookConfig.includeRoute) {
-    routes = routes.filter(r => hookConfig.includeRoute(r));
+    routes = routes.filter(route => hookConfig.includeRoute!(route));
   }
 
   if (!specifications.tags) specifications.tags = [];
   if (!specifications.components) specifications.components = {};
 
-  specifications.components.schemas = generators.generateSchemas(models);
+  const withoutSwaggerRoutes = routes.filter(route => !route.swagger)
+  const uniqueControllers = uniqBy(withoutSwaggerRoutes, 'controller')
+    .map(route => route.controller)
+    .filter((controller): controller is string => !!controller);
+    
+  const controllers = await parseControllers(sails, uniqueControllers)
+  const action2Paths = getAction2Paths(withoutSwaggerRoutes, controllers)
+  const action2s = await parseControllers(sails, action2Paths)
+
+  routes = loadRoutesSwaggerJsDoc(routes, controllers, action2s);
+
+
+
+/*
+  specifications.components.schemas = generateSchemas(models);
 
   specifications.paths = generators.generatePaths(routes, blueprintActionTemplates, defaults, specifications.tags, specifications.components);
 

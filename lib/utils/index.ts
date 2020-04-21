@@ -1,4 +1,4 @@
-import { SwaggerAttribute, SwaggerAction, SwaggerSailsRouteControllerTarget, MiddlewareType, BluePrintAction } from '../interfaces';
+import { SwaggerAttribute, SwaggerAction, SwaggerSailsRouteControllerTarget, MiddlewareType, BluePrintAction, SwaggerSailsController, SwaggerRouteInfo, NameKeyMap, SwaggerSailsModel } from '../interfaces';
 import swaggerJSDoc from 'swagger-jsdoc';
 import cloneDeep from 'lodash/cloneDeep';
 import { OpenApi } from '../../types/openapi';
@@ -6,6 +6,7 @@ import uniqByLodash from 'lodash/uniqBy';
 import mapKeys from 'lodash/mapKeys';
 import get from 'lodash/get';
 import uniq from 'lodash/uniq';
+import * as path from 'path';
 
 const uniqBy = uniqByLodash as unknown as <T>(array: Array<T>, prop: string) => Array<T>
 
@@ -133,11 +134,18 @@ export const normalizeRouteControllerTarget = (target: string | SwaggerSailsRout
     throw new TypeError(`Unable to normalize route: ${target}, see: https://sailsjs.com/documentation/concepts/routes/custom-routes for allowed routes pattern`)
 }
 
-// HOW to check for  standalone action
-// see ttps://sailsjs.com/documentation/concepts/routes/custom-routes#?controller-action-target-syntax 
-// check if the file exist in api/controllers/{action='foo/go-action'|'index'}.js if so it means return true
-// const isStandAloneAction = (): boolean => {}
+export const getSwaggerAction = (object: SwaggerSailsModel | SwaggerSailsController, action: string): OpenApi.Operation | undefined => {
+    return get(object, `swagger.actions.${action}`) 
+}
 
-// export const getActionPath = (sailsConfig: Sails.Config, normalisedTarget: SwaggerSailsRouteControllerTarget  ): string => {
-//     return ''
-// }
+export const getAction2Paths = (routes: SwaggerRouteInfo[], controllers: NameKeyMap<SwaggerSailsController>): string[] => {
+    return routes
+        .filter(route => {
+            const controller = controllers[route.controller!]
+            const swagger = getSwaggerAction(controller, route.action);
+            return !swagger
+        })
+        .map(route => {
+            return route.action
+        })
+}
