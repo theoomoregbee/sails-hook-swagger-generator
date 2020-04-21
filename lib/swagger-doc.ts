@@ -5,6 +5,7 @@ import uniqBy from 'lodash/uniqBy';
 import { blueprintActionTemplates as bluePrintTemplates, defaults as defaultsResponses } from './type-formatter';
 import { parseModels, parseCustomRoutes, parseBindRoutes, mergeCustomAndBindRoutes, parseControllers, loadRoutesSwaggerJsDoc } from './parsers';
 import { getAction2Paths } from './utils';
+import { generateSchemas } from './generators';
 
 const cloneDeep = lodash.cloneDeep
 
@@ -53,10 +54,9 @@ export default  async (sails: Sails.Sails, sailsRoutes: Array<Sails.Route>, cont
 
   routes = loadRoutesSwaggerJsDoc(routes, controllers, action2s);
 
-
-
-/*
   specifications.components.schemas = generateSchemas(models);
+
+  /*
 
   specifications.paths = generators.generatePaths(routes, blueprintActionTemplates, defaults, specifications.tags, specifications.components);
 

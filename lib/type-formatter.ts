@@ -33,7 +33,7 @@ export const swaggerTypes = {
 /**
  * Defines allowed Sails model attribute definition values, and provides mapping to Swagger/OpenAPI names
  */
-export const sailAttributePropertiesMap = {
+export const sailAttributePropertiesMap: Record<string, string> = {
   allowNull: 'nullable',
   defaultsTo: 'default',
   description: 'description',
