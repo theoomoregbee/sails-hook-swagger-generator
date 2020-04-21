@@ -134,3 +134,7 @@ export interface SwaggerRouteInfo {
     aliases: string[];
     associationsPrimaryKeyAttribute: AssociationPrimaryKeyAttribute[];
 }
+
+export interface NameKeyMap<T> {
+    [name: string]: T;
+}
