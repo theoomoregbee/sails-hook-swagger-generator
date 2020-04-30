@@ -5,7 +5,6 @@ import { SwaggerGenerator } from './lib/interfaces';
 
 export default (sails: Sails.Sails): Sails.Hook<SwaggerGenerator> => {
   const routes: Sails.Route[] = [];
-  
 
   return {
 
@@ -44,8 +43,8 @@ export default (sails: Sails.Sails): Sails.Hook<SwaggerGenerator> => {
         }
       });
 
-      sails.after('ready', () => {
-        swaggerDoc(sails, routes, this);
+      sails.after('ready', async () => {
+        await swaggerDoc(sails, routes, this);
       });
       next();
     }

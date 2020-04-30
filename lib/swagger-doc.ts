@@ -55,7 +55,6 @@ export default async (sails: Sails.Sails, sailsRoutes: Array<Sails.Route>, conte
 
   specifications.components.schemas = generateSchemas(models);
 
-
   specifications.paths = generatePaths(routes, blueprintActionTemplates, defaults, action2s, specifications);
 
   specifications.components.parameters = {
