@@ -189,10 +189,23 @@ export const generateSchemas = (models: NameKeyMap<SwaggerSailsModel>): NameKeyM
     }, {} as NameKeyMap<Schema | Reference>)
 }
 
+/**
+ * Generate Swagger schema content describing specified Sails routes/actions.
+ *
+ * @see https://swagger.io/docs/specification/paths-and-operations/
+ * 
+ * TODO: break down this function into smaller methods and add tests separately
+ * 
+ * @param routes 
+ * @param templates 
+ * @param defaultsValues 
+ * @param action2s 
+ * @param specification 
+ */
 export const generatePaths = (routes: SwaggerRouteInfo[], templates: BlueprintActionTemplates, defaultsValues: Defaults, action2s: NameKeyMap<SwaggerSailsController>, specification: Omit<OpenApi.OpenApi, 'paths'>): OpenApi.Paths => {
   const paths = {};
-  const tags = specification.tags || [];
-  const components = specification.components || {} as OpenApi.Components;
+  const tags = specification.tags!;
+  const components = specification.components!;
 
   if (!components.parameters) {
     components.parameters = {}
@@ -235,8 +248,8 @@ export const generatePaths = (routes: SwaggerRouteInfo[], templates: BlueprintAc
                 schema: generateAttributeSchema(attributeInfo),
                 description: subst('The desired **{globalId}** record\'s primary key value'),
               };
-              return { $ref: '#/components/parameters/' + pname };
             }
+            return { $ref: '#/components/parameters/' + pname };
           }
           return parameter;
         }) as Array<OpenApi.Parameter>;
@@ -540,8 +553,8 @@ export const generatePaths = (routes: SwaggerRouteInfo[], templates: BlueprintAc
       });
     }
 
-    addTags(get(route.swagger, '_tags', []));
-    mergeComponents(get(route.swagger, '_components'));
+    addTags(get(route.swagger, 'tags', []) as Tag[]);
+    mergeComponents(get(route.swagger, 'components', {}));
 
     set(paths, [path, route.verb], pathEntry);
   }
