@@ -23,26 +23,26 @@ export const parseModels = async (sails: Sails.Sails, sailsConfig: Sails.Config,
       return undefined
     })));
 
-    const parseTagsComponents = (model: SwaggerSailsModel, index: number) => {
-      // retrieve swagger documentation from jsDoc comments and merge it with any .swagger within our model
-      const swagger = swaggerComments[index];
-      model.swagger = cloneDeep(model.swagger || {})
-      if (swagger) {
-        model.swagger = mergeSwaggerSpec(model.swagger, swagger);
-      }
-      return model
+  const parseTagsComponents = (model: SwaggerSailsModel, index: number) => {
+    // retrieve swagger documentation from jsDoc comments and merge it with any .swagger within our model
+    const swagger = swaggerComments[index];
+    model.swagger = cloneDeep(model.swagger || {})
+    if (swagger) {
+      model.swagger = mergeSwaggerSpec(model.swagger, swagger);
+    }
+    return model
+  }
+
+  const parseSwaggerDocPaths = (model: SwaggerSailsModel, index: number) => {
+    // parse and merge swagger.actions and swagger-doc path (and take them as precendence) 
+    const swagger = swaggerComments[index]
+    if (swagger) {
+      const paths = swagger.paths || {}
+      model.swagger.actions = mergeSwaggerPaths(model.swagger.actions!, paths as SwaggerAction)
     }
 
-    const parseSwaggerDocPaths = (model: SwaggerSailsModel, index: number) => {
-      // parse and merge swagger.actions and swagger-doc path (and take them as precendence) 
-      const swagger = swaggerComments[index] 
-      if(swagger){
-        const paths = swagger.paths || {}
-        model.swagger.actions = mergeSwaggerPaths(model.swagger.actions!, paths as SwaggerAction)
-      }
-
-      return model
-    }
+    return model
+  }
 
   return models
     .map(parseTagsComponents)
@@ -59,7 +59,7 @@ export const parseCustomRoutes = (sailsConfig: Sails.Config): Array<ParsedCustom
   for (const routeAddress in routes) {
     // Parse 1: Route Address
     // see https://sailsjs.com/documentation/concepts/routes/custom-routes#?route-address
-    let [verb, path] = routeAddress.split(/\s+/) 
+    let [verb, path] = routeAddress.split(/\s+/)
     if (!path) {
       path = verb
       verb = 'all'
@@ -96,7 +96,7 @@ export const parseCustomRoutes = (sailsConfig: Sails.Config): Array<ParsedCustom
       customRoutes.push(parsedRoute);
     } else {
       ['get', 'post', 'put', 'patch', 'delete'].forEach(v => {
-        customRoutes.push({...parsedRoute, verb: v as HTTPMethodVerb});
+        customRoutes.push({ ...parsedRoute, verb: v as HTTPMethodVerb });
       });
     }
   }
@@ -104,14 +104,14 @@ export const parseCustomRoutes = (sailsConfig: Sails.Config): Array<ParsedCustom
 }
 
 const getAssociationPrimaryKeyAttribute = (routeOptions: ParsedBindRoute, models: NameKeyMap<SwaggerSailsModel>): AssociationPrimaryKeyAttribute | undefined => {
-  const associations = routeOptions.associations || [] 
+  const associations = routeOptions.associations || []
   const association = associations.find(item => item.alias === routeOptions.alias);
-  if(!association){
-    return 
+  if (!association) {
+    return
   }
   const identity = association.collection || association.model;
   const model = models[identity];
-  if(!model) {
+  if (!model) {
     return
   }
   const associationInfo = get(model.attributes, `[${model.primaryKey}]`, { description: '' });
@@ -121,7 +121,7 @@ const getAssociationPrimaryKeyAttribute = (routeOptions: ParsedBindRoute, models
   }
 }
 
-type GroupAggregatedModelRoutes = NameKeyMap<ParsedBindRoute[]>  
+type GroupAggregatedModelRoutes = NameKeyMap<ParsedBindRoute[]>
 const groupAggregatedModelRoutes = (routes: ParsedBindRoute[], type: 'populate' | 'add' | 'remove' | 'replace') => {
   return routes.filter(route => route.action === type)
     .reduce((grouped, route) => {
@@ -135,15 +135,15 @@ const groupAggregatedModelRoutes = (routes: ParsedBindRoute[], type: 'populate' 
 }
 
 
- /*
-   * Sails returns individual routes for each association:
-   * - /api/v1/quote/:parentid/supplier/:childid
-   * - /api/v1/quote/:parentid/items/:childid
-   *
-   * We now aggreggate these routes.
-   */
+/*
+  * Sails returns individual routes for each association:
+  * - /api/v1/quote/:parentid/supplier/:childid
+  * - /api/v1/quote/:parentid/items/:childid
+  *
+  * We now aggreggate these routes.
+  */
 const aggregateAssociationRoutes = (blueprintRoutes: ParsedBindRoute[], models: NameKeyMap<SwaggerSailsModel>): Array<ParsedBindRoute | undefined> => {
- type AggregationRoutesModel = {
+  type AggregationRoutesModel = {
     [name in 'populateByModel' | 'addByModel' | 'removeByModel' | 'replaceByModel']: GroupAggregatedModelRoutes;
   };
 
@@ -154,27 +154,27 @@ const aggregateAssociationRoutes = (blueprintRoutes: ParsedBindRoute[], models: 
     replaceByModel: groupAggregatedModelRoutes(blueprintRoutes, 'replace'),
   }
 
-  const processAggregationModelRoutes = (route: ParsedBindRoute, byModel: keyof AggregationRoutesModel): ParsedBindRoute | undefined => { 
+  const processAggregationModelRoutes = (route: ParsedBindRoute, byModel: keyof AggregationRoutesModel): ParsedBindRoute | undefined => {
     const byModelRoutes = aggregatedRoutesByModel[byModel][route.model.identity];
-    if(!byModelRoutes){
+    if (!byModelRoutes) {
       return undefined
     }
-    
+
     const primaryKey = route.model.primaryKey;
     route.path = route.path.replace(new RegExp(`/{parentid}/${route.alias}$`, 'g'), `/{${primaryKey}}/{association}`);
     route.path = route.path.replace(new RegExp(`/{parentid}/${route.alias}/{childid}$`, 'g'), `/{${primaryKey}}/{association}/{fk}`);
 
-    const associationPrimaryKeyAttribute = (r: ParsedBindRoute) =>  r.associations && r.alias ? getAssociationPrimaryKeyAttribute(r, models) : undefined;
+    const associationPrimaryKeyAttribute = (r: ParsedBindRoute) => r.associations && r.alias ? getAssociationPrimaryKeyAttribute(r, models) : undefined;
     route.aliases = byModelRoutes.map(r => r.alias).filter((alias): alias is string => !!alias)
     route.associationsPrimaryKeyAttribute = byModelRoutes.map(associationPrimaryKeyAttribute).filter((attr): attr is AssociationPrimaryKeyAttribute => !!attr)
     return route
   }
 
   return blueprintRoutes.map(route => {
-    if(route.action === 'populate') return processAggregationModelRoutes(route, 'populateByModel')
-    if(route.action === 'add') return processAggregationModelRoutes(route, 'addByModel')
-    if(route.action === 'remove') return processAggregationModelRoutes(route, 'removeByModel')
-    if(route.action === 'replace') return processAggregationModelRoutes(route, 'replaceByModel')
+    if (route.action === 'populate') return processAggregationModelRoutes(route, 'populateByModel')
+    if (route.action === 'add') return processAggregationModelRoutes(route, 'addByModel')
+    if (route.action === 'remove') return processAggregationModelRoutes(route, 'removeByModel')
+    if (route.action === 'replace') return processAggregationModelRoutes(route, 'replaceByModel')
     return route
   });
 }
@@ -201,10 +201,10 @@ export const parseBindRoutes = (boundRoutes: Array<Sails.Route>, models: NameKey
     const controller = normalizeRouteControllerName(model.globalId);
     const tags = get(model.swagger, 'tags', []);
     const swagger = get(model.swagger.actions, `${blueprintAction}.${route.verb}`) as OpenApi.Operation | undefined;
-  
+
     const swaggerPathParams = generateSwaggerPath(route.path);
 
-    if(model.primaryKey && model.primaryKey !== 'id') {
+    if (model.primaryKey && model.primaryKey !== 'id') {
       swaggerPathParams.path = swaggerPathParams.path.replace('{id}', `{${model.primaryKey}}`);
     }
 
@@ -219,6 +219,7 @@ export const parseBindRoutes = (boundRoutes: Array<Sails.Route>, models: NameKey
       aliases: [],
       alias: routeOptions.alias,
       associations: routeOptions.associations,
+      middlewareType: MiddlewareType.BLUEPRINT,
       associationsPrimaryKeyAttribute: []
     } as ParsedBindRoute
   }).filter((route): route is ParsedBindRoute => !!route)
@@ -239,7 +240,7 @@ const toSwaggerRoute = (customRoute: ParsedCustomRoute, models: NameKeyMap<Swagg
   }
 
   // use controller name as model identity name 
-  if(customRoute.controller){
+  if (customRoute.controller) {
     const [identity = ''] = customRoute.controller.split('Controller');
     const model = models[identity.toLowerCase()];
     route.model = model;
@@ -302,9 +303,9 @@ export const parseControllers = async (sails: Sails.Sails, controllerNames: stri
       const controllerPath = path.join(controllerDir, name)
       // eslint-disable-next-line @typescript-eslint/no-var-requires
       const controller = require(controllerPath);
-      if(controller){
+      if (controller) {
         swagger = controller.swagger
-      }      
+      }
     } catch (err) {
       sails.log.error(`ERROR: sails-hook-swagger-generator: Error resolving/loading controller ${name}: ${err.message || ''}`, err);
     }
@@ -324,8 +325,8 @@ export const parseControllers = async (sails: Sails.Sails, controllerNames: stri
 
   const parseSwaggerDocPaths = (controller: SwaggerSailsController, index: number) => {
     // parse and merge swagger.actions and swagger-doc path (and take them as precendence) 
-    const swagger = swaggerDocComments[index] 
-    if(swagger){
+    const swagger = swaggerDocComments[index]
+    if (swagger) {
       const paths = swagger.paths || {}
       controller.swagger.actions = mergeSwaggerPaths(controller.swagger.actions!, paths as SwaggerAction)
     }
@@ -333,7 +334,7 @@ export const parseControllers = async (sails: Sails.Sails, controllerNames: stri
     return controller
   }
 
-  
+
   return controllerNames
     .map(parseController)
     .map(parseTagsComponents)
@@ -344,15 +345,15 @@ export const parseControllers = async (sails: Sails.Sails, controllerNames: stri
     }, {} as NameKeyMap<SwaggerSailsController>)
 }
 
-export const loadRoutesSwaggerJsDoc = (routesInfo: SwaggerRouteInfo[],  controllers: NameKeyMap<SwaggerSailsController>, action2s: NameKeyMap<SwaggerSailsController>): SwaggerRouteInfo[] => {
+export const loadRoutesSwaggerJsDoc = (routesInfo: SwaggerRouteInfo[], controllers: NameKeyMap<SwaggerSailsController>, action2s: NameKeyMap<SwaggerSailsController>): SwaggerRouteInfo[] => {
   return routesInfo.map(route => {
     if (route.swagger) {
       return route
     }
-     route.swagger = getSwaggerAction(controllers[route.controller!], route.action);
-     if(!route.swagger) {
-       route.swagger = getSwaggerAction(action2s[route.action], route.action); 
-     }
+    route.swagger = getSwaggerAction(controllers[route.controller!], route.action);
+    if (!route.swagger) {
+      route.swagger = getSwaggerAction(action2s[route.action], route.action);
+    }
     return route
   })
 }

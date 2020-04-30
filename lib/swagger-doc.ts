@@ -1,15 +1,14 @@
 import * as fs from 'fs';
 import { SwaggerGenerator, SwaggerSailsModel } from './interfaces';
-import * as lodash from 'lodash';
+import cloneDeep from 'lodash/cloneDeep'
 import uniqBy from 'lodash/uniqBy';
-import { blueprintActionTemplates as bluePrintTemplates, defaults as defaultsResponses } from './type-formatter';
+import { blueprintActionTemplates as bluePrintTemplates, defaults as defaultsResponses, blueprintParameterTemplates } from './type-formatter';
 import { parseModels, parseCustomRoutes, parseBindRoutes, mergeCustomAndBindRoutes, parseControllers, loadRoutesSwaggerJsDoc } from './parsers';
-import { getAction2Paths } from './utils';
-import { generateSchemas } from './generators';
+import { getAction2Paths, getUniqueTagsFromPath } from './utils';
+import { generateSchemas, generatePaths } from './generators';
+import { OpenApi } from '../types/openapi';
 
-const cloneDeep = lodash.cloneDeep
-
-export default  async (sails: Sails.Sails, sailsRoutes: Array<Sails.Route>, context: Sails.Hook<SwaggerGenerator>): Promise<void> => {
+export default async (sails: Sails.Sails, sailsRoutes: Array<Sails.Route>, context: Sails.Hook<SwaggerGenerator>): Promise<OpenApi.OpenApi | undefined> => {
 
   const hookConfig: SwaggerGenerator = sails.config[context.configKey!];
 
@@ -22,7 +21,7 @@ export default  async (sails: Sails.Sails, sailsRoutes: Array<Sails.Route>, cont
     blueprintActionTemplates = hookConfig.updateBlueprintActionTemplates(blueprintActionTemplates);
   }
 
-  const specifications = cloneDeep(hookConfig.swagger);
+  const specifications = cloneDeep(hookConfig.swagger) as OpenApi.OpenApi;
 
   const defaults = hookConfig.defaults || defaultsResponses;
 
@@ -47,7 +46,7 @@ export default  async (sails: Sails.Sails, sailsRoutes: Array<Sails.Route>, cont
   const uniqueControllers = uniqBy(withoutSwaggerRoutes, 'controller')
     .map(route => route.controller)
     .filter((controller): controller is string => !!controller);
-    
+
   const controllers = await parseControllers(sails, uniqueControllers)
   const action2Paths = getAction2Paths(withoutSwaggerRoutes, controllers)
   const action2s = await parseControllers(sails, action2Paths)
@@ -56,32 +55,29 @@ export default  async (sails: Sails.Sails, sailsRoutes: Array<Sails.Route>, cont
 
   specifications.components.schemas = generateSchemas(models);
 
-  /*
 
-  specifications.paths = generators.generatePaths(routes, blueprintActionTemplates, defaults, specifications.tags, specifications.components);
+  specifications.paths = generatePaths(routes, blueprintActionTemplates, defaults, action2s, specifications);
 
-  _.defaults(specifications.components.parameters, formatters.blueprintParameterTemplates);
+  specifications.components.parameters = {
+    ...blueprintParameterTemplates,
+    ...specifications.components.parameters
+  };
+
 
   // clean up of specification, removing unreferenced tags
-  const referencedTags = new Set();
-  _.forEach(specifications.paths, (pathDef, path) => {
-    _.forEach(pathDef, (def, httpMethod) => {
-      if (def.tags) def.tags.map(tag => referencedTags.add(tag))
-    });
-  });
+  const referencedTags = getUniqueTagsFromPath(specifications.paths);
   specifications.tags = specifications.tags.filter(tag => referencedTags.has(tag.name));
 
   if (hookConfig.postProcess) hookConfig.postProcess(specifications);
 
-  const destPath = sails.config[context.configKey].swaggerJsonPath;
+  const destPath = hookConfig.swaggerJsonPath;
   try {
     fs.writeFileSync(destPath, JSON.stringify(specifications, null, 2));
-  } catch(e) {
+  } catch (e) {
     sails.log.error(`ERROR: sails-hook-swagger-generator: Error writing ${destPath}: ${e.message}`, e);
   }
 
   sails.log.info('Swagger generated successfully');
 
   return specifications;
-*/
 }

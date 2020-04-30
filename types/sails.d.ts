@@ -40,7 +40,7 @@ declare namespace Sails {
         path: string;
         target: Function;
         verb: string;
-        options: RouteOption; 
+        options: RouteOption;
     }
 
     export interface Hook<T> {
@@ -86,9 +86,10 @@ declare namespace Sails {
         after: (event: string, callback: Function) => void;
         models: Record<string, Model>;
         log: {
+            info: (value: string) => void;
             warn: (value: string) => void;
             error: (value: string, err: any) => void;
         };
     }
-   
+
 }

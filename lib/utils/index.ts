@@ -6,7 +6,6 @@ import uniqByLodash from 'lodash/uniqBy';
 import mapKeys from 'lodash/mapKeys';
 import get from 'lodash/get';
 import uniq from 'lodash/uniq';
-import * as path from 'path';
 
 const uniqBy = uniqByLodash as unknown as <T>(array: Array<T>, prop: string) => Array<T>
 
@@ -81,12 +80,12 @@ export const loadSwaggerDocComments = (filePath: string): Promise<OpenApi.OpenAp
     });
 }
 
-export const removeViewRoutes = (routes: Record<string, Sails.RouteTarget>): Record<string, Sails.RouteTarget>=> {
-    return Object.keys(routes).reduce((cleanedRoutes, routeAddress)=> {
+export const removeViewRoutes = (routes: Record<string, Sails.RouteTarget>): Record<string, Sails.RouteTarget> => {
+    return Object.keys(routes).reduce((cleanedRoutes, routeAddress) => {
         const target = routes[routeAddress];
-        const isView = !!get(target, 'view'); 
-           if(!isView){
-               cleanedRoutes[routeAddress]= target
+        const isView = !!get(target, 'view');
+        if (!isView) {
+            cleanedRoutes[routeAddress] = target
         }
         return cleanedRoutes
     }, {} as Record<string, Sails.RouteTarget>)
@@ -115,7 +114,7 @@ export const normalizeRouteControllerTarget = (target: string | SwaggerSailsRout
         if (dotParams.length > 1) {
             const controller = normalizeRouteControllerName(dotParams[0])
             const action = dotParams[1]
-            return { controller, action  }
+            return { controller, action }
         }
 
         // foo/go-action
@@ -135,7 +134,7 @@ export const normalizeRouteControllerTarget = (target: string | SwaggerSailsRout
 }
 
 export const getSwaggerAction = (object: SwaggerSailsModel | SwaggerSailsController, action: string): OpenApi.Operation | undefined => {
-    return get(object, `swagger.actions.${action}`) 
+    return get(object, `swagger.actions.${action}`)
 }
 
 export const getAction2Paths = (routes: SwaggerRouteInfo[], controllers: NameKeyMap<SwaggerSailsController>): string[] => {
@@ -148,4 +147,19 @@ export const getAction2Paths = (routes: SwaggerRouteInfo[], controllers: NameKey
         .map(route => {
             return route.action
         })
+}
+
+export const getUniqueTagsFromPath = (paths: OpenApi.Paths) => {
+    const referencedTags = new Set();
+
+    for (const path in paths) {
+        const pathDefinition = paths[path];
+        for (const verb in pathDefinition) {
+            const verbDefinition = pathDefinition[verb as keyof OpenApi.Path] as OpenApi.Operation;
+            if (verbDefinition.tags) {
+                verbDefinition.tags.forEach(tag => referencedTags.add(tag))
+            }
+        }
+    }
+    return referencedTags
 }

@@ -7,7 +7,7 @@ import { Schema, Reference, Header, Tag, Security } from 'swagger-schema-officia
 
 declare namespace OpenApi {
 
-    type EmptyObject = {}
+    type EmptyObject = Record<string, any>
 
     export interface Info {
         title: string;
@@ -36,6 +36,11 @@ declare namespace OpenApi {
         url: string;
     }
 
+    export type UpdatedSchema = Schema & {
+        oneOf?: UpdatedSchema[];
+        items?: UpdatedSchema;
+    }
+
     export interface Parameter {
         name: string;
         in: string;
@@ -43,6 +48,7 @@ declare namespace OpenApi {
         required?: boolean;
         deprecated?: boolean;
         allowEmptyValue?: boolean;
+        schema?: UpdatedSchema | Reference;
     }
 
     export interface Example {
@@ -61,7 +67,7 @@ declare namespace OpenApi {
     }
 
     export interface MediaType {
-        schema?: Schema | Reference;
+        schema?: UpdatedSchema | Reference;
         example?: any;
         examples?: Map<string, Example | Reference>;
         encoding?: Map<string, Encoding>;
@@ -70,7 +76,8 @@ declare namespace OpenApi {
 
     export interface RequestBody {
         description?: string;
-        content: Map<string, MediaType>;
+        content: Record<string, MediaType>;
+        required?: boolean;
     }
 
     export interface Link {
@@ -85,7 +92,7 @@ declare namespace OpenApi {
     export interface Response {
         description: string;
         headers?: Map<string, Header | Reference>;
-        content?: Map<string, MediaType>;
+        content?: Record<string, MediaType>;
         links?: Map<string, Link | Reference>;
     }
 
@@ -126,7 +133,7 @@ declare namespace OpenApi {
     export interface Components {
         schemas?: Map<string, Schema | Reference> | EmptyObject;
         responses?: Map<string, Response | Reference> | EmptyObject;
-        parameters?: Map<string, Parameter | Reference> | EmptyObject;
+        parameters?: Record<string, Parameter | Reference> | EmptyObject;
         examples?: Map<string, Example | Reference> | EmptyObject;
         requestBodies?: Map<string, RequestBody | Reference> | EmptyObject;
         headers?: Map<string, Header | Reference> | EmptyObject;

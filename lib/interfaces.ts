@@ -9,6 +9,7 @@ export interface SwaggerGenerator {
     swagger: Omit<OpenApi.OpenApi, 'paths'>;
     updateBlueprintActionTemplates?: (template: BlueprintActionTemplates) => BlueprintActionTemplates;
     defaults?: Defaults;
+    postProcess?: (specification: OpenApi.OpenApi) => void;
 }
 
 export type BluePrintAction = 'findone' | 'find' | 'create' | 'update' | 'destroy' | 'populate' | 'add' | 'remove' | 'replace'
@@ -27,6 +28,8 @@ export enum Modifiers {
     ADD_RESULT_VALIDATION_ERROR = 'addResultValidationError',
     ADD_FKS_BODY_PARAM = 'addFksBodyParam'
 }
+
+type Modifier = Modifiers | ((template: BluePrintActionTemplate, route: SwaggerRouteInfo, path: OpenApi.Operation, tags: Tag[], components: OpenApi.Components) => void)
 
 export interface Defaults {
     responses: { [statusCode: string]: { description: string } };
@@ -51,8 +54,10 @@ export interface SwaggerSailsModel extends Omit<Sails.Model, 'attributes'> {
     swagger: SwaggerAttribute;
 }
 
-export interface SwaggerSailsController extends Sails.Controller  {
+export interface SwaggerSailsController extends Sails.Controller {
     name: string; // controller name
+    inputs?: any; // action2
+    exits?: any; // action2
     swagger: SwaggerAttribute;
 }
 
@@ -67,7 +72,7 @@ interface BluePrintActionTemplate {
     parameters: Array<'primaryKeyPathParameter' | Reference | OpenApi.Parameter>;
     resultDescription: string;
     notFoundDescription?: string;
-    modifiers?: Array<Modifiers>;
+    modifiers?: Array<Modifier>;
 }
 
 export type BlueprintActionTemplates = {
@@ -99,25 +104,28 @@ export interface ParsedCustomRoute {
     variables: string[];
     controller?: string;
     action: string;
-    swagger?: OpenApi.Operation; 
+    swagger?: OpenApi.Operation;
 }
 
 export interface ParsedBindRoute {
     controller: string | undefined;
     tags: Array<Tag>;
     action: string;
-    verb: HTTPMethodVerb; 
+    verb: HTTPMethodVerb;
     path: string;
     variables: string[];
-    swagger: OpenApi.Operation | undefined; 
+    swagger: OpenApi.Operation | undefined;
     model: SwaggerSailsModel;
     associations: Sails.RouteAssociation[];
     alias?: string;
     aliases: string[];
-    associationsPrimaryKeyAttribute: AssociationPrimaryKeyAttribute[]; 
+    middlewareType: MiddlewareType.BLUEPRINT;
+    associationsPrimaryKeyAttribute: AssociationPrimaryKeyAttribute[];
 }
 
 export interface SwaggerRouteInfo {
+    middlewareType?: MiddlewareType;
+
     tags: Array<Tag>;
     model?: SwaggerSailsModel;
     swagger?: OpenApi.Operation | undefined;
