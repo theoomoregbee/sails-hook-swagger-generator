@@ -1,5 +1,5 @@
 import { SwaggerSailsModel, NameKeyMap, SwaggerRouteInfo, BlueprintActionTemplates, Defaults, MiddlewareType, SwaggerSailsController, Action2Response } from './interfaces';
-import { Schema, Reference, Tag, Parameter } from 'swagger-schema-official';
+import { Schema, Reference, Tag } from 'swagger-schema-official';
 import get from 'lodash/get';
 import { swaggerTypes, sailAttributePropertiesMap, validationsMap, blueprintActionTemplates, actions2Responses } from './type-formatter';
 import assign from 'lodash/assign';

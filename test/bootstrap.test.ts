@@ -27,7 +27,7 @@ describe('Basic tests ::', function () {
         // Skip grunt (unless your hook uses it)
         grunt: false
       },
-      log: { level: "error" }
+      log: { level: "silent" }
 
     }, function (err: any, _sails: any) {
       if (err) return done(err);
