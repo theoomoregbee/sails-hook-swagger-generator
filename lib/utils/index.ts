@@ -6,6 +6,9 @@ import uniqByLodash from 'lodash/uniqBy';
 import mapKeys from 'lodash/mapKeys';
 import get from 'lodash/get';
 import uniq from 'lodash/uniq';
+import defaults from 'lodash/defaults';
+import forEach from 'lodash/forEach';
+import { Tag } from 'swagger-schema-official';
 
 const uniqBy = uniqByLodash as unknown as <T>(array: Array<T>, prop: string) => Array<T>
 
@@ -162,4 +165,49 @@ export const getUniqueTagsFromPath = (paths: OpenApi.Paths) => {
         }
     }
     return referencedTags
+}
+
+export const mergeComponents = (existingComponents: OpenApi.Components, models: NameKeyMap<SwaggerSailsModel>, controllers: NameKeyMap<SwaggerSailsController>, action2s: NameKeyMap<SwaggerSailsController>) => {
+    const components = cloneDeep(existingComponents);
+    const merge = (toMerge: OpenApi.Components) => {
+        for (const key in toMerge) {
+            const componentName = key as keyof OpenApi.Components
+            if (!components[componentName]) {
+                components[componentName] = toMerge[componentName];
+            }
+            defaults(components[componentName], toMerge[componentName]);
+        }
+    }
+
+    forEach(models, model => {
+        merge(get(model, 'swagger.components', {}))
+    });
+    forEach(controllers, controller => {
+        merge(get(controller, 'swagger.components', {}))
+    });
+    forEach(action2s, action2 => {
+        merge(get(action2, 'swagger.components', {}))
+    });
+    return components
+}
+
+export const mergeTags = (existingTags: Tag[], models: NameKeyMap<SwaggerSailsModel>, controllers: NameKeyMap<SwaggerSailsController>, action2s: NameKeyMap<SwaggerSailsController>) => {
+    const tags = cloneDeep(existingTags);
+
+    const addTags = (toAdd: Array<Tag>) => {
+        const newTags = toAdd.filter(newTag => !tags.find(tag => newTag.name === tag.name));
+        tags.push(...newTags)
+    }
+
+    forEach(models, model => {
+        addTags(get(model, 'swagger.tags', []))
+    });
+    forEach(controllers, controller => {
+        addTags(get(controller, 'swagger.tags', []))
+    });
+    forEach(action2s, action2 => {
+        addTags(get(action2, 'swagger.tags', []))
+    });
+
+    return tags
 }

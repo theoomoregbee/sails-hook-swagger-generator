@@ -4,7 +4,7 @@ import cloneDeep from 'lodash/cloneDeep'
 import uniqBy from 'lodash/uniqBy';
 import { blueprintActionTemplates as bluePrintTemplates, defaults as defaultsResponses, blueprintParameterTemplates } from './type-formatter';
 import { parseModels, parseCustomRoutes, parseBindRoutes, mergeCustomAndBindRoutes, parseControllers, loadRoutesSwaggerJsDoc } from './parsers';
-import { getAction2Paths, getUniqueTagsFromPath } from './utils';
+import { getAction2Paths, getUniqueTagsFromPath, mergeComponents, mergeTags } from './utils';
 import { generateSchemas, generatePaths } from './generators';
 import { OpenApi } from '../types/openapi';
 
@@ -21,7 +21,11 @@ export default async (sails: Sails.Sails, sailsRoutes: Array<Sails.Route>, conte
     blueprintActionTemplates = hookConfig.updateBlueprintActionTemplates(blueprintActionTemplates);
   }
 
-  const specifications = cloneDeep(hookConfig.swagger) as OpenApi.OpenApi;
+  const specifications = {
+    tags: [],
+    components: {},
+    ...cloneDeep(hookConfig.swagger)
+  } as OpenApi.OpenApi;
 
   const defaults = hookConfig.defaults || defaultsResponses;
 
@@ -54,6 +58,10 @@ export default async (sails: Sails.Sails, sailsRoutes: Array<Sails.Route>, conte
   routes = loadRoutesSwaggerJsDoc(routes, controllers, action2s);
 
   specifications.components.schemas = generateSchemas(models);
+
+  // merge model, controller and action2 .components and .tags
+  specifications.components = mergeComponents(specifications.components, models, controllers, action2s);
+  specifications.tags = mergeTags(specifications.tags, models, controllers, action2s)
 
   specifications.paths = generatePaths(routes, blueprintActionTemplates, defaults, action2s, specifications);
 
