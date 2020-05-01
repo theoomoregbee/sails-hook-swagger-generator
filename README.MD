@@ -287,7 +287,7 @@ module.exports = {
     }
   },
   swagger: {
-    actions{
+    actions: {
       create: { ... },
     }
     tags: [...]
