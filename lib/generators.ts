@@ -1,7 +1,7 @@
 import { SwaggerSailsModel, NameKeyMap, SwaggerRouteInfo, BlueprintActionTemplates, Defaults, MiddlewareType, SwaggerSailsController, Action2Response } from './interfaces';
 import { Schema, Reference, Tag } from 'swagger-schema-official';
 import get from 'lodash/get';
-import { swaggerTypes, sailAttributePropertiesMap, validationsMap, blueprintActionTemplates, actions2Responses } from './type-formatter';
+import { swaggerTypes, sailAttributePropertiesMap, validationsMap, actions2Responses } from './type-formatter';
 import assign from 'lodash/assign';
 import defaults from 'lodash/defaults';
 import mapKeys from 'lodash/mapKeys';
@@ -231,7 +231,7 @@ export const generatePaths = (routes: SwaggerRouteInfo[], templates: BlueprintAc
     let pathEntry: OpenApi.Operation;
 
     if (route.middlewareType === MiddlewareType.BLUEPRINT && route.model) {
-      const template = blueprintActionTemplates[route.action as keyof BlueprintActionTemplates] || {};
+      const template = templates[route.action as keyof BlueprintActionTemplates] || {};
       const subst = (str: string) => str ? str.replace('{globalId}', route.model!.globalId) : '';
       // handle special case of PK parameter
       const parameters = [...(template.parameters || [])]
