@@ -3,7 +3,7 @@ import swaggerDoc from './lib/swagger-doc';
 import { SwaggerGenerator } from './lib/interfaces';
 
 
-export default (sails: Sails.Sails): Sails.Hook<SwaggerGenerator> => {
+module.exports = (sails: Sails.Sails): Sails.Hook<SwaggerGenerator> => {
   const routes: Sails.Route[] = [];
 
   return {

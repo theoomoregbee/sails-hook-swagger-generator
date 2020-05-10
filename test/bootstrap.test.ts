@@ -3,7 +3,8 @@
  * Created by theophy on 02/08/2017.
  */
 const Sails = require('sails').Sails;
-import swaggergenerator from '..'
+// eslint-disable-next-line @typescript-eslint/no-var-requires
+const swaggergenerator = require('../');
 
 describe('Basic tests ::', function () {
 
