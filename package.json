@@ -5,7 +5,7 @@
   "main": "build/index.js",
   "repository": {
     "type": "git",
-    "url": "https://github.com/theo4u/sails-hook-swagger-generator.git"
+    "url": "https://github.com/theoomoregbee/sails-hook-swagger-generator.git"
   },
   "sails": {
     "isHook": true
@@ -18,7 +18,7 @@
     "pretest": "npm run lint && npm run build",
     "test": "node ./node_modules/mocha/bin/mocha build/test/bootstrap.test.js build/test/**/*.test.js",
     "travis-deploy-once": "travis-deploy-once",
-    "semantic-release": "semantic-release pre && npm publish && semantic-release post"
+    "semantic-release": "semantic-release"
   },
   "keywords": [
     "sails",
@@ -43,7 +43,7 @@
     "sails": "^1.1.0",
     "sails-disk": "^1.1.2",
     "sails-hook-orm": "^2.1.1",
-    "semantic-release": "7.0.2",
+    "semantic-release": "^17.0.7",
     "swagger-jsdoc": "^3.4.0",
     "travis-deploy-once": "^4.3.4",
     "tslib": "^1.10.0",
