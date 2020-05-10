@@ -2,7 +2,7 @@
   "name": "sails-hook-swagger-generator",
   "version": "0.0.0-development",
   "description": "This is just a sails hook for generating swagger documentation json",
-  "main": "index.js",
+  "main": "build/index.js",
   "repository": {
     "type": "git",
     "url": "https://github.com/theo4u/sails-hook-swagger-generator.git"
@@ -11,7 +11,12 @@
     "isHook": true
   },
   "scripts": {
-    "test": "node ./node_modules/mocha/bin/mocha test/bootstrap.test.js test/**/*.test.js",
+    "tsc": "tsc",
+    "lint": "eslint . --ext .ts",
+    "build": "npm run lint && tsc",
+    "dev": "nodemon -e ts --ignore '**/*.js' --exec \"npm run test\"",
+    "pretest": "npm run lint && npm run build",
+    "test": "node ./node_modules/mocha/bin/mocha build/test/bootstrap.test.js build/test/**/*.test.js",
     "travis-deploy-once": "travis-deploy-once",
     "semantic-release": "semantic-release pre && npm publish && semantic-release post"
   },
@@ -19,17 +24,35 @@
     "sails",
     "hook",
     "swagger",
+    "openapi",
     "json",
     "generator"
   ],
   "author": "Theophilus Omoregbee",
   "license": "MIT",
   "devDependencies": {
+    "@types/mocha": "^7.0.1",
+    "@types/node": "^13.7.4",
+    "@types/swagger-schema-official": "^2.0.20",
+    "@typescript-eslint/eslint-plugin": "^2.19.2",
+    "@typescript-eslint/parser": "^2.19.2",
     "chai": "^4.1.1",
+    "eslint": "^6.8.0",
     "lodash": "^4.17.4",
     "mocha": "^3.5.0",
-    "sails": "~0.11.0",
+    "sails": "^1.1.0",
+    "sails-disk": "^1.1.2",
+    "sails-hook-orm": "^2.1.1",
+    "semantic-release": "7.0.2",
+    "swagger-jsdoc": "^3.4.0",
     "travis-deploy-once": "^4.3.4",
-    "semantic-release": "7.0.2"
+    "tslib": "^1.10.0",
+    "typescript": "^3.8.2"
+  },
+  "dependencies": {
+    "@types/chai": "^4.2.9",
+    "@types/lodash": "^4.14.149",
+    "@types/swagger-jsdoc": "^3.0.2",
+    "nodemon": "^2.0.2"
   }
 }
