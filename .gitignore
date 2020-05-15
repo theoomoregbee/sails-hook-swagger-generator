@@ -3,5 +3,4 @@
 node_modules/
 .tmp/
 swagger/swagger.json
-index.js
 build
