@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { Schema, Reference, Header, Tag, Security } from 'swagger-schema-official';
+import { Reference, Header, Tag, Security, ExternalDocs, XML, ParameterType } from 'swagger-schema-official';
 
 // This is simply building from  OpenApi Specification
 // see: https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.2.md
@@ -31,14 +31,50 @@ declare namespace OpenApi {
         variables?: Array<string | { enum?: Array<string>; default: string; description?: string }>;
     }
 
-    export interface ExternalDoc {
-        description?: string;
-        url: string;
+    export interface Discriminator {
+      propertyName: string;
+      mapping?: { [key: string]: string };
     }
 
-    export type UpdatedSchema = Schema & {
-        oneOf?: UpdatedSchema[];
-        items?: UpdatedSchema;
+    export interface UpdatedSchema {
+      nullable?: boolean;
+      discriminator?: Discriminator;
+      readOnly?: boolean;
+      writeOnly?: boolean;
+      xml?: XML;
+      externalDocs?: ExternalDocs;
+      example?: any;
+      examples?: any[];
+      deprecated?: boolean;
+
+      type?: ParameterType;
+      allOf?: (UpdatedSchema | Reference)[];
+      oneOf?: (UpdatedSchema | Reference)[];
+      anyOf?: (UpdatedSchema | Reference)[];
+      not?: UpdatedSchema | Reference;
+      items?: UpdatedSchema | Reference;
+      properties?: { [propertyName: string]: (UpdatedSchema | Reference) };
+      additionalProperties?: (UpdatedSchema | Reference | boolean);
+      description?: string;
+      format?: string;
+      default?: any;
+
+      title?: string;
+      multipleOf?: number;
+      maximum?: number;
+      exclusiveMaximum?: boolean;
+      minimum?: number;
+      exclusiveMinimum?: boolean;
+      maxLength?: number;
+      minLength?: number;
+      pattern?: string;
+      maxItems?: number;
+      minItems?: number;
+      uniqueItems?: boolean;
+      maxProperties?: number;
+      minProperties?: number;
+      required?: string[];
+      enum?: any[];
     }
 
     export interface Parameter {
@@ -100,7 +136,7 @@ declare namespace OpenApi {
         tags?: Array<string>;
         summary?: string;
         description?: string;
-        externalDocs?: ExternalDoc;
+        externalDocs?: ExternalDocs;
         operationId?: string;
         parameters: Array<Parameter>;
         requestBody?: RequestBody | Reference;
@@ -131,7 +167,7 @@ declare namespace OpenApi {
 
 
     export interface Components {
-        schemas?: Map<string, Schema | Reference> | EmptyObject;
+        schemas?: Map<string, UpdatedSchema | Reference> | EmptyObject;
         responses?: Map<string, Response | Reference> | EmptyObject;
         parameters?: Record<string, Parameter | Reference> | EmptyObject;
         examples?: Map<string, Example | Reference> | EmptyObject;
@@ -150,6 +186,6 @@ declare namespace OpenApi {
         components?: Components;
         security?: Array<Security>;
         tags?: Array<Tag>;
-        externalDocs: ExternalDoc;
+        externalDocs: ExternalDocs;
     }
 }

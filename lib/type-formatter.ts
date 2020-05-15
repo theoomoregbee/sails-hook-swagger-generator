@@ -9,25 +9,23 @@ import { BlueprintActionTemplates, Modifiers, Action2Response, Defaults } from '
 
 /**
  * this is used to map our sails types with the allowed type defintions based on swagger specification
- * @type {{integer: {common_name: string, type: string, format: string, comments: string}, long: {common_name: string, type: string, format: string, comments: string}, float: {common_name: string, type: string, format: string}, double: {common_name: string, type: string, format: string}, string: {common_name: string, type: string}, byte: {common_name: string, type: string, format: string, comments: string}, binary: {common_name: string, type: string, format: string, comments: string}, boolean: {common_name: string, type: string}, date: {common_name: string, type: string, format: string, comments: string}, datetime: {common_name: string, type: string, format: string, comments: string}, password: {common_name: string, type: string, format: string, comments: string}}}
  */
 export const swaggerTypes = {
-  integer: { common_name: 'integer', type: 'integer', format: 'int32', /* comments: 'signed 32 bits' */ },
-  long: { common_name: 'long', type: 'integer', format: 'int64', /* comments: 'signed 64 bits' */ },
-  float: { common_name: 'float', type: 'number', format: 'float' },
-  double: { common_name: 'double', type: 'number', format: 'double' },
-  string: { common_name: 'string', type: 'string' },
-  byte: { common_name: 'byte', type: 'string', format: 'byte', /* comments: 'base64 encoded characters' */ },
-  binary: { common_name: 'binary', type: 'string', format: 'binary', /* comments: 'any sequence of octets' */ },
-  boolean: { common_name: 'boolean', type: 'boolean' },
-  date: { common_name: 'date', type: 'string', format: 'date', /* comments: 'As defined by full-date - RFC3339' */ },
+  integer: { type: 'integer', format: 'int32', /* comments: 'signed 32 bits' */ },
+  long: { type: 'integer', format: 'int64', /* comments: 'signed 64 bits' */ },
+  float: { type: 'number', format: 'float' },
+  double: { type: 'number', format: 'double' },
+  string: { type: 'string' },
+  byte: { type: 'string', format: 'byte', /* comments: 'base64 encoded characters' */ },
+  binary: { type: 'string', format: 'binary', /* comments: 'any sequence of octets' */ },
+  boolean: { type: 'boolean' },
+  date: { type: 'string', format: 'date', /* comments: 'As defined by full-date - RFC3339' */ },
   datetime: {
-    common_name: 'dateTime',
     type: 'string',
     format: 'date-time',
     /* comments: 'As defined by date-time - RFC3339' */
   },
-  password: { common_name: 'password', type: 'string', format: 'password', /* comments: 'A hint to UIs to obscure input' */ }
+  password: { type: 'string', format: 'password', /* comments: 'A hint to UIs to obscure input' */ }
 };
 
 /**

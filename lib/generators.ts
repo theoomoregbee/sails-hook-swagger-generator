@@ -1,5 +1,5 @@
 import { SwaggerSailsModel, NameKeyMap, SwaggerRouteInfo, BlueprintActionTemplates, Defaults, MiddlewareType, SwaggerSailsController, Action2Response } from './interfaces';
-import { Schema, Reference, Tag } from 'swagger-schema-official';
+import { Reference, Tag } from 'swagger-schema-official';
 import get from 'lodash/get';
 import { swaggerTypes, sailAttributePropertiesMap, validationsMap, actions2Responses } from './type-formatter';
 import assign from 'lodash/assign';
@@ -43,14 +43,14 @@ export const generateSwaggerPath = (path: string): { variables: string[]; path: 
  * @param {Record<string, any>} attribute Sails model attribute specification as per `Model.js` file
  */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-export const generateAttributeSchema = (attribute: NameKeyMap<any>): Schema & { oneOf?: Schema[] } => {
+export const generateAttributeSchema = (attribute: NameKeyMap<any>): OpenApi.UpdatedSchema => {
   const ai = attribute || {}, sts = swaggerTypes;
 
   const type = attribute.type || 'string';
   const columnType = get(attribute, ['autoMigrations', 'columnType']);
   const autoIncrement = get(attribute, ['autoMigrations', 'autoIncrement']);
 
-  let schema: Schema & { oneOf?: Schema[]; common_name?: string } = {};
+  let schema: OpenApi.UpdatedSchema = {};
 
   if (ai.model) {
     assign(schema, {
@@ -152,8 +152,6 @@ export const generateAttributeSchema = (attribute: NameKeyMap<any>): Schema & { 
 
   // note: required --> required[] (not here, needs to be done at model level)
 
-  delete schema.common_name;
-
   return schema;
 }
 
@@ -161,14 +159,14 @@ export const generateAttributeSchema = (attribute: NameKeyMap<any>): Schema & { 
 /**
  * Generate Swagger schema content describing specified Sails models.
  * @see https://swagger.io/docs/specification/data-models/
- * @param models parsed Sails models as per `parsers.parseModels()` 
- * @returns 
+ * @param models parsed Sails models as per `parsers.parseModels()`
+ * @returns
  */
-export const generateSchemas = (models: NameKeyMap<SwaggerSailsModel>): NameKeyMap<Schema | Reference> => {
+export const generateSchemas = (models: NameKeyMap<SwaggerSailsModel>): NameKeyMap<OpenApi.UpdatedSchema | Reference> => {
   return Object.keys(models)
     .reduce((schemas, identiy) => {
       const model = models[identiy]
-      const schema: Schema = {
+      const schema: OpenApi.UpdatedSchema = {
         description: get(model, 'swagger.description', `Sails ORM Model **${model.globalId}**`),
         required: [],
       }
@@ -179,28 +177,28 @@ export const generateSchemas = (models: NameKeyMap<SwaggerSailsModel>): NameKeyM
         props[attributeName] = generateAttributeSchema(attribute);
         if (attribute.required) schema.required!.push(attributeName);
         return props
-      }, {} as NameKeyMap<Schema>)
+      }, {} as NameKeyMap<OpenApi.UpdatedSchema>)
 
       if (schema.required!.length <= 0) delete schema.required;
 
       schemas[model.identity] = schema;
 
       return schemas
-    }, {} as NameKeyMap<Schema | Reference>)
+    }, {} as NameKeyMap<OpenApi.UpdatedSchema | Reference>)
 }
 
 /**
  * Generate Swagger schema content describing specified Sails routes/actions.
  *
  * @see https://swagger.io/docs/specification/paths-and-operations/
- * 
+ *
  * TODO: break down this function into smaller methods and add tests separately
- * 
- * @param routes 
- * @param templates 
- * @param defaultsValues 
- * @param action2s 
- * @param specification 
+ *
+ * @param routes
+ * @param templates
+ * @param defaultsValues
+ * @param action2s
+ * @param specification
  */
 export const generatePaths = (routes: SwaggerRouteInfo[], templates: BlueprintActionTemplates, defaultsValues: Defaults, action2s: NameKeyMap<SwaggerSailsController>, specification: Omit<OpenApi.OpenApi, 'paths'>): OpenApi.Paths => {
   const paths = {};
