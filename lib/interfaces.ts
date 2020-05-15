@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { OpenApi } from '../types/openapi';
-import { Reference, Tag } from 'swagger-schema-official';
+import { Reference, Tag, ExternalDocs } from 'swagger-schema-official';
 
 export interface SwaggerGenerator {
     includeRoute?: (route: SwaggerRouteInfo) => boolean;
@@ -48,7 +48,7 @@ export interface SwaggerAttribute {
 export interface SwaggerSailsModel extends Omit<Sails.Model, 'attributes'> {
     attributes: Record<string, Sails.AttributeValue & {
         description?: string;
-        externalDocs?: OpenApi.ExternalDoc;
+        externalDocs?: ExternalDocs;
         example?: string;
     }>;
     swagger: SwaggerAttribute;
@@ -68,7 +68,7 @@ export interface SwaggerSailsRouteControllerTarget extends Sails.RouteController
 interface BluePrintActionTemplate {
     summary: string;
     description: string;
-    externalDocs: OpenApi.ExternalDoc;
+    externalDocs: ExternalDocs;
     parameters: Array<'primaryKeyPathParameter' | Reference | OpenApi.Parameter>;
     resultDescription: string;
     notFoundDescription?: string;
