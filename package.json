@@ -34,6 +34,9 @@
     "@types/mocha": "^7.0.1",
     "@types/node": "^13.7.4",
     "@types/swagger-schema-official": "^2.0.20",
+    "@types/chai": "^4.2.9",
+    "@types/lodash": "^4.14.149",
+    "@types/swagger-jsdoc": "^3.0.2",
     "@typescript-eslint/eslint-plugin": "^2.19.2",
     "@typescript-eslint/parser": "^2.19.2",
     "chai": "^4.1.1",
@@ -44,15 +47,12 @@
     "sails-disk": "^1.1.2",
     "sails-hook-orm": "^2.1.1",
     "semantic-release": "^17.0.7",
-    "swagger-jsdoc": "^3.4.0",
     "travis-deploy-once": "^4.3.4",
     "tslib": "^1.10.0",
     "typescript": "^3.8.2"
   },
   "dependencies": {
-    "@types/chai": "^4.2.9",
-    "@types/lodash": "^4.14.149",
-    "@types/swagger-jsdoc": "^3.0.2",
+    "swagger-jsdoc": "^3.4.0",
     "nodemon": "^2.0.2",
     "request": "^2.88.2"
   }
