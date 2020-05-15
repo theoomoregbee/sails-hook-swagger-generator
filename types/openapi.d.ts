@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { Reference, Header, Tag, Security, ExternalDocs, XML, ParameterType } from 'swagger-schema-official';
+import { Reference, Header, Tag, ExternalDocs, XML, ParameterType } from 'swagger-schema-official';
 
 // This is simply building from  OpenApi Specification
 // see: https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.2.md
@@ -142,7 +142,7 @@ declare namespace OpenApi {
         requestBody?: RequestBody | Reference;
         responses: Record<string, Response>;
         servers?: Array<Server>;
-        security?: Array<Security>;
+        security?: SecuritySchemeRefPlusScopes[];
     }
 
     export interface Path {
@@ -165,6 +165,89 @@ declare namespace OpenApi {
         [path: string]: Path;
     }
 
+    /**
+     * Security applied globally or to Operation
+     */
+
+    export type Scope = string;
+
+    export interface SecuritySchemeRefPlusScopes {
+      [schemeName: string]: Scope[];
+    }
+
+    /**
+     * Security scheme definition
+     */
+
+    export interface BaseSecurity {
+      type: 'http' | 'apiKey' | 'openIdConnect' | 'oauth2';
+      description?: string;
+    }
+
+    export interface HttpSecurity extends BaseSecurity {
+      type: 'http';
+      scheme: 'basic' | 'bearer';
+      bearerFormat?: string; // e.g. 'JWT'
+    }
+
+    export interface ApiKeySecurity extends BaseSecurity {
+      type: 'apiKey';
+      name: string;
+      in: 'query' | 'header' | 'cookie';
+    }
+
+    export interface OpenIDConnectSecurity extends BaseSecurity {
+      type: 'openIdConnect';
+      openIdConnectUrl: string;
+    }
+
+    export interface OAuth2Security extends BaseSecurity {
+      type: 'oauth2';
+      flows: OAuth2SecurityFlow;
+    }
+
+    export interface OAuth2SecurityFlows {
+      implicit?: OAuth2ImplicitSecurityFlow;
+      password?: OAuth2PasswordSecurityFlow;
+      clientCredentials?: OAuth2ClientCredentialsSecurityFlow;
+      authorizationCode?: OAuth2AuthorizationCodeSecurityFlow;
+    }
+
+    export interface OAuth2SecurityFlow {
+      refreshUrl?: string;
+      scopes?: OAuthScope;
+    }
+
+    export interface OAuth2ImplicitSecurityFlow extends OAuth2SecurityFlow {
+      authorizationUrl: string;
+    }
+
+    export interface OAuth2PasswordSecurityFlow extends OAuth2SecurityFlow {
+      tokenUrl: string;
+    }
+
+    export interface OAuth2ClientCredentialsSecurityFlow extends OAuth2SecurityFlow {
+      authorizationUrl: string;
+    }
+
+    export interface OAuth2AuthorizationCodeSecurityFlow extends OAuth2SecurityFlow {
+      authorizationUrl: string;
+      tokenUrl: string;
+    }
+
+    export interface OAuthScope {
+      [scopeName: string]: string;
+    }
+
+    export type Security =
+      | HttpSecurity
+      | ApiKeySecurity
+      | OpenIDConnectSecurity
+      | OAuth2Security;
+
+    /**
+     * Components dictionary
+     */
 
     export interface Components {
         schemas?: Map<string, UpdatedSchema | Reference> | EmptyObject;
@@ -184,7 +267,7 @@ declare namespace OpenApi {
         servers: Array<Server>;
         paths: Paths;
         components?: Components;
-        security?: Array<Security>;
+        security?: SecuritySchemeRefPlusScopes[];
         tags?: Array<Tag>;
         externalDocs: ExternalDocs;
     }
