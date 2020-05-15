@@ -70,11 +70,20 @@ declare namespace Sails {
         allowNull?: boolean;
     }
 
+    export interface Association {
+      alias: string;
+      type: 'model' | 'collection';
+      model?: string;
+      collection?: string;
+      via?: string;
+    }
+
     export interface Model {
         globalId: string;
         primaryKey: string;
         identity: string;
         attributes: Record<string, AttributeValue>;
+        associations?: Association[];
     }
 
     export type Controller = Record<string, any>;

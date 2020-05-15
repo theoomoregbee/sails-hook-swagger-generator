@@ -92,12 +92,6 @@ export enum MiddlewareType {
     ACTION = 'ACTION'
 }
 
-// (present for blueprints only); alias attributeInfo for association PK
-export interface AssociationPrimaryKeyAttribute {
-    [name: string]: any;
-    description: string;
-}
-
 export interface ParsedCustomRoute {
     verb: HTTPMethodVerb;
     path: string;
@@ -117,10 +111,8 @@ export interface ParsedBindRoute {
     swagger: OpenApi.Operation | undefined;
     model: SwaggerSailsModel;
     associations: Sails.RouteAssociation[];
-    alias?: string;
-    aliases: string[];
+    associationAliases: string[];
     middlewareType: MiddlewareType.BLUEPRINT;
-    associationsPrimaryKeyAttribute: AssociationPrimaryKeyAttribute[];
 }
 
 export interface SwaggerRouteInfo {
@@ -137,10 +129,7 @@ export interface SwaggerRouteInfo {
     path: string;
     variables: string[];
 
-    associations: Sails.RouteAssociation[];
-    alias?: string;
-    aliases: string[];
-    associationsPrimaryKeyAttribute: AssociationPrimaryKeyAttribute[];
+    associationAliases?: string[]; //< association attribute names (relevant blueprint routes only)    associationsPrimaryKeyAttribute: AssociationPrimaryKeyAttribute[];
 }
 
 export interface NameKeyMap<T> {
