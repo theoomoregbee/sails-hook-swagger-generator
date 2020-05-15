@@ -155,6 +155,37 @@ export const generateAttributeSchema = (attribute: NameKeyMap<any>): OpenApi.Upd
   return schema;
 }
 
+/**
+ * Generate the OpenAPI schemas for the foreign key values used to reference
+ * ORM records for the associations of the specified Sails Model.
+ *
+ * @param model
+ * @param models
+ */
+export const generateModelAssociationFKAttributeSchemas = (model: SwaggerSailsModel, models: NameKeyMap<SwaggerSailsModel>): OpenApi.UpdatedSchema[] => {
+
+  if (!model.associations) { return []; }
+
+  const ret = model.associations.map(association => {
+
+    const targetModelIdentity = association.type === 'model' ? association.model : association.collection;
+    const targetModel = models[targetModelIdentity!];
+
+    if (!targetModel) {
+      return {}; // data structure integrity issue should not occur
+    }
+
+    const targetFKAttribute = targetModel.attributes[targetModel.primaryKey];
+    return generateAttributeSchema({
+      ...targetFKAttribute,
+      description: `**${model.globalId}** record's foreign key value (**${association.alias}** association${targetFKAttribute.description ? '; ' + targetFKAttribute.description : ''})`
+    });
+
+  });
+
+  return ret;
+
+}
 
 /**
  * Generate Swagger schema content describing specified Sails models.
@@ -200,7 +231,7 @@ export const generateSchemas = (models: NameKeyMap<SwaggerSailsModel>): NameKeyM
  * @param action2s
  * @param specification
  */
-export const generatePaths = (routes: SwaggerRouteInfo[], templates: BlueprintActionTemplates, defaultsValues: Defaults, action2s: NameKeyMap<SwaggerSailsController>, specification: Omit<OpenApi.OpenApi, 'paths'>): OpenApi.Paths => {
+export const generatePaths = (routes: SwaggerRouteInfo[], templates: BlueprintActionTemplates, defaultsValues: Defaults, action2s: NameKeyMap<SwaggerSailsController>, specification: Omit<OpenApi.OpenApi, 'paths'>, models: NameKeyMap<SwaggerSailsModel>): OpenApi.Paths => {
   const paths = {};
   const tags = specification.tags!;
   const components = specification.components!;
@@ -265,14 +296,15 @@ export const generatePaths = (routes: SwaggerRouteInfo[], templates: BlueprintAc
       const isParam = (inType: string, name: string): boolean => !!pathEntry.parameters.find(parameter => parameter.in == inType && parameter.name == name);
       const modifiers = {
         addPopulateQueryParam: () => {
-          if (isParam('query', 'populate') || route.associations.length == 0) return;
+          const assoc = route.model?.associations || [];
+          if (isParam('query', 'populate') || assoc.length == 0) return;
           pathEntry.parameters.push({
             in: 'query',
             name: 'populate',
             required: false,
             schema: {
               type: 'string',
-              example: ['false', ...(route.associations.map(row => row.alias) || [])].join(','),
+              example: ['false', ...(assoc.map(row => row.alias) || [])].join(','),
             },
             description: 'If specified, overide the default automatic population process.'
               + ' Accepts a comma-separated list of attribute names for which to populate record values,'
@@ -350,7 +382,7 @@ export const generatePaths = (routes: SwaggerRouteInfo[], templates: BlueprintAc
             required: true,
             schema: {
               type: 'string',
-              enum: route.aliases,
+              enum: route.associationAliases,
             },
             description: 'The name of the association',
           });
@@ -363,15 +395,16 @@ export const generatePaths = (routes: SwaggerRouteInfo[], templates: BlueprintAc
             name: 'fk',
             required: true,
             schema: {
-              oneOf: route.associationsPrimaryKeyAttribute.map(ai => generateAttributeSchema(ai)),
+              oneOf: generateModelAssociationFKAttributeSchemas(route.model!, models),
             } as OpenApi.UpdatedSchema,
             description: 'The desired target association record\'s foreign key value'
           });
         },
 
         addAssociationResultOfArray: () => {
-          const models = route.aliases.map(a => {
-            const assoc = route.associations.find(_assoc => _assoc.alias == a);
+          const associations = route.model?.associations || [];
+          const models = (route.associationAliases || []).map(a => {
+            const assoc = associations.find(_assoc => _assoc.alias == a);
             return assoc ? (assoc.collection || assoc.model) : a;
           });
           assign(pathEntry.responses['200'], {
@@ -425,7 +458,7 @@ export const generatePaths = (routes: SwaggerRouteInfo[], templates: BlueprintAc
                 schema: {
                   type: 'array',
                   items: {
-                    oneOf: route.associationsPrimaryKeyAttribute.map(ai => generateAttributeSchema(ai)),
+                    oneOf: generateModelAssociationFKAttributeSchemas(route.model!, models),
                   }
                 } as OpenApi.UpdatedSchema,
               },

@@ -63,7 +63,7 @@ export default async (sails: Sails.Sails, sailsRoutes: Array<Sails.Route>, conte
   specifications.components = mergeComponents(specifications.components, models, controllers, action2s);
   specifications.tags = mergeTags(specifications.tags, models, controllers, action2s)
 
-  specifications.paths = generatePaths(routes, blueprintActionTemplates, defaults, action2s, specifications);
+  specifications.paths = generatePaths(routes, blueprintActionTemplates, defaults, action2s, specifications, models);
 
   specifications.components.parameters = {
     ...blueprintParameterTemplates,
