@@ -29,7 +29,7 @@ module.exports = (sails: Sails.Sails): Sails.Hook<SwaggerGenerator> => {
           servers: [
             { url: 'http://localhost:1337/' }
           ],
-          externalDocs: { url: 'http://theophilus.ziippii.com' }
+          externalDocs: { url: 'https://theoomoregbee.github.io/' }
         }
       }
     },
