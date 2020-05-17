@@ -1,6 +1,6 @@
 import path from 'path';
 import { expect } from 'chai';
-import { mergeSwaggerSpec, mergeSwaggerPaths, loadSwaggerDocComments, normalizeRouteControllerName, normalizeRouteControllerTarget, removeViewRoutes, getSwaggerAction, mergeComponents, mergeTags } from '../lib/utils';
+import { mergeSwaggerSpec, mergeSwaggerPaths, loadSwaggerDocComments, normalizeRouteControllerName, normalizeRouteControllerTarget, removeViewRoutes, getSwaggerAction, mergeComponents, mergeTags, getActionNameFromPath } from '../lib/utils';
 import { SwaggerAction, NameKeyMap, SwaggerSailsModel, SwaggerSailsController } from '../lib/interfaces';
 import { OpenApi } from '../types/openapi';
 
@@ -223,6 +223,13 @@ describe('Utils', () => {
             const actual = mergeTags(tags, models, controllers, action2)
             expect(actual).to.deep.equal([tags[0], models.user.swagger!.tags![0], controllers.UserController.swagger!.tags![0], action2['action/action2'].swagger!.tags![0]], 'merge tags props to existing tags')
             done()
+        })
+    })
+
+    describe('getActionNameFromPath', () => {
+        it('should get action2 filename from action2path', done => {
+            expect(getActionNameFromPath('subdir/actions2')).to.be.equal('actions2');
+            done();
         })
     })
 
