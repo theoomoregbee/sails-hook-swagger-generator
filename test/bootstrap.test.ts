@@ -1,4 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
+
+import swaggerDocTest from './swagger-doc.test';
+
 /**
  * Created by theophy on 02/08/2017.
  */
@@ -34,7 +37,6 @@ describe('Basic tests ::', function () {
       if (err) return done(err);
       sails = _sails;
       return done();
-
     });
 
   });
@@ -56,4 +58,5 @@ describe('Basic tests ::', function () {
     return true;
   });
 
+  swaggerDocTest();
 });
