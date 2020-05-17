@@ -594,7 +594,18 @@
         },
         "/actions2": {
             "get": {
-                "parameters": [],
+                "parameters": [
+                    {
+                        "in": "query",
+                        "name": "userId",
+                        "required": true,
+                        "schema": {
+                            "type": "number",
+                            "format": "double"
+                        },
+                        "description": "The ID of the user to look up."
+                    }
+                ],
                 "responses": {
                     "200": {
                         "description": "The requested resource"

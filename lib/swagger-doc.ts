@@ -52,7 +52,7 @@ export default async (sails: Sails.Sails, sailsRoutes: Array<Sails.Route>, conte
     .filter((controller): controller is string => !!controller);
 
   const controllers = await parseControllers(sails, uniqueControllers)
-  const action2Paths = getAction2Paths(withoutSwaggerRoutes, controllers)
+  const action2Paths = getAction2Paths(withoutSwaggerRoutes)
   const action2s = await parseControllers(sails, action2Paths)
 
   routes = loadRoutesSwaggerJsDoc(routes, controllers, action2s);
