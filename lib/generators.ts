@@ -1,7 +1,7 @@
 import { SwaggerSailsModel, NameKeyMap, SwaggerRouteInfo, BlueprintActionTemplates, Defaults, MiddlewareType, SwaggerSailsController, Action2Response } from './interfaces';
 import { Reference, Tag } from 'swagger-schema-official';
 import get from 'lodash/get';
-import { swaggerTypes, sailAttributePropertiesMap, validationsMap, actions2Responses } from './type-formatter';
+import { swaggerTypes, sailsAttributePropertiesMap, validationsMap, actions2Responses } from './type-formatter';
 import assign from 'lodash/assign';
 import defaults from 'lodash/defaults';
 import mapKeys from 'lodash/mapKeys';
@@ -118,10 +118,10 @@ export const generateAttributeSchema = (attribute: NameKeyMap<any>): OpenApi.Upd
   }
 
   // process Sails --> Swagger attribute mappings as per sailAttributePropertiesMap
-  defaults(schema, mapKeys(pick(ai, keys(sailAttributePropertiesMap)), (v, k) => sailAttributePropertiesMap[k]));
+  defaults(schema, mapKeys(pick(ai, keys(sailsAttributePropertiesMap)), (v, k: keyof Sails.AttributeDefinition) => sailsAttributePropertiesMap[k]));
 
   // process Sails --> Swagger attribute mappings as per validationsMap
-  defaults(schema, mapKeys(pick(ai.validations, keys(validationsMap)), (v, k: Sails.AttributeValidation) => get(validationsMap, `${k}`)));
+  defaults(schema, mapKeys(pick(ai.validations, keys(validationsMap)), (v, k: keyof Sails.AttributeValidation) => validationsMap[k]));
 
   // copy default into example if present
   if (schema.default && !schema.example) {

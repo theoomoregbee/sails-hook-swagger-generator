@@ -90,7 +90,8 @@ export const parseCustomRoutes = (sailsConfig: Sails.Config): Array<ParsedCustom
     const parsedRoute: ParsedCustomRoute = {
       verb: verb as HTTPMethodVerb,
       ...swaggerPathParams,
-      ...routeTarget
+      ...routeTarget,
+      action: routeTarget.action!,
     }
 
     if (verb !== 'all') {

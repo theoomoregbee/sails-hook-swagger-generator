@@ -46,11 +46,7 @@ export interface SwaggerAttribute {
 }
 
 export interface SwaggerSailsModel extends Omit<Sails.Model, 'attributes'> {
-    attributes: Record<string, Sails.AttributeValue & {
-        description?: string;
-        externalDocs?: ExternalDocs;
-        example?: string;
-    }>;
+    attributes: Record<string, Sails.AttributeDefinition>;
     swagger: SwaggerAttribute;
 }
 
@@ -61,7 +57,7 @@ export interface SwaggerSailsController extends Sails.Controller {
     swagger: SwaggerAttribute;
 }
 
-export interface SwaggerSailsRouteControllerTarget extends Sails.RouteControllerTarget {
+export interface SwaggerSailsRouteControllerTarget extends Sails.RouteTargetObject {
     swagger?: OpenApi.Operation;
 }
 
@@ -110,7 +106,7 @@ export interface ParsedBindRoute {
     variables: string[];
     swagger: OpenApi.Operation | undefined;
     model: SwaggerSailsModel;
-    associations: Sails.RouteAssociation[];
+    associations: Sails.Association[];
     associationAliases: string[];
     middlewareType: MiddlewareType.BLUEPRINT;
 }
