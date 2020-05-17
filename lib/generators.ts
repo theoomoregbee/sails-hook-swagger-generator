@@ -484,14 +484,20 @@ export const generatePaths = (routes: SwaggerRouteInfo[], templates: BlueprintAc
               return
             }
             const { statusCode = hasDefaults.statusCode, description = hasDefaults.description } = exit
-            exitResponses[statusCode] = {
-              description: description,
-              content: {
-                'application/json': {
-                  schema: { oneOf: [{ type: 'object', description: description }] }
+
+            if (exitResponses[statusCode]) {
+              const arr = get(pathEntry, ['responses', statusCode, 'content', 'application/json', 'schema', 'oneOf'], []);
+              arr.push({ type: 'json', description: description });
+            } else {
+              exitResponses[statusCode] = {
+                description: description,
+                content: {
+                  'application/json': {
+                    schema: { oneOf: [{ type: 'object', description: description }] }
+                  }
                 }
-              }
-            };
+              };
+            }
           });
 
           // remove oneOf for single entries, otherwise summarise
@@ -504,7 +510,10 @@ export const generatePaths = (routes: SwaggerRouteInfo[], templates: BlueprintAc
             }
           });
 
-          defaults(pathEntry.responses, exitResponses);
+          pathEntry.responses = {
+            ...pathEntry.responses,
+            ...exitResponses
+          }
           forEach(pathEntry.responses, (v, k) => { // ensure description
             if (!v.description) v.description = get(exitResponses, [k, 'description'], '-');
           });

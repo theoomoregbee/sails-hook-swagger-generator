@@ -608,13 +608,37 @@
                 ],
                 "responses": {
                     "200": {
-                        "description": "The requested resource"
+                        "description": "Success",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "description": "Success"
+                                }
+                            }
+                        }
                     },
                     "404": {
-                        "description": "Resource not found"
+                        "description": "No user with the specified ID was found in the database",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "description": "No user with the specified ID was found in the database"
+                                }
+                            }
+                        }
                     },
                     "500": {
-                        "description": "Internal server error"
+                        "description": "An unexpected error occurred.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "description": "An unexpected error occurred."
+                                }
+                            }
+                        }
                     }
                 },
                 "summary": "/actions2"
