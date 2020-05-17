@@ -29,20 +29,22 @@ export const swaggerTypes = {
 };
 
 /**
- * Defines allowed Sails model attribute definition values, and provides mapping to Swagger/OpenAPI names
+ * Defines direct mappings from Sails model attribute definition values (key) to Swagger/OpenAPI
+ * schema names (value).
  */
-export const sailAttributePropertiesMap: Record<string, string> = {
+export const sailsAttributePropertiesMap: { [n in keyof Sails.AttributeDefinition]?: string } = {
   allowNull: 'nullable',
   defaultsTo: 'default',
   description: 'description',
-  externalDocs: 'externalDocs',
+  moreInfoUrl: 'externalDocs',
   example: 'example',
 };
 
 /**
- * this is used to hold on to the different types of validation sails offers with the value as the swagger specification
+ * Defines direct mappings from Sails attribute validation (key) to Swagger/OpenAPI
+ * schema name (value).
  */
-export const validationsMap: Record<keyof Sails.AttributeValidation, string> = {
+export const validationsMap: { [n in keyof Sails.AttributeValidation]: string } = {
   max: 'maximum',
   min: 'minimum',
   maxLength: 'maxLength',
