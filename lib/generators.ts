@@ -42,19 +42,25 @@ export const generateSwaggerPath = (path: string): { variables: string[]; path: 
  * @see https://swagger.io/docs/specification/data-models/
  * @param {Record<string, any>} attribute Sails model attribute specification as per `Model.js` file
  */
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export const generateAttributeSchema = (attribute: NameKeyMap<any>): OpenApi.UpdatedSchema => {
+export const generateAttributeSchema = (attribute: Sails.AttributeDefinition): OpenApi.UpdatedSchema => {
   const ai = attribute || {}, sts = swaggerTypes;
 
-  const type = attribute.type || 'string';
-  const columnType = get(attribute, ['autoMigrations', 'columnType']);
-  const autoIncrement = get(attribute, ['autoMigrations', 'autoIncrement']);
+  const type = ai.type || 'string';
+  const columnType = ai.autoMigrations?.columnType;
+  const autoIncrement = ai.autoMigrations?.autoIncrement;
 
   let schema: OpenApi.UpdatedSchema = {};
 
+  const formatDesc = (extra: string): string => {
+    const ret: string[] = [];
+    if(ai.description) ret.push(ai.description);
+    if(extra) ret.push(extra);
+    return ret.join(' ');
+  }
+
   if (ai.model) {
     assign(schema, {
-      description: `JSON dictionary representing the **${ai.model}** instance or FK when creating / updating / not populated`,
+      description: formatDesc(`JSON dictionary representing the **${ai.model}** instance or FK when creating / updating / not populated`),
       // '$ref': '#/components/schemas/' + ai.model,
       oneOf: [ // we use oneOf (rather than simple ref) so description rendered (!) (at least in redocly)
         { '$ref': '#/components/schemas/' + ai.model },
@@ -63,14 +69,14 @@ export const generateAttributeSchema = (attribute: NameKeyMap<any>): OpenApi.Upd
 
   } else if (ai.collection) {
     assign(schema, {
-      description: `Array of **${ai.collection}**'s or array of FK's when creating / updating / not populated`,
+      description: formatDesc(`Array of **${ai.collection}**'s or array of FK's when creating / updating / not populated`),
       type: 'array',
       items: { '$ref': '#/components/schemas/' + ai.collection },
     });
 
   } else if (type == 'number') {
     let t = autoIncrement ? sts.integer : sts.double;
-    if (ai.isInteger) {
+    if (ai.validations?.isInteger) {
       t = sts.integer;
     } else if (columnType) {
       const ct = columnType;
@@ -106,6 +112,7 @@ export const generateAttributeSchema = (attribute: NameKeyMap<any>): OpenApi.Upd
       if (v.isIP) { isIP = true; schema.format = 'ipv4'; }
       if (v.isURL) schema.format = 'uri';
       if (v.isUUID) schema.format = 'uuid';
+      if (v.regex) schema.pattern = v.regex.toString().slice(1, -1);
     }
   }
 
@@ -129,15 +136,17 @@ export const generateAttributeSchema = (attribute: NameKeyMap<any>): OpenApi.Upd
   }
 
   // process final autoMigrations: autoIncrement, unique
-  if (autoIncrement) annotations.push('autoIncrement');
-  if (get(attribute, ['autoMigrations', 'unique'])) {
+  if (autoIncrement) {
+    annotations.push('autoIncrement');
+  }
+  if (ai.autoMigrations?.unique) {
     schema.uniqueItems = true;
   }
 
   // represent Sails `isIP` as one of ipv4/ipv6
   if (schema.type == 'string' && isIP) {
     schema = {
-      description: 'ipv4 or ipv6 address',
+      description: formatDesc('ipv4 or ipv6 address'),
       oneOf: [
         cloneDeep(schema),
         assign(cloneDeep(schema), { format: 'ipv6' }),
@@ -147,8 +156,10 @@ export const generateAttributeSchema = (attribute: NameKeyMap<any>): OpenApi.Upd
 
   if (annotations.length > 0) {
     const s = `Note Sails special attributes: ${annotations.join(', ')}`;
-    schema.description = schema.description ? `\n\n${s}` : s;
+    schema.description = schema.description ? `${schema.description}\n\n${s}` : s;
   }
+
+  if(schema.description) schema.description = schema.description.trim();
 
   // note: required --> required[] (not here, needs to be done at model level)
 
