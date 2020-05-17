@@ -298,19 +298,18 @@ export const parseControllers = async (sails: Sails.Sails, controllerNames: stri
     })
   }));
   const parseController = (name: string): SwaggerSailsController => {
-    let swagger = {}
     try {
       const controllerPath = path.join(controllerDir, name)
       // eslint-disable-next-line @typescript-eslint/no-var-requires
-      const controller = require(controllerPath);
-      if (controller) {
-        swagger = controller.swagger
+      const controllerOrAction = require(controllerPath);
+      if (controllerOrAction) {
+        return { name, ...controllerOrAction }
       }
     } catch (err) {
       sails.log.error(`ERROR: sails-hook-swagger-generator: Error resolving/loading controller ${name}: ${err.message || ''}`, err);
     }
 
-    return { name, swagger }
+    return { name, swagger: {} }
   }
 
   const parseTagsComponents = (controller: SwaggerSailsController, index: number) => {
