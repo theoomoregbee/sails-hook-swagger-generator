@@ -7,6 +7,10 @@
         {
             "name": "User List",
             "description": "Group just for user list operation"
+        },
+        {
+            "name": "Actions2 Group",
+            "description": "A test actions2 group"
         }
     ],
     "components": {
@@ -641,6 +645,10 @@
                         }
                     }
                 },
+                "tags": [
+                    "Actions2 Group"
+                ],
+                "description": "Return a user list",
                 "summary": "/actions2"
             }
         },

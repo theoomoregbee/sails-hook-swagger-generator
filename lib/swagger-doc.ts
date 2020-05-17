@@ -3,7 +3,7 @@ import { SwaggerGenerator, SwaggerSailsModel } from './interfaces';
 import cloneDeep from 'lodash/cloneDeep'
 import uniqBy from 'lodash/uniqBy';
 import { blueprintActionTemplates as bluePrintTemplates, defaults as defaultsResponses, blueprintParameterTemplates } from './type-formatter';
-import { parseModels, parseCustomRoutes, parseBindRoutes, mergeCustomAndBindRoutes, parseControllers, loadRoutesSwaggerJsDoc } from './parsers';
+import { parseModels, parseCustomRoutes, parseBindRoutes, mergeCustomAndBindRoutes, parseControllers, attachControllerOrActionSwagger } from './parsers';
 import { getAction2Paths, getUniqueTagsFromPath, mergeComponents, mergeTags } from './utils';
 import { generateSchemas, generatePaths } from './generators';
 import { OpenApi } from '../types/openapi';
@@ -55,7 +55,7 @@ export default async (sails: Sails.Sails, sailsRoutes: Array<Sails.Route>, conte
   const action2Paths = getAction2Paths(withoutSwaggerRoutes)
   const action2s = await parseControllers(sails, action2Paths)
 
-  routes = loadRoutesSwaggerJsDoc(routes, controllers, action2s);
+  routes = attachControllerOrActionSwagger(routes, controllers, action2s);
 
   specifications.components.schemas = generateSchemas(models);
 

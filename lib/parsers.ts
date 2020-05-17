@@ -7,7 +7,7 @@ import cloneDeep from 'lodash/cloneDeep';
 import get from 'lodash/get';
 import { OpenApi } from '../types/openapi';
 import { generateSwaggerPath } from './generators';
-import { loadSwaggerDocComments, mergeSwaggerSpec, mergeSwaggerPaths, removeViewRoutes, normalizeRouteControllerTarget, getBlueprintAllowedMiddlewareRoutes, normalizeRouteControllerName, getSwaggerAction } from './utils';
+import { loadSwaggerDocComments, mergeSwaggerSpec, mergeSwaggerPaths, removeViewRoutes, normalizeRouteControllerTarget, getBlueprintAllowedMiddlewareRoutes, normalizeRouteControllerName, getSwaggerAction, getActionNameFromPath } from './utils';
 
 // consider all models except associative tables and 'Archive' model special case
 const removeModelExceptions = (model: SwaggerSailsModel): boolean => !!model.globalId && model.globalId !== 'Archive'
@@ -344,14 +344,14 @@ export const parseControllers = async (sails: Sails.Sails, controllerNames: stri
     }, {} as NameKeyMap<SwaggerSailsController>)
 }
 
-export const loadRoutesSwaggerJsDoc = (routesInfo: SwaggerRouteInfo[], controllers: NameKeyMap<SwaggerSailsController>, action2s: NameKeyMap<SwaggerSailsController>): SwaggerRouteInfo[] => {
+export const attachControllerOrActionSwagger = (routesInfo: SwaggerRouteInfo[], controllers: NameKeyMap<SwaggerSailsController>, action2s: NameKeyMap<SwaggerSailsController>): SwaggerRouteInfo[] => {
   return routesInfo.map(route => {
     if (route.swagger) {
       return route
     }
     route.swagger = getSwaggerAction(controllers[route.controller!], route.action);
     if (!route.swagger) {
-      route.swagger = getSwaggerAction(action2s[route.action], route.action);
+      route.swagger = getSwaggerAction(action2s[route.action], getActionNameFromPath(route.action));
     }
     return route
   })

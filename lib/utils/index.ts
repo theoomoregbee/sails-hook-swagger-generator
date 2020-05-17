@@ -209,3 +209,7 @@ export const mergeTags = (existingTags: Tag[], models: NameKeyMap<SwaggerSailsMo
 
     return tags
 }
+
+export const getActionNameFromPath = (actionPath: string): string => {
+    return actionPath.split('/').pop()!
+}

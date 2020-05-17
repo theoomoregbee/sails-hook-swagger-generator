@@ -178,7 +178,7 @@ Documentation detail and customisation of most aspects of the generated Swagger 
 1. Adding an object with the key `swagger` added to a controller file action function.
 1. Adding an object with the key `swagger` to the exports of a controller file, standalone action file or actions2 file: 
    - For controller files, actions are referenced by adding objects keyed on `swagger.actions.{actionName}` name. See [UserController.js](./api/controllers/UserController.js),
-   - For standalone action or actions2 files, placing content in the `swagger.actions.{actionName|actions2Name}` object. See [actions2.js](./api/controllers/subdir/actions2.js) 
+   - For standalone action or actions2 files, placing content in the `swagger.actions.{actionFileName|actions2FileName}` object. See [actions2.js](./api/controllers/subdir/actions2.js) ***Note**: `actionFileName|actions2FileName` must correspond to the filename*
    - Adding documentation under `tags` and `components` elements for adding to the top-level Swagger/OpenAPI definitions. See example in either [UserController.js](./api/controllers/UserController.js) or [actions2.js](./api/controllers/subdir/actions2.js)  
 1. Adding JSDoc `@swagger` comments to controller file, standalone action file or actions2 file:
    - JSDoc `@swagger` documentation under the `/{actionName}` path for the route, or
