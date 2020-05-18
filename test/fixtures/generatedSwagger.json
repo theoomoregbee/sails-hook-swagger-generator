@@ -612,37 +612,21 @@
                 ],
                 "responses": {
                     "200": {
-                        "description": "Success",
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "type": "object",
-                                    "description": "Success"
+                                    "type": "number",
+                                    "default": 123
                                 }
                             }
-                        }
+                        },
+                        "description": "Done."
                     },
                     "404": {
-                        "description": "No user with the specified ID was found in the database",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "type": "object",
-                                    "description": "No user with the specified ID was found in the database"
-                                }
-                            }
-                        }
+                        "description": "No user with the specified ID was found in the database"
                     },
                     "500": {
-                        "description": "An unexpected error occurred.",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "type": "object",
-                                    "description": "An unexpected error occurred."
-                                }
-                            }
-                        }
+                        "description": "An unexpected error occurred."
                     }
                 },
                 "tags": [
