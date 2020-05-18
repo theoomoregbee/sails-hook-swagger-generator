@@ -20,8 +20,6 @@ module.exports = {
   },
 
   exits: {
-    success: {
-    },
     notFound: {
       description: 'No user with the specified ID was found in the database',
       responseType: 'notFound',
