@@ -59,7 +59,8 @@ export const parseCustomRoutes = (sailsConfig: Sails.Config): Array<ParsedCustom
   for (const routeAddress in routes) {
     // Parse 1: Route Address
     // see https://sailsjs.com/documentation/concepts/routes/custom-routes#?route-address
-    let [verb, path] = routeAddress.split(/\s+/)
+    let [verb = 'get', path] = routeAddress.split(/\s+/)
+    verb = verb.toLowerCase();
     if (!path) {
       path = verb
       verb = 'all'

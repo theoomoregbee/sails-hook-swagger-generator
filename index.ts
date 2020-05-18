@@ -37,8 +37,9 @@ module.exports = (sails: Sails.Sails): Sails.Hook<SwaggerGenerator> => {
     initialize: function (next): void {
 
       // https://github.com/balderdashy/sails/blob/master/lib/EVENTS.md#routerbind
-      sails.on('router:bind', (routeObj) => {
-        if (!routes.find(route => route.path === routeObj.path && route.verb === routeObj.verb)) {
+      sails.on('router:bind', routeObj => {
+        if (!routes.find(route => route.path === routeObj.path && route.verb === routeObj.verb.toLowerCase())) {
+          routeObj.verb = routeObj.verb.toLowerCase();
           routes.push(routeObj);
         }
       });
