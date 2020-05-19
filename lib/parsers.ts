@@ -2,55 +2,36 @@
  * Created by theophy on 02/08/2017.
  */
 import * as path from 'path';
-import { SwaggerSailsModel, SwaggerSailsRouteControllerTarget, HTTPMethodVerb, ParsedCustomRoute, ParsedBindRoute, MiddlewareType, SwaggerRouteInfo, SwaggerSailsController, NameKeyMap, SwaggerActionAttribute } from './interfaces';
+import { SwaggerSailsModel, SwaggerSailsRouteControllerTarget, HTTPMethodVerb, ParsedCustomRoute, ParsedBindRoute, MiddlewareType, SwaggerRouteInfo, SwaggerSailsController, NameKeyMap, SwaggerActionAttribute, SwaggerModelAttribute } from './interfaces';
 import cloneDeep from 'lodash/cloneDeep';
 import get from 'lodash/get';
 import { OpenApi } from '../types/openapi';
 import { generateSwaggerPath } from './generators';
 import { loadSwaggerDocComments, mergeSwaggerSpec, mergeSwaggerPaths, removeViewRoutes, normalizeRouteControllerTarget, getBlueprintAllowedMiddlewareRoutes, normalizeRouteControllerName, getSwaggerAction, getActionNameFromPath } from './utils';
-
-// consider all models except associative tables and 'Archive' model special case
-const removeModelExceptions = (model: SwaggerSailsModel): boolean => !!model.globalId && model.globalId !== 'Archive'
+import { map, pickBy, mapValues, mapKeys } from 'lodash';
 
 
-export const parseModels = async (sails: Sails.Sails, sailsConfig: Sails.Config, sailsModels: Array<SwaggerSailsModel> = []): Promise<NameKeyMap<SwaggerSailsModel>> => {
-  const models = sailsModels.filter(removeModelExceptions);
-  // parse swagger jsDoc comments in each of our models
-  const modelDir = sailsConfig.paths.models;
-  const swaggerComments: Array<OpenApi.OpenApi | undefined> = await Promise.all(models.map(model =>
-    loadSwaggerDocComments(require.resolve(path.join(modelDir, model.globalId))).catch(err => {
-      sails.log.error(`ERROR: sails-hook-swagger-generator: Error resolving/loading model ${model.globalId}: ${err.message || ''}`, err);
-      return undefined
-    })));
+export const parseModels = (sails: Sails.Sails): NameKeyMap<SwaggerSailsModel> => {
 
-  const parseTagsComponents = (model: SwaggerSailsModel, index: number) => {
-    // retrieve swagger documentation from jsDoc comments and merge it with any .swagger within our model
-    const swagger = swaggerComments[index];
-    model.swagger = cloneDeep(model.swagger || {})
-    if (swagger) {
-      model.swagger = mergeSwaggerSpec(model.swagger, swagger);
-    }
-    return model
-  }
+  const filteredModels = pickBy(sails.models, (model /*, _identity */) => {
 
-  const parseSwaggerDocPaths = (model: SwaggerSailsModel, index: number) => {
-    // parse and merge swagger.actions and swagger-doc path (and take them as precendence)
-    const swagger = swaggerComments[index]
-    if (swagger) {
-      const paths = swagger.paths || {}
-      model.swagger.actions = mergeSwaggerPaths(model.swagger.actions!, paths as NameKeyMap<SwaggerActionAttribute>)
-    }
+    // consider all models except associative tables and 'Archive' model special case
+    return !!model.globalId && model.globalId !== 'Archive';
 
-    return model
-  }
+  });
 
-  return models
-    .map(parseTagsComponents)
-    .map(parseSwaggerDocPaths)
-    .reduce((parsed, model) => {
-      parsed[model.globalId.toLowerCase()] = model;
-      return parsed
-    }, {} as NameKeyMap<SwaggerSailsModel>)
+  return mapValues(filteredModels, model => {
+    return {
+      globalId: model.globalId,
+      primaryKey: model.primaryKey,
+      identity: model.identity,
+      attributes: model.attributes,
+      associations: model.associations,
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      swagger: (model as any).swagger || {}
+    };
+  });
+
 }
 
 export const parseCustomRoutes = (sailsConfig: Sails.Config): Array<ParsedCustomRoute> => {
@@ -333,4 +314,50 @@ export const attachControllerOrActionSwagger = (routesInfo: SwaggerRouteInfo[], 
     }
     return route
   })
+}
+
+/**
+ * Loads and parses model JSDoc, returning a map keyed on model identity.
+ * @param sails
+ * @param models
+ */
+export const parseModelsJsDoc = async (sails: Sails.Sails, models: NameKeyMap<SwaggerSailsModel>):
+  Promise<NameKeyMap<SwaggerModelAttribute>> => {
+
+  const ret: NameKeyMap<SwaggerModelAttribute> = {};
+
+
+  await Promise.all(
+    map(models, async (model, identity) => {
+      try {
+
+        const modelFile = require.resolve(path.join(sails.config.paths.models, model.globalId));
+        const swaggerDoc = await loadSwaggerDocComments(modelFile);
+
+        ret[identity] = {
+          tags: swaggerDoc.tags,
+          components: swaggerDoc.components,
+        };
+
+        const modelJsDoc = swaggerDoc.paths['/' + model.globalId];
+        if(modelJsDoc) {
+          // note coercion as non-standard swaggerDoc i.e. '/{globalId}' contains operation contents (no HTTP method specified)
+          ret[identity].model = modelJsDoc as SwaggerActionAttribute;
+        }
+
+        // note coercion as non-standard swaggerDoc i.e. '/{action}' contains operation contents (no HTTP method specified)
+        const actionNames = ['findone', 'find', 'create', 'update', 'destroy', 'populate', 'add', 'remove', 'replace'];
+        ret[identity].actions = mapKeys(
+          pickBy(swaggerDoc.paths, (action, path) => actionNames.includes(path.substring(1))),
+          (action, path) => path.substring(1) // convert '/findone' --> 'findone'
+        ) as NameKeyMap<SwaggerActionAttribute>;
+
+      } catch (err) {
+        sails.log.error(`ERROR: sails-hook-swagger-generator: Error resolving/loading model ${model.globalId}: ${err.message || ''}` /* , err */);
+      }
+    })
+  );
+
+  return ret;
+
 }

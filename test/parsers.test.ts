@@ -29,19 +29,18 @@ const sails = {
 }
 
 describe ('Parsers', () => {
-    const models = [
-
-        {
+    const models = {
+        user: {
             globalId: 'User',
             ...userModel
         },
-        {
+        dummy: {
             attributes: {}
         },
-        {
+        archive: {
             globalId: 'Archive'
         }
-    ]
+    }
 
     const boundRoutes = [
         {
@@ -116,23 +115,17 @@ describe ('Parsers', () => {
     ];
 
     describe ('parseModels', () => {
-        it(`should only consider all models except associative tables and 'Archive' model special case `, async () => {
-          const parsedModels = await parseModels(sails as unknown as Sails.Sails, sails.config as Sails.Config, models as unknown as SwaggerSailsModel[])
+        it(`should only consider all models except associative tables and 'Archive' model special case`, async () => {
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            (sails as any).models = models;
+            const parsedModels = parseModels(sails as unknown as Sails.Sails);
             expect(Object.keys(parsedModels).length).to.equal(1);
             expect(parsedModels['user'],'key parsed models with their globalId').to.be.ok;
         })
 
         it('should load and merge swagger specification in /models/{globalId} with the model.swagger attribute', async () => {
-          const parsedModels = await parseModels(sails as unknown as Sails.Sails, sails.config as Sails.Config, models as unknown as SwaggerSailsModel[])
+          const parsedModels = parseModels(sails as unknown as Sails.Sails);
             const expectedTags = [
-                {
-                    "name": "User (ORM)",
-                    "description": "A longer, multi-paragraph description\nexplaining how this all works.\n\nIt is linked to more information.\n",
-                    "externalDocs": {
-                        "url": "https://somewhere.com/yep",
-                        "description": "Refer to these docs"
-                    }
-                },
                 {
                     "name": "User (ORM duplicate)",
                     "externalDocs": {
@@ -143,7 +136,7 @@ describe ('Parsers', () => {
             ]
             expect(parsedModels.user.swagger.tags, 'should merge tags from swagger doc with Model.swagger.tags').to.deep.equal(expectedTags);
             expect(parsedModels.user.swagger.components, 'should merge components from swagger doc with Model.swagger.components').to.deep.equal({parameters: []});
-            expect(parsedModels.user.swagger.actions, 'should convert and merge swagger doc path param to actions').to.contains.keys('findone', 'find');
+            expect(parsedModels.user.swagger.actions, 'should convert and merge swagger doc path param to actions').to.contains.keys('findone');
         })
     })
 
@@ -156,14 +149,14 @@ describe ('Parsers', () => {
     })
 
     describe('parseBindRoutes: sails router:bind event',  () => {
-        
+
         it('Should only parse blueprint routes',  async () => {
-            const parsedModels = await parseModels(sails as unknown as Sails.Sails, sailsConfig as Sails.Config, models as unknown as SwaggerSailsModel[])
+            const parsedModels = await parseModels(sails as unknown as Sails.Sails);
             const actual = parseBindRoutes(boundRoutes as unknown as Sails.Route[], parsedModels, sails as unknown as Sails.Sails);
             expect(actual.every(route => bluerprintActions.includes(route.action as BluePrintAction))).to.be.true;
         })
         it('Should contain route model',  async () => {
-            const parsedModels = await parseModels(sails as unknown as Sails.Sails, sailsConfig as Sails.Config, models as unknown as SwaggerSailsModel[])
+            const parsedModels = await parseModels(sails as unknown as Sails.Sails);
             const actual = parseBindRoutes(boundRoutes as unknown as Sails.Route[], parsedModels, sails as unknown as Sails.Sails);
             expect(actual.every(route => !!route.model), 'Should return model for all routes');
             const updateUserRoute = actual.find(route => route.action === 'update');
@@ -174,7 +167,7 @@ describe ('Parsers', () => {
 
     describe('mergeCustomAndBindRoutes', () => {
         it('should merge both custom and bound routes', async () => {
-            const parsedModels = await parseModels(sails as unknown as Sails.Sails, sailsConfig as Sails.Config, models as unknown as SwaggerSailsModel[])
+            const parsedModels = await parseModels(sails as unknown as Sails.Sails);
             const parsedBoundRoutes = parseBindRoutes(boundRoutes as unknown as Sails.Route[], parsedModels, sails as unknown as Sails.Sails);
             const parsedCustomRoutes = parseCustomRoutes(sails.config);
             const mergedRoutes = mergeCustomAndBindRoutes(parsedCustomRoutes, parsedBoundRoutes, parsedModels);
@@ -186,7 +179,7 @@ describe ('Parsers', () => {
     })
 
     describe ('parseControllers', () => {
-      
+
       it('should load and merge swagger specification in /controllers/{name} with the controller.swagger attribute', async () => {
         const parsedControllers = await parseControllers(sails as unknown as Sails.Sails, ['UserController'])
         const expectedTags = [
