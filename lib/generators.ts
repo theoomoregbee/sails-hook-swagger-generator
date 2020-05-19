@@ -519,38 +519,25 @@ export const generatePaths = (routes: SwaggerRouteInfo[], templates: BlueprintAc
         if (action2.exits) {
           const exitResponses: NameKeyMap<OpenApi.Response> = {};
 
-          // actions2 may specify more than one 'exit' per 'statusCode' --> use oneOf
           forEach(action2.exits, (exit, exitName) => {
-            let { statusCode, description } = actions2Responses[exitName as keyof Action2Response] || actions2Responses.success;
-            statusCode = exit.statusCode || statusCode;
-            description = exit.description || description;
-
-            if (exitResponses[statusCode]) {
-              const arr = get(pathEntry, ['responses', statusCode, 'content', 'application/json', 'schema', 'oneOf'], []);
-              arr.push({ type: 'json', description: description });
-            } else {
-              exitResponses[statusCode] = {
-                description: description,
-                content: {
-                  'application/json': {
-                    schema: { oneOf: [{ type: 'object', description: description }] }
-                  }
-                }
-              };
+            const hasDefaults = actions2Responses[exitName as keyof Action2Response];
+            if (!hasDefaults) {
+              return
             }
+            const { statusCode = hasDefaults.statusCode, description = hasDefaults.description, headers, content, links } = exit
+
+            exitResponses[statusCode] = {
+              description: description,
+              content,
+              headers,
+              links
+            };
           });
 
-          // remove oneOf for single entries, otherwise summarise
-          forEach(exitResponses, resp => {
-            const arr = get(resp, ['content', 'application/json', 'schema', 'oneOf'], []);
-            if (arr.length === 1) {
-              set(resp, ['content', 'application/json', 'schema'], arr[0]);
-            } else {
-              resp.description = `${arr.length} alternative responses`;
-            }
-          });
-
-          defaults(pathEntry.responses, exitResponses);
+          pathEntry.responses = {
+            ...exitResponses,
+            ...pathEntry.responses,
+          }
           forEach(pathEntry.responses, (v, k) => { // ensure description
             if (!v.description) v.description = get(exitResponses, [k, 'description'], '-');
           });

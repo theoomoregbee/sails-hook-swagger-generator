@@ -7,7 +7,7 @@ import cloneDeep from 'lodash/cloneDeep';
 import get from 'lodash/get';
 import { OpenApi } from '../types/openapi';
 import { generateSwaggerPath } from './generators';
-import { loadSwaggerDocComments, mergeSwaggerSpec, mergeSwaggerPaths, removeViewRoutes, normalizeRouteControllerTarget, getBlueprintAllowedMiddlewareRoutes, normalizeRouteControllerName, getSwaggerAction } from './utils';
+import { loadSwaggerDocComments, mergeSwaggerSpec, mergeSwaggerPaths, removeViewRoutes, normalizeRouteControllerTarget, getBlueprintAllowedMiddlewareRoutes, normalizeRouteControllerName, getSwaggerAction, getActionNameFromPath } from './utils';
 
 // consider all models except associative tables and 'Archive' model special case
 const removeModelExceptions = (model: SwaggerSailsModel): boolean => !!model.globalId && model.globalId !== 'Archive'
@@ -59,7 +59,8 @@ export const parseCustomRoutes = (sailsConfig: Sails.Config): Array<ParsedCustom
   for (const routeAddress in routes) {
     // Parse 1: Route Address
     // see https://sailsjs.com/documentation/concepts/routes/custom-routes#?route-address
-    let [verb, path] = routeAddress.split(/\s+/)
+    let [verb = 'get', path] = routeAddress.split(/\s+/)
+    verb = verb.toLowerCase();
     if (!path) {
       path = verb
       verb = 'all'
@@ -275,19 +276,18 @@ export const parseControllers = async (sails: Sails.Sails, controllerNames: stri
     })
   }));
   const parseController = (name: string): SwaggerSailsController => {
-    let swagger = {}
     try {
       const controllerPath = path.join(controllerDir, name)
       // eslint-disable-next-line @typescript-eslint/no-var-requires
-      const controller = require(controllerPath);
-      if (controller) {
-        swagger = controller.swagger
+      const controllerOrAction = require(controllerPath);
+      if (controllerOrAction) {
+        return { name, ...controllerOrAction }
       }
     } catch (err) {
       sails.log.error(`ERROR: sails-hook-swagger-generator: Error resolving/loading controller ${name}: ${err.message || ''}`, err);
     }
 
-    return { name, swagger }
+    return { name, swagger: {} }
   }
 
   const parseTagsComponents = (controller: SwaggerSailsController, index: number) => {
@@ -322,14 +322,14 @@ export const parseControllers = async (sails: Sails.Sails, controllerNames: stri
     }, {} as NameKeyMap<SwaggerSailsController>)
 }
 
-export const loadRoutesSwaggerJsDoc = (routesInfo: SwaggerRouteInfo[], controllers: NameKeyMap<SwaggerSailsController>, action2s: NameKeyMap<SwaggerSailsController>): SwaggerRouteInfo[] => {
+export const attachControllerOrActionSwagger = (routesInfo: SwaggerRouteInfo[], controllers: NameKeyMap<SwaggerSailsController>, action2s: NameKeyMap<SwaggerSailsController>): SwaggerRouteInfo[] => {
   return routesInfo.map(route => {
     if (route.swagger) {
       return route
     }
     route.swagger = getSwaggerAction(controllers[route.controller!], route.action);
     if (!route.swagger) {
-      route.swagger = getSwaggerAction(action2s[route.action], route.action);
+      route.swagger = getSwaggerAction(action2s[route.action], getActionNameFromPath(route.action));
     }
     return route
   })

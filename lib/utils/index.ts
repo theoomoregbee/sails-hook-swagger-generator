@@ -140,12 +140,10 @@ export const getSwaggerAction = (object: SwaggerSailsModel | SwaggerSailsControl
     return get(object, `swagger.actions.${action}`)
 }
 
-export const getAction2Paths = (routes: SwaggerRouteInfo[], controllers: NameKeyMap<SwaggerSailsController>): string[] => {
+export const getAction2Paths = (routes: SwaggerRouteInfo[]): string[] => {
     return routes
         .filter(route => {
-            const controller = controllers[route.controller!]
-            const swagger = getSwaggerAction(controller, route.action);
-            return !swagger
+            return !route.controller
         })
         .map(route => {
             return route.action
@@ -210,4 +208,8 @@ export const mergeTags = (existingTags: Tag[], models: NameKeyMap<SwaggerSailsMo
     });
 
     return tags
+}
+
+export const getActionNameFromPath = (actionPath: string): string => {
+    return actionPath.split('/').pop()!
 }

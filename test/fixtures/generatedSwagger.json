@@ -1,0 +1,719 @@
+{
+    "tags": [
+        {
+            "name": "Auth Mgt",
+            "description": "User management and login"
+        },
+        {
+            "name": "User List",
+            "description": "Group just for user list operation"
+        },
+        {
+            "name": "Actions2 Group",
+            "description": "A test actions2 group"
+        }
+    ],
+    "components": {
+        "schemas": {
+            "user": {
+                "description": "Sails ORM Model **User**",
+                "required": [
+                    "names"
+                ],
+                "properties": {
+                    "id": {
+                        "type": "integer",
+                        "format": "int32",
+                        "uniqueItems": true,
+                        "description": "Note Sails special attributes: autoIncrement"
+                    },
+                    "names": {
+                        "type": "string",
+                        "example": "First Middle Last"
+                    },
+                    "email": {
+                        "type": "string",
+                        "format": "email",
+                        "description": "Just any old email"
+                    },
+                    "sex": {
+                        "type": "string",
+                        "enum": [
+                            "Male",
+                            "Female"
+                        ]
+                    },
+                    "ageLimit": {
+                        "type": "number",
+                        "format": "double",
+                        "maximum": 100,
+                        "minimum": 15
+                    }
+                }
+            }
+        },
+        "parameters": {
+            "AttributeFilterParam": {
+                "in": "query",
+                "name": "_*_",
+                "required": false,
+                "schema": {
+                    "type": "string"
+                },
+                "description": "To filter results based on a particular attribute, specify a query parameter with the same name as the attribute defined on your model. For instance, if our `Purchase` model has an `amount` attribute, we could send `GET /purchase?amount=99.99` to return a list of $99.99 purchases."
+            },
+            "WhereQueryParam": {
+                "in": "query",
+                "name": "where",
+                "required": false,
+                "schema": {
+                    "type": "string"
+                },
+                "description": "Instead of filtering based on a specific attribute, you may instead choose to provide a `where` parameter with the WHERE piece of a [Waterline criteria](https://sailsjs.com/documentation/concepts/models-and-orm/query-language), _encoded as a JSON string_. This allows you to take advantage of `contains`, `startsWith`, and other sub-attribute criteria modifiers for more powerful `find()` queries.\n\ne.g. `?where={\"name\":{\"contains\":\"theodore\"}}`"
+            },
+            "LimitQueryParam": {
+                "in": "query",
+                "name": "limit",
+                "required": false,
+                "schema": {
+                    "type": "integer"
+                },
+                "description": "The maximum number of records to send back (useful for pagination). Defaults to 30."
+            },
+            "SkipQueryParam": {
+                "in": "query",
+                "name": "skip",
+                "required": false,
+                "schema": {
+                    "type": "integer"
+                },
+                "description": "The number of records to skip (useful for pagination)."
+            },
+            "SortQueryParam": {
+                "in": "query",
+                "name": "sort",
+                "required": false,
+                "schema": {
+                    "type": "string"
+                },
+                "description": "The sort order. By default, returned records are sorted by primary key value in ascending order.\n\ne.g. `?sort=lastName%20ASC`"
+            },
+            "ModelPKParam-user": {
+                "in": "path",
+                "name": "id",
+                "required": true,
+                "schema": {
+                    "type": "integer",
+                    "format": "int32",
+                    "uniqueItems": true,
+                    "description": "Note Sails special attributes: autoIncrement"
+                },
+                "description": "The desired **User** record's primary key value"
+            }
+        }
+    },
+    "openapi": "3.0.0",
+    "info": {
+        "title": "Swagger Json",
+        "description": "This is a generated swagger json for your sails project",
+        "termsOfService": "http://example.com/terms",
+        "contact": {
+            "name": "Theophilus Omoregbee",
+            "url": "http://github.com/theo4u",
+            "email": "theo4u@ymail.com"
+        },
+        "license": {
+            "name": "Apache 2.0",
+            "url": "http://www.apache.org/licenses/LICENSE-2.0.html"
+        },
+        "version": "1.0.0"
+    },
+    "servers": [
+        {
+            "url": "http://localhost:1337/"
+        }
+    ],
+    "externalDocs": {
+        "url": "https://theoomoregbee.github.io/"
+    },
+    "paths": {
+        "/user": {
+            "post": {
+                "summary": "Create User",
+                "description": "Create a new **User** record.",
+                "externalDocs": {
+                    "url": "https://sailsjs.com/documentation/reference/blueprint-api/create",
+                    "description": "See https://sailsjs.com/documentation/reference/blueprint-api/create"
+                },
+                "tags": [],
+                "parameters": [],
+                "responses": {
+                    "200": {
+                        "description": "Responds with a JSON dictionary representing the newly created **User** instance",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/user"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Resource not found"
+                    },
+                    "500": {
+                        "description": "Internal server error"
+                    }
+                },
+                "requestBody": {
+                    "description": "JSON dictionary representing the User instance to create.",
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/user"
+                            }
+                        }
+                    }
+                }
+            },
+            "get": {
+                "summary": "List User (find where)",
+                "description": "Find a list of **User** records that match the specified criteria.",
+                "externalDocs": {
+                    "url": "https://sailsjs.com/documentation/reference/blueprint-api/find-where",
+                    "description": "See https://sailsjs.com/documentation/reference/blueprint-api/find-where"
+                },
+                "tags": [],
+                "parameters": [
+                    {
+                        "$ref": "#/components/parameters/AttributeFilterParam"
+                    },
+                    {
+                        "$ref": "#/components/parameters/WhereQueryParam"
+                    },
+                    {
+                        "$ref": "#/components/parameters/LimitQueryParam"
+                    },
+                    {
+                        "$ref": "#/components/parameters/SkipQueryParam"
+                    },
+                    {
+                        "$ref": "#/components/parameters/SortQueryParam"
+                    },
+                    {
+                        "in": "query",
+                        "name": "select",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "example": "id,names,email,sex,ageLimit"
+                        },
+                        "description": "The attributes to include in the result, specified as a comma-delimited list. By default, all attributes are selected. Not valid for plural (“collection”) association attributes."
+                    },
+                    {
+                        "in": "query",
+                        "name": "omit",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "example": "id,names,email,sex,ageLimit"
+                        },
+                        "description": "The attributes to exclude from the result, specified as a comma-delimited list. Cannot be used in conjuction with `select`. Not valid for plural (“collection”) association attributes."
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Responds with a paged list of **User** records that match the specified criteria",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/user"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Resource not found"
+                    },
+                    "500": {
+                        "description": "Internal server error"
+                    }
+                }
+            }
+        },
+        "/clients/{client_id}/user/{id}": {
+            "delete": {
+                "summary": "Delete User (destroy)",
+                "description": "Delete the **User** record with the specified ID.",
+                "externalDocs": {
+                    "url": "https://sailsjs.com/documentation/reference/blueprint-api/destroy",
+                    "description": "See https://sailsjs.com/documentation/reference/blueprint-api/destroy"
+                },
+                "tags": [],
+                "parameters": [
+                    {
+                        "$ref": "#/components/parameters/ModelPKParam-user"
+                    },
+                    {
+                        "in": "path",
+                        "name": "client_id",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Route pattern variable `client_id`"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Responds with a JSON dictionary representing the destroyed **User** instance",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/user"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Cannot destroy, **User** record with specified ID **NOT** found"
+                    },
+                    "500": {
+                        "description": "Internal server error"
+                    }
+                }
+            }
+        },
+        "/user/{id}": {
+            "get": {
+                "summary": "Get User (find one)",
+                "description": "Look up the **User** record with the specified ID.",
+                "externalDocs": {
+                    "url": "https://sailsjs.com/documentation/reference/blueprint-api/find-one",
+                    "description": "See https://sailsjs.com/documentation/reference/blueprint-api/find-one"
+                },
+                "tags": [],
+                "parameters": [
+                    {
+                        "$ref": "#/components/parameters/ModelPKParam-user"
+                    },
+                    {
+                        "in": "query",
+                        "name": "select",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "example": "id,names,email,sex,ageLimit"
+                        },
+                        "description": "The attributes to include in the result, specified as a comma-delimited list. By default, all attributes are selected. Not valid for plural (“collection”) association attributes."
+                    },
+                    {
+                        "in": "query",
+                        "name": "omit",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "example": "id,names,email,sex,ageLimit"
+                        },
+                        "description": "The attributes to exclude from the result, specified as a comma-delimited list. Cannot be used in conjuction with `select`. Not valid for plural (“collection”) association attributes."
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Responds with a single **User** record as a JSON dictionary",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/user"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Response denoting **User** record with specified ID **NOT** found"
+                    },
+                    "500": {
+                        "description": "Internal server error"
+                    }
+                }
+            },
+            "patch": {
+                "summary": "Update User",
+                "description": "Update an existing **User** record.",
+                "externalDocs": {
+                    "url": "https://sailsjs.com/documentation/reference/blueprint-api/update",
+                    "description": "See https://sailsjs.com/documentation/reference/blueprint-api/update"
+                },
+                "tags": [],
+                "parameters": [
+                    {
+                        "$ref": "#/components/parameters/ModelPKParam-user"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Responds with the newly updated **User** record as a JSON dictionary",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/user"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Cannot update, **User** record with specified ID **NOT** found"
+                    },
+                    "500": {
+                        "description": "Internal server error"
+                    }
+                },
+                "requestBody": {
+                    "description": "JSON dictionary representing the User instance to create.",
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/user"
+                            }
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "summary": "Delete User (destroy)",
+                "description": "Delete the **User** record with the specified ID.",
+                "externalDocs": {
+                    "url": "https://sailsjs.com/documentation/reference/blueprint-api/destroy",
+                    "description": "See https://sailsjs.com/documentation/reference/blueprint-api/destroy"
+                },
+                "tags": [],
+                "parameters": [
+                    {
+                        "$ref": "#/components/parameters/ModelPKParam-user"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Responds with a JSON dictionary representing the destroyed **User** instance",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/user"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Cannot destroy, **User** record with specified ID **NOT** found"
+                    },
+                    "500": {
+                        "description": "Internal server error"
+                    }
+                }
+            }
+        },
+        "/user/login": {
+            "post": {
+                "parameters": [],
+                "responses": {
+                    "200": {
+                        "description": "Success"
+                    }
+                },
+                "summary": "Authentication",
+                "description": "This is for authentication of any user",
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "email": {
+                                        "type": "string"
+                                    },
+                                    "password": {
+                                        "type": "string",
+                                        "format": "password"
+                                    }
+                                },
+                                "required": [
+                                    "email",
+                                    "password"
+                                ]
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/user/logout": {
+            "get": {
+                "parameters": [
+                    {
+                        "name": "example-only",
+                        "description": "Username to use for logout (dummy for test)",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "password",
+                        "description": "User's password (dummy for test)",
+                        "in": "query",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "logout result"
+                    }
+                },
+                "summary": "Perform Logout",
+                "description": "Logout of the application",
+                "tags": [
+                    "Auth Mgt"
+                ]
+            }
+        },
+        "/user/list": {
+            "get": {
+                "parameters": [],
+                "responses": {
+                    "200": {
+                        "description": "The requested resource"
+                    },
+                    "404": {
+                        "description": "Resource not found"
+                    },
+                    "500": {
+                        "description": "Internal server error"
+                    }
+                },
+                "tags": [
+                    "User List"
+                ],
+                "description": "Return a user list",
+                "summary": "/user/list"
+            }
+        },
+        "/user/list2": {
+            "get": {
+                "parameters": [],
+                "responses": {
+                    "200": {
+                        "description": "The requested resource"
+                    },
+                    "404": {
+                        "description": "Resource not found"
+                    },
+                    "500": {
+                        "description": "Internal server error"
+                    }
+                },
+                "summary": "/user/list2"
+            }
+        },
+        "/user/list3": {
+            "get": {
+                "parameters": [],
+                "responses": {
+                    "200": {
+                        "description": "The requested resource"
+                    },
+                    "404": {
+                        "description": "Resource not found"
+                    },
+                    "500": {
+                        "description": "Internal server error"
+                    }
+                },
+                "summary": "/user/list3"
+            },
+            "post": {
+                "parameters": [],
+                "responses": {
+                    "200": {
+                        "description": "The requested resource"
+                    },
+                    "404": {
+                        "description": "Resource not found"
+                    },
+                    "500": {
+                        "description": "Internal server error"
+                    }
+                },
+                "summary": "/user/list3"
+            },
+            "put": {
+                "parameters": [],
+                "responses": {
+                    "200": {
+                        "description": "The requested resource"
+                    },
+                    "404": {
+                        "description": "Resource not found"
+                    },
+                    "500": {
+                        "description": "Internal server error"
+                    }
+                },
+                "summary": "/user/list3"
+            },
+            "patch": {
+                "parameters": [],
+                "responses": {
+                    "200": {
+                        "description": "The requested resource"
+                    },
+                    "404": {
+                        "description": "Resource not found"
+                    },
+                    "500": {
+                        "description": "Internal server error"
+                    }
+                },
+                "summary": "/user/list3"
+            },
+            "delete": {
+                "parameters": [],
+                "responses": {
+                    "200": {
+                        "description": "The requested resource"
+                    },
+                    "404": {
+                        "description": "Resource not found"
+                    },
+                    "500": {
+                        "description": "Internal server error"
+                    }
+                },
+                "summary": "/user/list3"
+            }
+        },
+        "/actions2": {
+            "get": {
+                "parameters": [
+                    {
+                        "in": "query",
+                        "name": "userId",
+                        "required": true,
+                        "schema": {
+                            "type": "number",
+                            "format": "double"
+                        },
+                        "description": "The ID of the user to look up."
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "number",
+                                    "default": 123
+                                }
+                            }
+                        },
+                        "description": "Done."
+                    },
+                    "404": {
+                        "description": "No user with the specified ID was found in the database"
+                    },
+                    "500": {
+                        "description": "An unexpected error occurred."
+                    }
+                },
+                "tags": [
+                    "Actions2 Group"
+                ],
+                "description": "Return a user list",
+                "summary": "/actions2"
+            }
+        },
+        "/user/test/{phoneNumber}": {
+            "get": {
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "phoneNumber",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Route pattern variable `phoneNumber`"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "The requested resource"
+                    },
+                    "404": {
+                        "description": "Resource not found"
+                    },
+                    "500": {
+                        "description": "Internal server error"
+                    }
+                },
+                "summary": "Phone No. Logout",
+                "description": "Alternate description (of no real significance)"
+            }
+        },
+        "/user/upload": {
+            "get": {
+                "parameters": [
+                    {
+                        "in": "query",
+                        "name": "data",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "The data"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Success"
+                    }
+                },
+                "summary": "/user/upload"
+            }
+        },
+        "/user/roles": {
+            "put": {
+                "parameters": [],
+                "responses": {
+                    "200": {
+                        "description": "Success"
+                    }
+                },
+                "summary": "update user roles",
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "roles": {
+                                        "type": "array",
+                                        "items": {
+                                            "type": "string"
+                                        }
+                                    }
+                                },
+                                "required": [
+                                    "roles"
+                                ]
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}

@@ -55,7 +55,7 @@ module.exports.routes = {
    */
   'delete /clients/:client_id/user/:id': 'UserController.destroy',
 
-  'post /user': {
+  'POST /user': {
     controller: 'UserController',
     action: 'create',
   },
