@@ -2,11 +2,12 @@ import * as fs from 'fs';
 import { SwaggerGenerator, SwaggerSailsModel } from './interfaces';
 import cloneDeep from 'lodash/cloneDeep'
 import uniqBy from 'lodash/uniqBy';
-import { parseModels, parseCustomRoutes, parseBindRoutes, mergeCustomAndBindRoutes, parseControllers, attachControllerOrActionSwagger } from './parsers';
 import { blueprintActionTemplates as bluePrintTemplates, defaults as configurationDefaults, blueprintParameterTemplates } from './type-formatter';
+import { parseModels, parseCustomRoutes, parseBindRoutes, mergeCustomAndBindRoutes, parseControllers, attachControllerOrActionSwagger, parseModelsJsDoc } from './parsers';
 import { getAction2Paths, getUniqueTagsFromPath, mergeComponents, mergeTags } from './utils';
 import { generateSchemas, generatePaths } from './generators';
 import { OpenApi } from '../types/openapi';
+import { mergeModelJsDoc } from './transformations';
 
 export default async (sails: Sails.Sails, sailsRoutes: Array<Sails.Route>, context: Sails.Hook<SwaggerGenerator>): Promise<OpenApi.OpenApi | undefined> => {
 
@@ -29,7 +30,8 @@ export default async (sails: Sails.Sails, sailsRoutes: Array<Sails.Route>, conte
 
   const theDefaults = hookConfig.defaults || configurationDefaults;
 
-  const models = await parseModels(sails, sails.config, Object.keys(sails.models).map(key => sails.models[key]) as Array<SwaggerSailsModel>);
+  const models = parseModels(sails);
+  const modelsJsDoc = await parseModelsJsDoc(sails, models);
 
   const customRoutes = parseCustomRoutes(sails.config);
   let allRoutes = parseBindRoutes(sailsRoutes, models, sails);
@@ -42,6 +44,8 @@ export default async (sails: Sails.Sails, sailsRoutes: Array<Sails.Route>, conte
   if (hookConfig.includeRoute) {
     routes = routes.filter(route => hookConfig.includeRoute!(route));
   }
+
+  mergeModelJsDoc(models, modelsJsDoc);
 
   if (!specifications.tags) specifications.tags = [];
   if (!specifications.components) specifications.components = {};

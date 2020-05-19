@@ -12,6 +12,7 @@ import isFunction from 'lodash/isFunction';
 import forEach from 'lodash/forEach';
 import { OpenApi } from '../types/openapi';
 import set from 'lodash/set';
+import { map } from 'lodash';
 
 /**
  * Maps from a Sails route path of the form `/path/:id` to a
@@ -298,9 +299,10 @@ export const generatePaths = (routes: SwaggerRouteInfo[], templates: BlueprintAc
         summary: subst(template.summary),
         description: subst(template.description),
         externalDocs: template.externalDocs || undefined,
-        tags: get(route, 'swagger.tags', []) as string[],
+        tags: route.swagger?.tags || [route.model.globalId],
         parameters,
         responses: cloneDeep(defaultsValues.responses || {}),
+        ...(route.model.swagger?.model || {}),
         ...(route.swagger || {})
       };
 
@@ -589,4 +591,25 @@ export const generatePaths = (routes: SwaggerRouteInfo[], templates: BlueprintAc
   }
 
   return paths
+}
+
+export const generateDefaultModelTags = (models: NameKeyMap<SwaggerSailsModel>): Tag[] => {
+
+  return map(models, model => {
+
+    const defaultDescription = `Sails blueprint actions for the **${model.globalId}** model`;
+
+    const tagDef: Tag = {
+      name: model.globalId,
+      description: model.swagger.model?.description || defaultDescription,
+    };
+
+    if(model.swagger.model?.externalDocs) {
+      tagDef.externalDocs = { ...model.swagger.model.externalDocs };
+    }
+
+    return tagDef;
+
+  });
+
 }
