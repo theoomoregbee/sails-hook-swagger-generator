@@ -2,12 +2,12 @@ import * as fs from 'fs';
 import { SwaggerGenerator, SwaggerSailsModel } from './interfaces';
 import cloneDeep from 'lodash/cloneDeep'
 import uniqBy from 'lodash/uniqBy';
-import { blueprintActionTemplates as bluePrintTemplates, defaults as configurationDefaults, blueprintParameterTemplates } from './type-formatter';
+import { blueprintActionTemplates as defaultBlueprintActionTemplates, defaults as configurationDefaults, blueprintParameterTemplates } from './type-formatter';
 import { parseModels, parseCustomRoutes, parseBindRoutes, mergeCustomAndBindRoutes, parseControllers, attachControllerOrActionSwagger, parseModelsJsDoc } from './parsers';
-import { getAction2Paths, getUniqueTagsFromPath, mergeComponents, mergeTags } from './utils';
-import { generateSchemas, generatePaths } from './generators';
+import { getAction2Paths, getUniqueTagsFromPath, mergeComponents } from './utils';
+import { generateSchemas, generatePaths, generateDefaultModelTags } from './generators';
 import { OpenApi } from '../types/openapi';
-import { mergeModelJsDoc } from './transformations';
+import { mergeModelJsDoc, mergeTags } from './transformations';
 
 export default async (sails: Sails.Sails, sailsRoutes: Array<Sails.Route>, context: Sails.Hook<SwaggerGenerator>): Promise<OpenApi.OpenApi | undefined> => {
 
@@ -17,7 +17,7 @@ export default async (sails: Sails.Sails, sailsRoutes: Array<Sails.Route>, conte
     return;
   }
 
-  let blueprintActionTemplates = cloneDeep(bluePrintTemplates);
+  let blueprintActionTemplates = cloneDeep(defaultBlueprintActionTemplates);
   if (hookConfig.updateBlueprintActionTemplates) {
     blueprintActionTemplates = hookConfig.updateBlueprintActionTemplates(blueprintActionTemplates);
   }
@@ -63,9 +63,11 @@ export default async (sails: Sails.Sails, sailsRoutes: Array<Sails.Route>, conte
 
   specifications.components.schemas = generateSchemas(models);
 
+  const defaultModelTags = generateDefaultModelTags(models);
+
   // merge model, controller and action2 .components and .tags
   specifications.components = mergeComponents(specifications.components, models, controllers, action2s);
-  specifications.tags = mergeTags(specifications.tags, models, controllers, action2s)
+  mergeTags(specifications.tags, models, modelsJsDoc, /*controllers, controllersJsDoc,*/ defaultModelTags);
 
   specifications.paths = generatePaths(routes, blueprintActionTemplates, theDefaults, action2s, specifications, models);
 
