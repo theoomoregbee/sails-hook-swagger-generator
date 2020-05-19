@@ -2,7 +2,7 @@
  * Created by theophy on 02/08/2017.
  */
 import * as path from 'path';
-import { SwaggerSailsModel, SwaggerSailsRouteControllerTarget, HTTPMethodVerb, ParsedCustomRoute, ParsedBindRoute, MiddlewareType, SwaggerRouteInfo, SwaggerSailsController, SwaggerAction, NameKeyMap } from './interfaces';
+import { SwaggerSailsModel, SwaggerSailsRouteControllerTarget, HTTPMethodVerb, ParsedCustomRoute, ParsedBindRoute, MiddlewareType, SwaggerRouteInfo, SwaggerSailsController, NameKeyMap, SwaggerActionAttribute } from './interfaces';
 import cloneDeep from 'lodash/cloneDeep';
 import get from 'lodash/get';
 import { OpenApi } from '../types/openapi';
@@ -38,7 +38,7 @@ export const parseModels = async (sails: Sails.Sails, sailsConfig: Sails.Config,
     const swagger = swaggerComments[index]
     if (swagger) {
       const paths = swagger.paths || {}
-      model.swagger.actions = mergeSwaggerPaths(model.swagger.actions!, paths as SwaggerAction)
+      model.swagger.actions = mergeSwaggerPaths(model.swagger.actions!, paths as NameKeyMap<SwaggerActionAttribute>)
     }
 
     return model
@@ -305,7 +305,7 @@ export const parseControllers = async (sails: Sails.Sails, controllerNames: stri
     const swagger = swaggerDocComments[index]
     if (swagger) {
       const paths = swagger.paths || {}
-      controller.swagger.actions = mergeSwaggerPaths(controller.swagger.actions!, paths as SwaggerAction)
+      controller.swagger.actions = mergeSwaggerPaths(controller.swagger.actions!, paths as NameKeyMap<SwaggerActionAttribute>)
     }
 
     return controller

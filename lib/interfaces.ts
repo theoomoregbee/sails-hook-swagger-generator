@@ -12,6 +12,18 @@ export interface SwaggerGenerator {
     postProcess?: (specification: OpenApi.OpenApi) => void;
 }
 
+/**
+ * Sails action types.
+ *
+ * @see https://sailsjs.com/documentation/concepts/routes/custom-routes
+ */
+export type ActionType = 'blueprint' | 'shortcutBlueprint' | 'controller' | 'standalone' | 'actions2' | 'function';
+
+/**
+ * Sails blueprint action types.
+ *
+ * @see https://sailsjs.com/documentation/concepts/blueprints/blueprint-actions
+ */
 export type BluePrintAction = 'findone' | 'find' | 'create' | 'update' | 'destroy' | 'populate' | 'add' | 'remove' | 'replace'
 
 export enum Modifiers {
@@ -35,26 +47,78 @@ export interface Defaults {
     responses: { [statusCode: string]: { description: string } };
 }
 
-export interface SwaggerAction {
-    [name: string]: OpenApi.Operation;
+/**
+ * JSON used to desribe/document individual Swagger/OpenAPI Operation, with
+ * additional annotation to enable excluding the Sails action from the generated Swagger.
+ */
+export interface SwaggerActionAttribute extends OpenApi.Operation {
+  exclude?: boolean;
 }
 
-export interface SwaggerAttribute {
+/**
+ * JSON used to desribe/document Sails Controller file, describing global `tags` and
+ * `components` to be added, `controller` documentation to be applied to **all**
+ * actions in the file and per-action documentation.
+ */
+export interface SwaggerControllerAttribute {
     tags?: Array<Tag>;
     components?: OpenApi.Components;
-    actions?: SwaggerAction;
+    controller?: SwaggerActionAttribute;
+    actions?: NameKeyMap<SwaggerActionAttribute>;
+}
+
+/**
+ * JSON used to desribe/document Sails Model definition file, describing global `tags` and
+ * `components` to be added, `model` documentation to be applied to **all**
+ * blueprint actions for the model and per-action documentation.
+ */
+export interface SwaggerModelAttribute extends Omit<SwaggerControllerAttribute, 'controller'> {
+  model?: SwaggerActionAttribute;
+}
+
+/**
+ * Extend Sail attribute definition to include `meta.swagger`, including `exclude` for
+ * individual attributes.
+ */
+export interface SwaggerSailsModelAttributeDefinition extends Omit<Sails.AttributeDefinition, 'meta'> {
+  meta?: {
+    swagger?: OpenApi.UpdatedSchema & {
+      exclude?: boolean;
+    };
+    [name: string]: any;
+  };
 }
 
 export interface SwaggerSailsModel extends Omit<Sails.Model, 'attributes'> {
-    attributes: Record<string, Sails.AttributeDefinition>;
-    swagger: SwaggerAttribute;
+    attributes: Record<string, SwaggerSailsModelAttributeDefinition>;
+    swagger: SwaggerModelAttribute;
 }
 
 export interface SwaggerSailsController extends Sails.Controller {
     name: string; // controller name
     inputs?: any; // action2
     exits?: any; // action2
-    swagger: SwaggerAttribute;
+    swagger: SwaggerControllerAttribute;
+}
+
+/**
+ * All Sails controller files and actions (as loaded from disk).
+ */
+export interface SwaggerSailsControllers {
+
+  /// Controller files keyed on controller file identity
+  controllerFiles: NameKeyMap<IncludeAll.File & {
+    defaultTagName: string;
+    swagger: SwaggerControllerAttribute;
+  }>;
+
+  /// All controller actions keyed on action identity
+  actions: NameKeyMap<(Sails.Action | Sails.Actions2Machine) & {
+    actionType: ActionType;
+    defaultTagName: string;
+    swagger?: SwaggerActionAttribute;
+  }>;
+
 }
 
 export interface SwaggerSailsRouteControllerTarget extends Sails.RouteTargetObject {
@@ -111,12 +175,15 @@ export interface ParsedBindRoute {
     middlewareType: MiddlewareType.BLUEPRINT;
 }
 
+/**
+ * Metadata relating to Sails action or blueprint action routes.
+ */
 export interface SwaggerRouteInfo {
     middlewareType?: MiddlewareType;
 
     tags: Array<Tag>;
     model?: SwaggerSailsModel;
-    swagger?: OpenApi.Operation | undefined;
+    swagger?: SwaggerActionAttribute;
 
     controller?: string | undefined;
     action: string;
