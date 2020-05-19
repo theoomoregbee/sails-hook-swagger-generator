@@ -8,16 +8,12 @@
       }
     },
     {
-      "name": "Auth Mgt",
-      "description": "User management and login"
-    },
-    {
-      "name": "User List",
-      "description": "Group just for user list operation"
-    },
-    {
-      "name": "Actions2 Group",
-      "description": "A test actions2 group"
+      "name": "User (ORM)",
+      "description": "A longer, multi-paragraph description\nexplaining how this all works.\n\nIt is linked to more information.\n",
+      "externalDocs": {
+        "url": "https://somewhere.com/yep",
+        "description": "Refer to these docs"
+      }
     }
   ],
   "components": {
