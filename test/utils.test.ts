@@ -1,7 +1,7 @@
 import path from 'path';
 import { expect } from 'chai';
 import { mergeSwaggerSpec, mergeSwaggerPaths, loadSwaggerDocComments, normalizeRouteControllerName, normalizeRouteControllerTarget, removeViewRoutes, getSwaggerAction, mergeComponents, mergeTags, getActionNameFromPath } from '../lib/utils';
-import { SwaggerAction, NameKeyMap, SwaggerSailsModel, SwaggerSailsController } from '../lib/interfaces';
+import { SwaggerActionAttribute, NameKeyMap, SwaggerSailsModel, SwaggerSailsController } from '../lib/interfaces';
 import { OpenApi } from '../types/openapi';
 
 const sailsConfig = {
@@ -82,7 +82,7 @@ describe('Utils', () => {
                 description: 'something with /'
             }
         }
-        const merged = mergeSwaggerPaths(dest as unknown as SwaggerAction, source as unknown as SwaggerAction)
+        const merged = mergeSwaggerPaths(dest as unknown as NameKeyMap<SwaggerActionAttribute>, source as unknown as NameKeyMap<SwaggerActionAttribute>)
         it('should remove only leading / from merged paths', done => {
             expect(Object.keys(merged).every(key => key.charAt(0) !== '/')).to.be.true;
             done()

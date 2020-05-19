@@ -1,4 +1,4 @@
-import { SwaggerAttribute, SwaggerAction, SwaggerSailsRouteControllerTarget, MiddlewareType, BluePrintAction, SwaggerSailsController, SwaggerRouteInfo, NameKeyMap, SwaggerSailsModel } from '../interfaces';
+import { SwaggerControllerAttribute, SwaggerSailsRouteControllerTarget, MiddlewareType, BluePrintAction, SwaggerSailsController, SwaggerRouteInfo, NameKeyMap, SwaggerSailsModel, SwaggerActionAttribute } from '../interfaces';
 import swaggerJSDoc from 'swagger-jsdoc';
 import cloneDeep from 'lodash/cloneDeep';
 import { OpenApi } from '../../types/openapi';
@@ -28,8 +28,8 @@ const componentReference: Array<keyof OpenApi.Components> = [
 
 export const bluerprintActions: Array<BluePrintAction> = ['findone', 'find', 'create', 'update', 'destroy', 'populate', 'add', 'remove', 'replace'];
 
-export const mergeSwaggerSpec = (destination: SwaggerAttribute, source: SwaggerAttribute): SwaggerAttribute => {
-    const dest: SwaggerAttribute = cloneDeep(destination)
+export const mergeSwaggerSpec = (destination: SwaggerControllerAttribute, source: SwaggerControllerAttribute): SwaggerControllerAttribute => {
+    const dest: SwaggerControllerAttribute = cloneDeep(destination)
     dest.tags = uniqBy([
         ...(get(source, 'tags', [])),
         ...(get(dest, 'tags', [])),
@@ -48,7 +48,7 @@ export const mergeSwaggerSpec = (destination: SwaggerAttribute, source: SwaggerA
     return dest
 }
 
-export const mergeSwaggerPaths = (dest: SwaggerAction | undefined, sourcePaths: SwaggerAction): SwaggerAction => {
+export const mergeSwaggerPaths = (dest: NameKeyMap<SwaggerActionAttribute> | undefined, sourcePaths: NameKeyMap<SwaggerActionAttribute>): NameKeyMap<SwaggerActionAttribute> => {
     // strip off leading '/' from both source and destination swagger action, swagger-doc returns paths with leading /path-name: {}
     const swaggerActions = mapKeys(cloneDeep(dest || {}), (_, key) => key.replace(/^\//, ''));
     const paths = mapKeys(cloneDeep(sourcePaths), (_, key) => key.replace(/^\//, ''));
@@ -62,7 +62,7 @@ export const mergeSwaggerPaths = (dest: SwaggerAction | undefined, sourcePaths: 
             ...(source || {})
         }
         return merged
-    }, {} as SwaggerAction)
+    }, {} as NameKeyMap<SwaggerActionAttribute>)
 }
 
 export const loadSwaggerDocComments = (filePath: string): Promise<OpenApi.OpenApi> => {
