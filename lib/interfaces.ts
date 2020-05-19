@@ -101,6 +101,30 @@ export interface SwaggerSailsController extends Sails.Controller {
     swagger: SwaggerControllerAttribute;
 }
 
+export interface SwaggerSailsActions2Input extends Sails.Actions2Input {
+  meta?: {
+    swagger?: (OpenApi.Parameter | OpenApi.MediaType) & {
+      in?: 'query' | 'header' | 'path' | 'cookie' | 'body';
+      exclude?: boolean;
+    };
+    [name: string]: any;
+  };
+}
+
+export interface SwaggerSailsActions2Exit extends Sails.Actions2Exit {
+  meta?: {
+    swagger?: OpenApi.Response & {
+      exclude?: boolean;
+    };
+    [name: string]: any;
+  };
+}
+
+export interface SwaggerSailsActions2Machine extends Omit<Sails.Actions2Machine, 'inputs' | 'exits'> {
+  inputs?: NameKeyMap<SwaggerSailsActions2Input>;
+  exits?: NameKeyMap<SwaggerSailsActions2Exit>;
+}
+
 /**
  * All Sails controller files and actions (as loaded from disk).
  */

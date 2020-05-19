@@ -194,13 +194,14 @@ declare namespace Sails {
     /**
      * Sails 'actions2' exits.
      *
-     * @see https://github.com/sailshq/machine-as-action#customizing-the-response
+     * @see https://github.com/sailshq/machine-as-action
      */
     export interface Actions2Exit {
       description?: string;
       responseType?: '' | 'view' | 'redirect';
       statusCode?: string;
       viewTemplatePath?: string;
+      outputExample?: any;
     }
 
     /**
