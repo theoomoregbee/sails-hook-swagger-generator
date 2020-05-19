@@ -96,9 +96,12 @@ describe('Utils', () => {
         })
     })
 
-    describe('loadSwaggerDocComments', async () => {
+    describe('loadSwaggerDocComments', () => {
         const fixturePath = require.resolve(path.join(sailsConfig.paths.models, 'User'))
-        const doc = await loadSwaggerDocComments(fixturePath);
+        let doc: OpenApi.OpenApi;
+        before(async () => {
+          doc = await loadSwaggerDocComments(fixturePath);
+        });
         it('should generate openapi v3.0.0 spec doc from swagger-doc comment', done => {
             expect(doc.openapi).equal('3.0.0');
             done()
