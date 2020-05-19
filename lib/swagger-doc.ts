@@ -2,8 +2,8 @@ import * as fs from 'fs';
 import { SwaggerGenerator, SwaggerSailsModel } from './interfaces';
 import cloneDeep from 'lodash/cloneDeep'
 import uniqBy from 'lodash/uniqBy';
-import { blueprintActionTemplates as bluePrintTemplates, defaults as defaultsResponses, blueprintParameterTemplates } from './type-formatter';
 import { parseModels, parseCustomRoutes, parseBindRoutes, mergeCustomAndBindRoutes, parseControllers, attachControllerOrActionSwagger } from './parsers';
+import { blueprintActionTemplates as bluePrintTemplates, defaults as configurationDefaults, blueprintParameterTemplates } from './type-formatter';
 import { getAction2Paths, getUniqueTagsFromPath, mergeComponents, mergeTags } from './utils';
 import { generateSchemas, generatePaths } from './generators';
 import { OpenApi } from '../types/openapi';
@@ -27,7 +27,7 @@ export default async (sails: Sails.Sails, sailsRoutes: Array<Sails.Route>, conte
     ...cloneDeep(hookConfig.swagger)
   } as OpenApi.OpenApi;
 
-  const defaults = hookConfig.defaults || defaultsResponses;
+  const theDefaults = hookConfig.defaults || configurationDefaults;
 
   const models = await parseModels(sails, sails.config, Object.keys(sails.models).map(key => sails.models[key]) as Array<SwaggerSailsModel>);
 
@@ -63,7 +63,7 @@ export default async (sails: Sails.Sails, sailsRoutes: Array<Sails.Route>, conte
   specifications.components = mergeComponents(specifications.components, models, controllers, action2s);
   specifications.tags = mergeTags(specifications.tags, models, controllers, action2s)
 
-  specifications.paths = generatePaths(routes, blueprintActionTemplates, defaults, action2s, specifications, models);
+  specifications.paths = generatePaths(routes, blueprintActionTemplates, theDefaults, action2s, specifications, models);
 
   specifications.components.parameters = {
     ...blueprintParameterTemplates,
