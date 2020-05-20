@@ -1,8 +1,8 @@
 import { expect } from 'chai';
-import { NameKeyMap, SwaggerSailsModel, SwaggerSailsController, SwaggerModelAttribute } from '../lib/interfaces';
+import { NameKeyMap, SwaggerSailsModel, SwaggerSailsController, SwaggerModelAttribute, SwaggerControllerAttribute, SwaggerSailsControllers } from '../lib/interfaces';
 import { OpenApi } from '../types/openapi';
-import { mergeComponents, mergeTags } from '../lib/transformations';
-import { cloneDeep } from 'lodash';
+import { mergeComponents, mergeTags, mergeModelJsDoc, mergeControllerJsDoc } from '../lib/transformations';
+import { cloneDeep, defaults } from 'lodash';
 import { generateDefaultModelTags } from '../lib/generators';
 
 // const sailsConfig = {
@@ -24,6 +24,9 @@ describe('Transformations', () => {
   const models = {
     user: {
       globalId: 'User',
+      identity: 'user',
+      primaryKey: 'id',
+      attributes: {},
       swagger: {
         components: {
           schemas: { modelSchema: {} }
@@ -31,34 +34,80 @@ describe('Transformations', () => {
         tags: [{ name: 'modelTag' }]
       }
     }
-  } as unknown as NameKeyMap<SwaggerSailsModel>;
+  } as NameKeyMap<SwaggerSailsModel>;
 
   const modelsJsDoc = {
     user: {
-      tags: [{ name: 'modelsJsDocTag' }]
+      tags: [{ name: 'modelsJsDocTag' }],
+      components: {
+        examples: { dummy: { summary: 'An example', value: 'dummy' } }
+      },
+      actions: {
+        find: { description: 'Description', parameters: [], responses: {} }
+      }
     }
   } as NameKeyMap<SwaggerModelAttribute>;
 
   const controllers = {
-    UserController: {
-      swagger: {
-        components: {
-          schemas: { controllerSchema: {} }
-        },
-        tags: [{ name: 'controllerTag' }]
+    controllerFiles: {
+      user: {
+        globalId: 'User',
+        identity: 'user',
+        defaultTagName: 'User',
+        swagger: {
+          components: {
+            schemas: { controllerSchema: {} }
+          },
+          tags: [{ name: 'controllerTag' }]
+        }
+      }
+    },
+    actions: {},
+  } as SwaggerSailsControllers;
+  const controllersJsDoc = {
+    user: {
+      actions: {
+        logout: {
+          summary: 'Perform Logout',
+          description: 'Logout of the application',
+          tags: ['Auth Mgt'],
+          parameters:
+            [{
+              name: 'example-only',
+              description: 'Username to use for logout (dummy for test)',
+              in: 'path',
+              required: true,
+              schema: { type: 'string' }
+            }],
+          responses: { '200': { description: 'logout result' } }
+        }
       }
     }
-  } as unknown as NameKeyMap<SwaggerSailsController>
-  const action2 = {
-    'action/action2': {
-      swagger: {
-        components: {
-          schemas: { action2Schema: {} }
-        },
-        tags: [{ name: 'action2Tag' }]
-      }
-    }
-  } as unknown as NameKeyMap<SwaggerSailsController>
+  } as NameKeyMap<SwaggerControllerAttribute>;
+
+  describe('mergeModelJsDoc', () => {
+    it('should merge model JSDoc `actions` and `model` elements into model `swagger` element', () => {
+      const destModels = cloneDeep(models);
+      mergeModelJsDoc(destModels, modelsJsDoc);
+      const expected = cloneDeep(models);
+      defaults(expected.user.swagger, {
+        actions: cloneDeep(modelsJsDoc.user.actions)
+      });
+      expect(destModels).to.deep.equal(expected);
+    })
+  })
+
+  describe('mergeControllerJsDoc', () => {
+    it('should merge model JSDoc `actions` and `model` elements into model `swagger` element', () => {
+      const destControllers = cloneDeep(controllers);
+      mergeControllerJsDoc(destControllers, controllersJsDoc);
+      const expected = cloneDeep(controllers);
+      defaults(expected.controllerFiles.user!.swagger, {
+        actions: cloneDeep(controllersJsDoc.user.actions)
+      });
+      expect(destControllers).to.deep.equal(expected);
+    })
+  })
 
   describe('mergeComponents', () => {
     it(`should merge component definitions from models and controllers`, () => {

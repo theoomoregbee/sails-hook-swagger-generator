@@ -2,11 +2,12 @@
  * Created by theophy on 02/08/2017.
  */
 import * as path from 'path';
-import { SwaggerSailsModel, SwaggerSailsRouteControllerTarget, HTTPMethodVerb, ParsedCustomRoute, ParsedBindRoute, MiddlewareType, SwaggerRouteInfo, SwaggerSailsController, NameKeyMap, SwaggerActionAttribute, SwaggerModelAttribute, ActionType } from './interfaces';
+import { SwaggerSailsModel, SwaggerSailsRouteControllerTarget, HTTPMethodVerb, ParsedCustomRoute, ParsedBindRoute, MiddlewareType, SwaggerRouteInfo, SwaggerSailsController, NameKeyMap, SwaggerActionAttribute, SwaggerModelAttribute, ActionType, SwaggerSailsControllers, AnnotatedFunction, SwaggerControllerAttribute } from './interfaces';
 import cloneDeep from 'lodash/cloneDeep';
 import { OpenApi } from '../types/openapi';
 import { loadSwaggerDocComments, mergeSwaggerSpec, mergeSwaggerPaths, getSwaggerAction, getActionNameFromPath } from './utils';
-import { map, pickBy, mapValues, mapKeys } from 'lodash';
+import { map, pickBy, mapValues, mapKeys, forEach, isObject, isArray, isFunction, isString, isUndefined, omit } from 'lodash';
+import includeAll from 'include-all';
 
 
 /**
@@ -322,66 +323,128 @@ export const parseBoundRoutes = (boundRoutes: Array<Sails.Route>,
 
 }
 
-export const parseControllers = async (sails: Sails.Sails, controllerNames: string[]): Promise<NameKeyMap<SwaggerSailsController>> => {
-  const controllerDir = sails.config.paths.controllers!;
-  const swaggerDocComments: Array<OpenApi.OpenApi | undefined> = await Promise.all(controllerNames.map(async name => {
-    let filePath
-    try {
-      filePath = require.resolve(path.join(controllerDir, name))
-    } catch (err) {
-      sails.log.error(`ERROR: sails-hook-swagger-generator: Error resolving/loading controller ${name}: ${err.message || ''}`, err);
-      return undefined
+/**
+ * Load and return details of all Sails controller files and actions.
+ *
+ * @note The loading mechanism is taken from Sails.
+ * @see https://github.com/balderdashy/sails/blob/master/lib/app/private/controller/load-action-modules.js#L27
+ *
+ * @param sails
+ */
+export const parseControllers = async (sails: Sails.Sails): Promise<SwaggerSailsControllers> => {
+
+  const controllersLoadedFromDisk = await new Promise((resolve, reject) => {
+    includeAll.optional({
+      dirname: sails.config.paths.controllers,
+      filter: /(^[^.]+\.(?:(?!md|txt).)+$)/,
+      flatten: true,
+      keepDirectoryPath: true,
+    }, (err: Error | string, files: IncludeAll.FilesDictionary) => {
+      if (err) reject(err);
+      resolve(files);
+    });
+  }) as IncludeAll.FilesDictionary;
+
+  const ret: SwaggerSailsControllers = {
+    controllerFiles: {},
+    actions: {}
+  };
+
+  // Traditional controllers are PascalCased and end with the word "Controller".
+  const traditionalRegex = new RegExp('^((?:(?:.*)/)*([0-9A-Z][0-9a-zA-Z_]*))Controller\\..+$');
+  // Actions are kebab-cased.
+  const actionRegex = new RegExp('^((?:(?:.*)/)*([a-z][a-z0-9-]*))\\..+$');
+
+  forEach(controllersLoadedFromDisk, (moduleDef) => {
+
+    let filePath = moduleDef.globalId;
+    if (filePath[0] === '.') { return; }
+
+    if (path.dirname(filePath) !== '.') {
+      filePath = path.dirname(filePath).replace(/\./g, '/') + '/' + path.basename(filePath);
     }
-    return loadSwaggerDocComments(filePath).catch(err => {
-      sails.log.error(`ERROR: sails-hook-swagger-generator: Error resolving/loading controller ${name}: ${err.message || ''}`, err);
-      return undefined
-    })
-  }));
-  const parseController = (name: string): SwaggerSailsController => {
-    try {
-      const controllerPath = path.join(controllerDir, name)
-      // eslint-disable-next-line @typescript-eslint/no-var-requires
-      const controllerOrAction = require(controllerPath);
-      if (controllerOrAction) {
-        return { name, ...controllerOrAction }
+
+    /* traditional controllers */
+    let match = traditionalRegex.exec(filePath);
+    if (match) {
+
+      if (!isObject(moduleDef) || isArray(moduleDef) || isFunction(moduleDef)) { return; }
+      const identity = match[1].toLowerCase();
+      const defaultTagName = path.basename(match[1]);
+
+      // store keyed on controller file identity
+      ret.controllerFiles[identity] = {
+        ...moduleDef,
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        swagger: (moduleDef as any).swagger || {},
+        defaultTagName
+      };
+
+      forEach(moduleDef, (action, actionName) => {
+        if (isString(action)) { /* ignore */ return; }
+        else if (actionName === '_config') { /* ignore */ return; }
+        else if(actionName === 'swagger') { /* ignore */ return; }
+        else if(isFunction(action)) {
+          const actionIdentity = (identity + '/' + actionName).toLowerCase();
+          if(ret.actions[actionIdentity]) {
+            // conflict --> dealt with by Sails loader so just ignore here
+          } else {
+            ret.actions[actionIdentity] = {
+              actionType: 'controller',
+              defaultTagName,
+              fn: action,
+            };
+            const _action = action as AnnotatedFunction;
+            if(_action.swagger) {
+              ret.actions[actionIdentity].swagger = _action.swagger;
+            }
+          }
+        }
+      });
+
+    /* else actions (standalone or actions2) */
+    } else if ((match = actionRegex.exec(filePath))) {
+
+      const actionIdentity = match[1].toLowerCase();
+      if (ret.actions[actionIdentity]) {
+        // conflict --> dealt with by Sails loader so just ignore here
+        return;
       }
-    } catch (err) {
-      sails.log.error(`ERROR: sails-hook-swagger-generator: Error resolving/loading controller ${name}: ${err.message || ''}`, err);
+
+      const defaultTagName = path.basename(match[1]);
+
+      // store keyed on controller file identity
+      ret.controllerFiles[actionIdentity] = {
+        ...moduleDef,
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        swagger: (moduleDef as any).swagger || {},
+        defaultTagName
+      };
+
+      if(isFunction(moduleDef)) {
+        ret.actions[actionIdentity] = {
+          actionType: 'standalone',
+          defaultTagName: path.basename(match[1]),
+          fn: moduleDef,
+        };
+        const _action = moduleDef as AnnotatedFunction;
+        if (_action.swagger) {
+          ret.actions[actionIdentity].swagger = _action.swagger;
+        }
+      } else if(!isUndefined(moduleDef.machine) || !isUndefined(moduleDef.friendlyName) || isFunction(moduleDef.fn)) {
+        // note no swagger here as this is captured at the controller file level above
+        ret.actions[actionIdentity] = {
+          actionType: 'actions2',
+          defaultTagName,
+          ...(omit(moduleDef, 'swagger') as unknown as Sails.Actions2Machine)
+        };
+      }
     }
 
-    return { name, swagger: {} }
-  }
+  });
 
-  const parseTagsComponents = (controller: SwaggerSailsController, index: number) => {
-    // retrieve swagger documentation from jsDoc comments and merge it with any .swagger within our controller
-    const swagger = swaggerDocComments[index];
-    controller.swagger = cloneDeep(controller.swagger || {})
-    if (swagger) {
-      controller.swagger = mergeSwaggerSpec(controller.swagger, swagger);
-    }
-    return controller
-  }
+  return ret;
 
-  const parseSwaggerDocPaths = (controller: SwaggerSailsController, index: number) => {
-    // parse and merge swagger.actions and swagger-doc path (and take them as precendence)
-    const swagger = swaggerDocComments[index]
-    if (swagger) {
-      const paths = swagger.paths || {}
-      controller.swagger.actions = mergeSwaggerPaths(controller.swagger.actions!, paths as NameKeyMap<SwaggerActionAttribute>)
-    }
-
-    return controller
-  }
-
-
-  return controllerNames
-    .map(parseController)
-    .map(parseTagsComponents)
-    .map(parseSwaggerDocPaths)
-    .reduce((parsed, controller) => {
-      parsed[controller.name] = controller;
-      return parsed
-    }, {} as NameKeyMap<SwaggerSailsController>)
 }
 
 
@@ -430,3 +493,46 @@ export const parseModelsJsDoc = async (sails: Sails.Sails, models: NameKeyMap<Sw
   return ret;
 
 }
+
+/**
+ * Loads and parses controller JSDoc, returning a map keyed on controller file identity.
+ * @param sails
+ * @param controllers
+ */
+export const parseControllerJsDoc = async (sails: Sails.Sails, controllers: SwaggerSailsControllers):
+  Promise<NameKeyMap<SwaggerControllerAttribute>> => {
+
+  const ret: NameKeyMap<SwaggerControllerAttribute> = {};
+
+  await Promise.all(
+    map(controllers.controllerFiles, async (controller, identity) => {
+      try {
+        const controllerFile = path.join(sails.config.paths.controllers, controller.globalId);
+        const swaggerDoc = await loadSwaggerDocComments(controllerFile);
+
+        ret[identity] = {
+          tags: swaggerDoc.tags,
+          components: swaggerDoc.components,
+        };
+
+        const controllerJsDoc = swaggerDoc.paths['/' + controller.defaultTagName];
+        if(controllerJsDoc) {
+          // note coercion as non-standard swaggerDoc i.e. '/{controller}' contains operation contents (no HTTP method specified)
+          ret[identity].controller = controllerJsDoc as SwaggerActionAttribute;
+        }
+
+        // note coercion as non-standard swaggerDoc i.e. '/{action}' contains operation contents (no HTTP method specified)
+        ret[identity].actions = mapKeys(
+          swaggerDoc.paths,
+          (action, path) => path.substring(1) // convert '/{action}' --> '{action'
+        ) as NameKeyMap<SwaggerActionAttribute>;
+
+      } catch (err) {
+        sails.log.error(`ERROR: sails-hook-swagger-generator: Error resolving/loading controller ${controller.globalId}: ${err.message || ''}` /* , err */);
+      }
+    })
+  );
+
+  return ret;
+}
+

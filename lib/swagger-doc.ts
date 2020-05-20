@@ -3,11 +3,11 @@ import { SwaggerGenerator, SwaggerSailsModel } from './interfaces';
 import cloneDeep from 'lodash/cloneDeep'
 import uniqBy from 'lodash/uniqBy';
 import { blueprintActionTemplates as defaultBlueprintActionTemplates, defaults as configurationDefaults, blueprintParameterTemplates } from './type-formatter';
-import { parseModels, parseControllers, parseModelsJsDoc, parseBoundRoutes } from './parsers';
+import { parseModels, parseControllers, parseModelsJsDoc, parseBoundRoutes, parseControllerJsDoc } from './parsers';
 import { getUniqueTagsFromPath } from './utils';
 import { generateSchemas, generatePaths, generateDefaultModelTags } from './generators';
 import { OpenApi } from '../types/openapi';
-import { mergeModelJsDoc, mergeTags, mergeComponents } from './transformations';
+import { mergeModelJsDoc, mergeTags, mergeComponents, mergeControllerJsDoc } from './transformations';
 
 export default async (sails: Sails.Sails, sailsRoutes: Array<Sails.Route>, context: Sails.Hook<SwaggerGenerator>): Promise<OpenApi.OpenApi | undefined> => {
 
@@ -30,8 +30,15 @@ export default async (sails: Sails.Sails, sailsRoutes: Array<Sails.Route>, conte
 
   const theDefaults = hookConfig.defaults || configurationDefaults;
 
+  /*
+   * parse models and controllers (structures, source Swagger and JSDoc Swagger)
+   */
+
   const models = parseModels(sails);
   const modelsJsDoc = await parseModelsJsDoc(sails, models);
+
+  const controllers = await parseControllers(sails);
+  const controllersJsDoc = await parseControllerJsDoc(sails, controllers);
 
   let routes = parseBoundRoutes(sailsRoutes, models, sails);
 
@@ -43,6 +50,7 @@ export default async (sails: Sails.Sails, sailsRoutes: Array<Sails.Route>, conte
   }
 
   mergeModelJsDoc(models, modelsJsDoc);
+  mergeControllerJsDoc(controllers, controllersJsDoc);
 
   if (!specifications.tags) specifications.tags = [];
   if (!specifications.components) specifications.components = {};

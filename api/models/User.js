@@ -29,6 +29,12 @@
  *     externalDocs:
  *       url: https://somewhere.com/yep
  *       description: Refer to these docs
+ *
+ * components:
+ *   examples:
+ *     modelDummy:
+ *       summary: A model example example
+ *       value: dummy
  */
 
 module.exports = {
