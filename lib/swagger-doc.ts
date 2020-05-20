@@ -3,11 +3,11 @@ import { SwaggerGenerator, SwaggerSailsModel } from './interfaces';
 import cloneDeep from 'lodash/cloneDeep'
 import uniqBy from 'lodash/uniqBy';
 import { blueprintActionTemplates as defaultBlueprintActionTemplates, defaults as configurationDefaults, blueprintParameterTemplates } from './type-formatter';
-import { parseModels, parseCustomRoutes, parseBindRoutes, mergeCustomAndBindRoutes, parseControllers, attachControllerOrActionSwagger, parseModelsJsDoc } from './parsers';
-import { getAction2Paths, getUniqueTagsFromPath, mergeComponents } from './utils';
+import { parseModels, parseControllers, parseModelsJsDoc, parseBoundRoutes } from './parsers';
+import { getUniqueTagsFromPath } from './utils';
 import { generateSchemas, generatePaths, generateDefaultModelTags } from './generators';
 import { OpenApi } from '../types/openapi';
-import { mergeModelJsDoc, mergeTags } from './transformations';
+import { mergeModelJsDoc, mergeTags, mergeComponents } from './transformations';
 
 export default async (sails: Sails.Sails, sailsRoutes: Array<Sails.Route>, context: Sails.Hook<SwaggerGenerator>): Promise<OpenApi.OpenApi | undefined> => {
 
@@ -33,13 +33,10 @@ export default async (sails: Sails.Sails, sailsRoutes: Array<Sails.Route>, conte
   const models = parseModels(sails);
   const modelsJsDoc = await parseModelsJsDoc(sails, models);
 
-  const customRoutes = parseCustomRoutes(sails.config);
-  let allRoutes = parseBindRoutes(sailsRoutes, models, sails);
+  let routes = parseBoundRoutes(sailsRoutes, models, sails);
 
   // remove globally excluded routes
-  allRoutes = allRoutes.filter(route => route.path !== '/__getcookie')
-
-  let routes = mergeCustomAndBindRoutes(customRoutes, allRoutes, models);
+  routes = routes.filter(route => route.path !== '/__getcookie')
 
   if (hookConfig.includeRoute) {
     routes = routes.filter(route => hookConfig.includeRoute!(route));
@@ -50,26 +47,21 @@ export default async (sails: Sails.Sails, sailsRoutes: Array<Sails.Route>, conte
   if (!specifications.tags) specifications.tags = [];
   if (!specifications.components) specifications.components = {};
 
-  const withoutSwaggerRoutes = routes.filter(route => !route.swagger)
-  const uniqueControllers = uniqBy(withoutSwaggerRoutes, 'controller')
-    .map(route => route.controller)
-    .filter((controller): controller is string => !!controller);
+  // const controllers = await parseControllers(sails, uniqueControllers)
+  // const action2Paths = getAction2Paths(withoutSwaggerRoutes)
+  // const action2s = await parseControllers(sails, action2Paths)
 
-  const controllers = await parseControllers(sails, uniqueControllers)
-  const action2Paths = getAction2Paths(withoutSwaggerRoutes)
-  const action2s = await parseControllers(sails, action2Paths)
-
-  routes = attachControllerOrActionSwagger(routes, controllers, action2s);
+  //routes = attachControllerOrActionSwagger(routes, controllers, action2s);
 
   specifications.components.schemas = generateSchemas(models);
 
   const defaultModelTags = generateDefaultModelTags(models);
 
   // merge model, controller and action2 .components and .tags
-  specifications.components = mergeComponents(specifications.components, models, controllers, action2s);
+  mergeComponents(specifications.components, /* routesJsDoc, */ models, modelsJsDoc/*, controllers, controllersJsDoc*/);
   mergeTags(specifications.tags, models, modelsJsDoc, /*controllers, controllersJsDoc,*/ defaultModelTags);
 
-  specifications.paths = generatePaths(routes, blueprintActionTemplates, theDefaults, action2s, specifications, models);
+  specifications.paths = generatePaths(routes, blueprintActionTemplates, theDefaults, {}, specifications, models);
 
   specifications.components.parameters = {
     ...blueprintParameterTemplates,

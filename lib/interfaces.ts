@@ -203,20 +203,22 @@ export interface ParsedBindRoute {
  * Metadata relating to Sails action or blueprint action routes.
  */
 export interface SwaggerRouteInfo {
-    middlewareType?: MiddlewareType;
+  middlewareType: MiddlewareType; //< one of action|blueprint
 
-    tags: Array<Tag>;
-    model?: SwaggerSailsModel;
-    swagger?: SwaggerActionAttribute;
+  verb: HTTPMethodVerb; //< one of all|get|post|put|patch|delete
+  path: string; //< full Sails URL as per sails.getUrlFor() including prefix
+  variables: string[]; //< list of ALL variables extracted from path e.g. `/pet/:id` --> `id`
+  optionalVariables: string[]; //< list of optional variables from path e.g. `/pet/:id?` // XXX TODO make Variable type
 
-    controller?: string | undefined;
-    action: string;
+  action: string; //< either blueprint action (e.g. 'find') or action identity (e.g. 'subdir/reporting/run')
+  actionType: ActionType; //< one of blueprint|shortcutBlueprint|controller|standalone|actions2|function  actions2Machine?: Sails.Actions2Machine; //< for actionType === 'actions2', details of the action2 machine
 
-    verb: HTTPMethodVerb;
-    path: string;
-    variables: string[];
+  model?: SwaggerSailsModel; //< reference to Sails Model (blueprints only)
+  associationAliases?: string[]; //< association attribute names (relevant blueprint routes only)
 
-    associationAliases?: string[]; //< association attribute names (relevant blueprint routes only)    associationsPrimaryKeyAttribute: AssociationPrimaryKeyAttribute[];
+  defaultTagName: string; //< default tag name for route, if any, based on Sails Model or Controller
+
+  swagger?: SwaggerActionAttribute; //< per-route Swagger (OpenApi Operation)
 }
 
 export interface NameKeyMap<T> {

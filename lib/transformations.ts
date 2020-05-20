@@ -1,6 +1,7 @@
 import { NameKeyMap, SwaggerSailsModel, SwaggerModelAttribute, SwaggerSailsControllers, SwaggerControllerAttribute } from "./interfaces";
 import { forEach, defaults, cloneDeep } from "lodash";
 import { Tag } from "swagger-schema-official";
+import { OpenApi } from "../types/openapi";
 
 
 /**
@@ -49,6 +50,52 @@ export const mergeModelJsDoc = (models: NameKeyMap<SwaggerSailsModel>, modelsJsD
 }
 
 /**
+ * Merge elements of components from `config/routes.js`, model definition files and
+ * controller definition files.
+ *
+ * Elements of components are added to the top-level Swagger/OpenAPI definitions as follows:
+ * 1. Elements of the component definition reference (schemas, parameters, etc) are added where
+ *    they **do not exist**.
+ * 2. Existing elements are **not** overwritten or merged.
+ *
+ * For example, the element `components.schemas.pet` will be added as part of a merge process,
+ * but the contents of multiple definitions of `pet` **will not** be merged.
+ *
+ * @param dest
+ * @param routesJsDoc
+ * @param models
+ * @param controllers
+ */
+export const mergeComponents = (dest: OpenApi.Components,
+  // routesJsDoc: OpenApi.OpenApi,
+  models: NameKeyMap<SwaggerSailsModel>,
+  modelsJsDoc: NameKeyMap<SwaggerModelAttribute>,
+  // controllers: SwaggerSailsControllers,
+  // controllersJsDoc: NameKeyMap<SwaggerControllerAttribute>
+  ): void => {
+
+  const mergeIntoDest = (source: OpenApi.Components | undefined) => {
+    if (!source) { return; }
+    for (const key in source) {
+      const componentName = key as keyof OpenApi.Components;
+      if (!dest[componentName]) {
+        dest[componentName] = {};
+      }
+      defaults(dest[componentName], source[componentName]);
+    }
+  }
+
+  // WIP TBC mergeIntoDest(routesJsDoc.components);
+
+  forEach(models, model => mergeIntoDest(model.swagger?.components));
+  forEach(modelsJsDoc, jsDoc => mergeIntoDest(jsDoc.components));
+
+  // WIP forEach(controllers.controllerFiles, controllerFile => mergeIntoDest(controllerFile.swagger?.components));
+  // WIP forEach(controllersJsDoc, jsDoc => mergeIntoDest(jsDoc.components));
+
+}
+
+/**
  * Merge tag definitions from `config/routes.js`, model definition files and
  * controller definition files.
  *
@@ -82,7 +129,7 @@ export const mergeTags = (dest: Tag[],
     });
   }
 
-  // WIP mergeIntoDest(routesJsDoc.tags);
+  // WIP TBC mergeIntoDest(routesJsDoc.tags);
 
   forEach(models, model => mergeIntoDest(model.swagger?.tags));
   forEach(modelsJsDoc, jsDoc => mergeIntoDest(jsDoc.tags));
