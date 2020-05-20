@@ -10,6 +10,12 @@
  * tags:
  *   name: Auth Mgt
  *   description: User management and login
+ *
+ * components:
+ *   examples:
+ *     dummy:
+ *       summary: An example example
+ *       value: 3.0
  */
 
 function list2(req, res) {

@@ -224,3 +224,8 @@ export interface SwaggerRouteInfo {
 export interface NameKeyMap<T> {
     [name: string]: T;
 }
+
+export type AnnotatedFunction = {
+  (): Function;
+  swagger?: SwaggerActionAttribute;
+}

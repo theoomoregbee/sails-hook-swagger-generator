@@ -3,10 +3,23 @@
  * tags:
  *   name: Action2 Mgt
  *   description: Action2 testing
+ *
+ * components:
+ *   examples:
+ *     dummyA2:
+ *       summary: Another example example
+ *       value: 4
  */
 
 module.exports = {
 
+  /**
+   * @swagger
+   * /actions2:
+   *   summary: Swagger element below should take precedence
+   *   tags:
+   *     - Ditto
+   */
   friendlyName: 'Friendly',
 
   description: 'Friendly description',

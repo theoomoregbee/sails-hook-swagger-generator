@@ -1,9 +1,9 @@
 /* eslint-disable @typescript-eslint/no-empty-function */
 import { expect } from 'chai';
-import {  parseModels, parseBoundRoutes, parseControllers } from '../lib/parsers';
-import { SwaggerSailsModel, BluePrintAction, MiddlewareType } from '../lib/interfaces';
-import parsedRoutesFixture from './fixtures/parsedRoutes.json';
+import { parseModels, parseBoundRoutes, parseControllers, parseControllerJsDoc, parseModelsJsDoc } from '../lib/parsers';
+import { BluePrintAction, MiddlewareType, SwaggerSailsControllers, NameKeyMap, SwaggerControllerAttribute, SwaggerModelAttribute, SwaggerSailsModel } from '../lib/interfaces';
 import { bluerprintActions } from '../lib/utils';
+import path from 'path';
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const userModel = require('../../api/models/User');
@@ -13,8 +13,8 @@ const routes = require('../../config/routes');
 
 const sailsConfig = {
     paths: {
-        models: '../../api/models',
-        controllers: '../../api/controllers'
+        models: path.resolve('./api/models'),
+        controllers: path.resolve('./api/controllers')
     },
     routes: routes.routes,
     appPath: ''
@@ -26,7 +26,7 @@ const sails = {
         error: ()=> {}
     },
     config: sailsConfig
-}
+} as unknown as Sails.Sails;
 
 describe ('Parsers', () => {
 
@@ -133,14 +133,15 @@ describe ('Parsers', () => {
     ];
 
     describe ('parseModels', () => {
+
         it(`should only consider all models except associative tables and 'Archive' model special case`, async () => {
-            const parsedModels = parseModels(sails as unknown as Sails.Sails);
+            const parsedModels = parseModels(sails);
             expect(Object.keys(parsedModels).length).to.equal(1);
             expect(parsedModels['user'],'key parsed models with their globalId').to.be.ok;
         })
 
         it('should load and merge swagger specification in /models/{globalId} with the model.swagger attribute', async () => {
-          const parsedModels = parseModels(sails as unknown as Sails.Sails);
+          const parsedModels = parseModels(sails);
             const expectedTags = [
                 {
                     "name": "User (ORM duplicate)",
@@ -156,11 +157,43 @@ describe ('Parsers', () => {
         })
     })
 
+    describe ('parseModelsJsDoc', () => {
+
+
+      let parsedModels: NameKeyMap<SwaggerSailsModel>;
+      let modelsJsDoc: NameKeyMap<SwaggerModelAttribute>;
+
+      before(async () => {
+        parsedModels = parseModels(sails);
+        modelsJsDoc = await parseModelsJsDoc(sails, parsedModels);
+      })
+
+      it('should parse `tags` from model JSDoc', () => {
+        const expected = [{
+          name: 'User (ORM)',
+          description: 'A longer, multi-paragraph description\nexplaining how this all works.\n\nIt is linked to more information.\n',
+          externalDocs: { url: 'https://somewhere.com/yep', description: 'Refer to these docs' }
+        }];
+        expect(modelsJsDoc.user.tags).to.deep.equal(expected);
+      })
+
+      it('should parse `components` from model JSDoc', () => {
+        const expected = { examples: { modelDummy: { summary: 'A model example example', value: 'dummy' } } };
+        expect(modelsJsDoc.user.components).to.deep.equal(expected);
+      })
+
+      it('should parse model JSDoc for blueprint actions', () => {
+        const expected = { find: { description: '_Alternate description_: Find a list of **User** records that match the specified criteria.\n' } };
+        expect(modelsJsDoc.user.actions).to.deep.equal(expected);
+      })
+
+    })
+
     describe('parseBoundRoutes: sails router:bind events',  () => {
 
         it('Should only parse blueprint and action routes',  async () => {
-            const parsedModels = parseModels(sails as unknown as Sails.Sails);
-            const actual = parseBoundRoutes(boundRoutes as unknown as Sails.Route[], parsedModels, sails as unknown as Sails.Sails);
+            const parsedModels = parseModels(sails);
+            const actual = parseBoundRoutes(boundRoutes as unknown as Sails.Route[], parsedModels, sails);
             const expectedPaths = [ '/user', '/user/:id', '/user/:id', '/actions2' ];
             expect(actual.map(r => r.path)).to.deep.equal(expectedPaths);
             expect(actual.every(route => {
@@ -173,8 +206,8 @@ describe ('Parsers', () => {
         })
 
         it('Should contain route model for all blueprint routes',  async () => {
-            const parsedModels = parseModels(sails as unknown as Sails.Sails);
-            const actual = parseBoundRoutes(boundRoutes as unknown as Sails.Route[], parsedModels, sails as unknown as Sails.Sails);
+            const parsedModels = parseModels(sails);
+            const actual = parseBoundRoutes(boundRoutes as unknown as Sails.Route[], parsedModels, sails);
             const expectedPaths = [ '/user', '/user/:id', '/user/:id' ];
             expect(actual.filter(route => route.middlewareType == MiddlewareType.BLUEPRINT && !!route.model).map(r => r.path), 'should return model for all blueprint routes').to.deep.equal(expectedPaths);
             const updateUserRoute = actual.find(route => route.action === 'update');
@@ -185,38 +218,98 @@ describe ('Parsers', () => {
 
     describe ('parseControllers', () => {
 
-      it('should load and merge swagger specification in /controllers/{name} with the controller.swagger attribute', async () => {
-        const parsedControllers = await parseControllers(sails as unknown as Sails.Sails, ['UserController'])
-        const expectedTags = [
-          {
-            name: 'Auth Mgt',
-            description: 'User management and login'
-          },
-          {
-            name: 'User List',
-            description: 'Group just for user list operation',
-          }
-        ]
-          expect(parsedControllers.UserController.swagger.tags, 'should merge tags from swagger doc with Controller.swagger.tags').to.deep.equal(expectedTags);
-          expect(parsedControllers.UserController.swagger.components, 'should merge components from swagger doc with Controller.swagger.components').to.deep.equal({parameters: []});
-          expect(parsedControllers.UserController.swagger.actions, 'should convert and merge swagger doc path param to actions').to.contains.keys('list', 'logout');
+      let parsedControllers: SwaggerSailsControllers;
+
+      before(async () => {
+        parsedControllers = await parseControllers(sails);
       })
 
-      it('Action2: should load and merge swagger specification in /controllers/{action2-name} with the action2.swagger attribute', async () => {
-        const parsedControllers = await parseControllers(sails as unknown as Sails.Sails, ['subdir/actions2'])
-        const expectedTags = [
-          {
-            name: 'Action2 Mgt',
-            description: 'Action2 testing'
-          },
-          {
-            name: 'Actions2 Group',
-            description: 'A test actions2 group',
-          }
-        ]
-          expect(parsedControllers['subdir/actions2'].swagger.tags, 'should merge tags from swagger doc with Action2.swagger.tags').to.deep.equal(expectedTags);
-          expect(parsedControllers['subdir/actions2'].swagger.components, 'should merge components from swagger doc with Action2.swagger.components').to.deep.equal({parameters: []});
-          expect(parsedControllers['subdir/actions2'].swagger.actions, 'should convert and merge swagger doc path param to actions').to.contains.keys('actions2');
+      describe('load and parse `swagger` element exports in controller files', () => {
+
+        it('should parse `tags` from controller swagger element', () => {
+          const expected = [{ name: 'User List', description: 'Group just for user list operation', }];
+          expect(parsedControllers.controllerFiles.user.swagger.tags).to.deep.equal(expected);
+        })
+
+        it('should parse `components` from controller swagger element', () => {
+          expect(parsedControllers.controllerFiles.user.swagger.components).to.deep.equal({ parameters: [] });
+        })
+
+        it('should parse controller swagger element for actions', () => {
+          expect(parsedControllers.controllerFiles.user.swagger.actions).to.contains.keys('list');
+        })
+
       })
-  })
+
+      describe('load and parse `swagger` element expoerts in actions2 files', () => {
+
+        it('should parse `tags` from actions2 action swagger element', () => {
+          const expected = [{ name: 'Actions2 Group', description: 'A test actions2 group', }];
+          expect(parsedControllers.controllerFiles['subdir/actions2'].swagger.tags).to.deep.equal(expected);
+        })
+
+        it('should parse `components` from actions2 action swagger element', () => {
+          expect(parsedControllers.controllerFiles['subdir/actions2'].swagger.components).to.deep.equal({ parameters: [] });
+        })
+
+        it('should parse actions2 action swagger element for actions', () => {
+          expect(parsedControllers.controllerFiles['subdir/actions2'].swagger.actions).to.contains.keys('actions2');
+        })
+
+      })
+
+    })
+
+    describe('parseControllerJsDoc', () => {
+
+      let parsedControllers: SwaggerSailsControllers;
+      let controllersJsDoc: NameKeyMap<SwaggerControllerAttribute>;
+
+      before(async () => {
+        parsedControllers = await parseControllers(sails);
+        controllersJsDoc = await parseControllerJsDoc(sails, parsedControllers);
+      })
+
+      describe('load and parse JSDoc comments in controller files', () => {
+
+        it('should parse `tags` from controller JSDoc', () => {
+          const expected = [ { name: 'Auth Mgt', description: 'User management and login' } ];
+          expect(controllersJsDoc.user.tags).to.deep.equal(expected);
+        })
+
+        it('should parse `components` from controller JSDoc', () => {
+          const expected = { examples: { dummy: { summary: 'An example example', value: 3.0 } } };
+          expect(controllersJsDoc.user.components).to.deep.equal(expected);
+        })
+
+        it('should parse controller JSDoc for actions', () => {
+          expect(controllersJsDoc.user.actions).to.contains.keys('logout');
+        })
+      })
+
+      describe('load and parse JSDoc comments in actions2 files', () => {
+
+        it('should parse `tags` from actions2 JSDoc', () => {
+          const expectedTagsActions2 = [
+            {
+              name: 'Action2 Mgt',
+              description: 'Action2 testing'
+            },
+          ];
+          expect(controllersJsDoc['subdir/actions2'].tags).to.deep.equal(expectedTagsActions2);
+        })
+
+        it('should parse `components` from actions2 JSDoc', () => {
+          const expected = { examples: { dummyA2: { summary: 'Another example example', value: 4 } } };
+          expect(controllersJsDoc['subdir/actions2'].components).to.deep.equal(expected);
+        })
+
+        it('should parse actions2 JSDoc', () => {
+          expect(controllersJsDoc['subdir/actions2'].actions).to.contains.keys('actions2');
+        })
+
+      })
+
+    })
+
 })

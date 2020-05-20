@@ -52,8 +52,9 @@
     "typescript": "^3.8.2"
   },
   "dependencies": {
-    "swagger-jsdoc": "^3.4.0",
+    "include-all": "^4.0.3",
     "nodemon": "^2.0.2",
-    "request": "^2.88.2"
+    "request": "^2.88.2",
+    "swagger-jsdoc": "^3.4.0"
   }
 }

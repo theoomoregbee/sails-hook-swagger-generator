@@ -50,6 +50,62 @@ export const mergeModelJsDoc = (models: NameKeyMap<SwaggerSailsModel>, modelsJsD
 }
 
 /**
+ * Merges JSDoc into `controllerFiles` (not `actions`).
+ *
+ * The merge includes JSDoc `actions` and `controller` elements **but not** `components` and `tags`
+ * (which are merged in `mergeComponents()` and `mergeTags()`).
+ *
+ * @param controllers
+ * @param controllersJsDoc
+ */
+export const mergeControllerJsDoc = (controllers: SwaggerSailsControllers, controllersJsDoc: NameKeyMap<SwaggerControllerAttribute>): void => {
+
+  forEach(controllers.controllerFiles, (controllerFile, identity) => {
+
+    const controllerJsDoc = controllersJsDoc[identity];
+    if(controllerJsDoc) {
+      if(controllerJsDoc.actions) {
+        forEach(controllerJsDoc.actions, (action, actionName) => {
+          // if(!controllerFile.swagger) {
+          //   controllerFile.swagger = {};
+          // }
+          if(!controllerFile.swagger.actions) {
+            controllerFile.swagger.actions = {};
+          }
+          if(!controllerFile.swagger.actions[actionName]) {
+            controllerFile.swagger.actions[actionName] = { ...action };
+          } else {
+            defaults(controllerFile.swagger.actions[actionName], action);
+          }
+        });
+      }
+
+      if(controllerJsDoc.controller) {
+        // if (!controllerFile.swagger) {
+        //   controllerFile.swagger = {};
+        // }
+        if(!controllerFile.swagger.controller) {
+          controllerFile.swagger.controller = { ...controllerJsDoc.controller };
+        } else {
+          defaults(controllerFile.swagger.controller, controllerJsDoc.controller);
+        }
+      }
+
+      // if(controllerJsDoc.exclude !== undefined) {
+      //   if (!controllerFile.swagger) {
+      //     controllerFile.swagger = {};
+      //   }
+      //   if(controllerFile.swagger.exclude === undefined) {
+      //     controllerFile.swagger.exclude = controllerJsDoc.exclude;
+      //   }
+      // }
+    }
+
+  });
+
+}
+
+/**
  * Merge elements of components from `config/routes.js`, model definition files and
  * controller definition files.
  *
