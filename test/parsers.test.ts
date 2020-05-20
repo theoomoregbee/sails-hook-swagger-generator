@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-empty-function */
 import { expect } from 'chai';
-import {  parseModels, parseCustomRoutes, parseBindRoutes, mergeCustomAndBindRoutes, parseControllers } from '../lib/parsers';
-import { SwaggerSailsModel, BluePrintAction } from '../lib/interfaces';
+import {  parseModels, parseBoundRoutes, parseControllers } from '../lib/parsers';
+import { SwaggerSailsModel, BluePrintAction, MiddlewareType } from '../lib/interfaces';
 import parsedRoutesFixture from './fixtures/parsedRoutes.json';
 import { bluerprintActions } from '../lib/utils';
 
@@ -29,6 +29,7 @@ const sails = {
 }
 
 describe ('Parsers', () => {
+
     const models = {
         user: {
             globalId: 'User',
@@ -40,7 +41,10 @@ describe ('Parsers', () => {
         archive: {
             globalId: 'Archive'
         }
-    }
+    };
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (sails as any).models = models;
 
     const boundRoutes = [
         {
@@ -111,13 +115,25 @@ describe ('Parsers', () => {
               "_middlewareType": "ACTION: subdir/actions2",
               "skipRegex": []
             }
+          },
+          {
+            // eslint-disable-next-line @typescript-eslint/camelcase
+            path: /^\/app\/.*$/,
+            target: '[Function]',
+            verb: 'get',
+            options: {
+              detectedVerb: { verb: '', original: 'r|^/app/.*$|', path: 'r|^/app/.*$|' },
+              skipAssets: true,
+              view: 'pages/homepage',
+              locals: { layout: false },
+              skipRegex: [/^[^?]*\/[^?/]+\.[^?/]+(\?.*)?$/]
+            },
+            originalFn: { /* [Function: serveView] */ _middlewareType: 'FUNCTION: serveView' }
           }
     ];
 
     describe ('parseModels', () => {
         it(`should only consider all models except associative tables and 'Archive' model special case`, async () => {
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            (sails as any).models = models;
             const parsedModels = parseModels(sails as unknown as Sails.Sails);
             expect(Object.keys(parsedModels).length).to.equal(1);
             expect(parsedModels['user'],'key parsed models with their globalId').to.be.ok;
@@ -140,42 +156,31 @@ describe ('Parsers', () => {
         })
     })
 
-    describe('parseCustomRoutes', () => {
-        it('should parse routes from config/routes.js or sails.routes', done => {
-            const actual = parseCustomRoutes(sails.config);
-            expect(JSON.stringify(actual)).to.equal(JSON.stringify(parsedRoutesFixture));
-            done()
-        })
-    })
+    describe('parseBoundRoutes: sails router:bind events',  () => {
 
-    describe('parseBindRoutes: sails router:bind event',  () => {
-
-        it('Should only parse blueprint routes',  async () => {
-            const parsedModels = await parseModels(sails as unknown as Sails.Sails);
-            const actual = parseBindRoutes(boundRoutes as unknown as Sails.Route[], parsedModels, sails as unknown as Sails.Sails);
-            expect(actual.every(route => bluerprintActions.includes(route.action as BluePrintAction))).to.be.true;
+        it('Should only parse blueprint and action routes',  async () => {
+            const parsedModels = parseModels(sails as unknown as Sails.Sails);
+            const actual = parseBoundRoutes(boundRoutes as unknown as Sails.Route[], parsedModels, sails as unknown as Sails.Sails);
+            const expectedPaths = [ '/user', '/user/:id', '/user/:id', '/actions2' ];
+            expect(actual.map(r => r.path)).to.deep.equal(expectedPaths);
+            expect(actual.every(route => {
+              if(route.middlewareType === MiddlewareType.BLUEPRINT) {
+                return bluerprintActions.includes(route.action as BluePrintAction);
+              } else {
+                return route.middlewareType === MiddlewareType.ACTION;
+              }
+            })).to.be.true;
         })
-        it('Should contain route model',  async () => {
-            const parsedModels = await parseModels(sails as unknown as Sails.Sails);
-            const actual = parseBindRoutes(boundRoutes as unknown as Sails.Route[], parsedModels, sails as unknown as Sails.Sails);
-            expect(actual.every(route => !!route.model), 'Should return model for all routes');
+
+        it('Should contain route model for all blueprint routes',  async () => {
+            const parsedModels = parseModels(sails as unknown as Sails.Sails);
+            const actual = parseBoundRoutes(boundRoutes as unknown as Sails.Route[], parsedModels, sails as unknown as Sails.Sails);
+            const expectedPaths = [ '/user', '/user/:id', '/user/:id' ];
+            expect(actual.filter(route => route.middlewareType == MiddlewareType.BLUEPRINT && !!route.model).map(r => r.path), 'should return model for all blueprint routes').to.deep.equal(expectedPaths);
             const updateUserRoute = actual.find(route => route.action === 'update');
-            expect(!!updateUserRoute?.model, 'should parse blueprint routes and auto add model to routes without model').to.be.true;
-            expect(updateUserRoute?.path, 'should convert sails path param to swagger param with :id to {id}').to.equal('/user/{id}');
+            expect(!!updateUserRoute?.model, 'should parse blueprint routes and auto add model to routes without model (based on action)').to.be.true;
         })
-    })
 
-    describe('mergeCustomAndBindRoutes', () => {
-        it('should merge both custom and bound routes', async () => {
-            const parsedModels = await parseModels(sails as unknown as Sails.Sails);
-            const parsedBoundRoutes = parseBindRoutes(boundRoutes as unknown as Sails.Route[], parsedModels, sails as unknown as Sails.Sails);
-            const parsedCustomRoutes = parseCustomRoutes(sails.config);
-            const mergedRoutes = mergeCustomAndBindRoutes(parsedCustomRoutes, parsedBoundRoutes, parsedModels);
-            expect(mergedRoutes
-                .filter(route => route.controller && route.controller.includes('Controller'))
-                .every(route => !!route.model), 'should attach model to custom routes with controller routes if existing').to.be.true;
-            expect(mergedRoutes.length, 'merge both custom and bound routes').to.equal(18)
-        })
     })
 
     describe ('parseControllers', () => {

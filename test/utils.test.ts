@@ -1,7 +1,7 @@
 import path from 'path';
 import { expect } from 'chai';
-import { mergeSwaggerSpec, mergeSwaggerPaths, loadSwaggerDocComments, normalizeRouteControllerName, normalizeRouteControllerTarget, removeViewRoutes, getSwaggerAction, mergeComponents, mergeTags, getActionNameFromPath } from '../lib/utils';
-import { SwaggerActionAttribute, NameKeyMap, SwaggerSailsModel, SwaggerSailsController } from '../lib/interfaces';
+import { mergeSwaggerSpec, mergeSwaggerPaths, loadSwaggerDocComments, normalizeRouteControllerName, normalizeRouteControllerTarget, removeViewRoutes, getSwaggerAction, getActionNameFromPath } from '../lib/utils';
+import { SwaggerActionAttribute, NameKeyMap } from '../lib/interfaces';
 import { OpenApi } from '../types/openapi';
 
 const sailsConfig = {
@@ -177,54 +177,6 @@ describe('Utils', () => {
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
             const object: any = { swagger: { actions: { action } } }
             expect(getSwaggerAction(object, 'action')).to.deep.equal(action);
-            done()
-        })
-    })
-
-    const models = {
-        user: {
-            swagger: {
-                components: {
-                    schemas: { modelSchema: {} }
-                },
-                tags: [{ name: 'modelTag' }]
-            }
-        }
-    } as unknown as NameKeyMap<SwaggerSailsModel>
-    const controllers = {
-        UserController: {
-            swagger: {
-                components: {
-                    schemas: { controllerSchema: {} }
-                },
-                tags: [{ name: 'controllerTag' }]
-            }
-        }
-    } as unknown as NameKeyMap<SwaggerSailsController>
-    const action2 = {
-        'action/action2': {
-            swagger: {
-                components: {
-                    schemas: { action2Schema: {} }
-                },
-                tags: [{ name: 'action2Tag' }]
-            }
-        }
-    } as unknown as NameKeyMap<SwaggerSailsController>
-    describe('mergeComponents', () => {
-        it(`should merge models,controllers and action2 swagger.components if it's existing`, done => {
-            const components = { schemas: { existingSchema: {} } } as OpenApi.Components
-            const actual = mergeComponents(components, models, controllers, action2)
-            expect(Object.keys(actual.schemas!)).to.deep.equal(['existingSchema', 'modelSchema', 'controllerSchema', 'action2Schema'], 'merge components props to existing components')
-            done()
-        })
-    })
-
-    describe('mergeTags', () => {
-        it(`should merge models,controllers and action2 swagger.tags if it's existing`, done => {
-            const tags = [{ name: 'existing' }]
-            const actual = mergeTags(tags, models, controllers, action2)
-            expect(actual).to.deep.equal([tags[0], models.user.swagger!.tags![0], controllers.UserController.swagger!.tags![0], action2['action/action2'].swagger!.tags![0]], 'merge tags props to existing tags')
             done()
         })
     })
