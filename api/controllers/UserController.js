@@ -72,6 +72,16 @@ module.exports = {
 
   list2: list2,
 
+  // override User blueprint
+  create: (req, res) => {
+    return res.json({ in: 'create' });
+  },
+
+  // override User blueprint
+  destroy: (req, res) => {
+    return res.json({ in: 'destroy' });
+  },
+
   roles: function (req, res) {
 
   },

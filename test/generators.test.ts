@@ -22,10 +22,10 @@ describe('Generators', () => {
     describe('generateSchemas', () => {
         // TODO: attribute with relationship with other models
         it('should generate OpenAPIV3 accepted schema type', done => {
-            const actual = generateSchemas({ user: { ...userModel, identity: 'user' } })
+            const actual = generateSchemas({ user: { ...userModel, globalId: 'User', identity: 'user' } })
             const expected = {
                 user: {
-                    description: "Sails ORM Model **undefined**",
+                    description: "Sails ORM Model **User**",
                     required: ['names'],
                     properties: {
                         id: {
@@ -46,7 +46,17 @@ describe('Generators', () => {
                         ageLimit: {
                             type: "number",
                             format: "double"
-                        }
+                        },
+                        pets: {
+                          description: "Array of **Pet**'s or array of FK's when creating / updating / not populated",
+                          type: "array",
+                          items: { '$ref': "#/components/schemas/Pet", }
+                        },
+                        neighboursPets: {
+                          description: "Array of **Pet**'s or array of FK's when creating / updating / not populated",
+                          type: "array",
+                          items: { '$ref': "#/components/schemas/Pet", }
+                        },
                     }
                 }
             }

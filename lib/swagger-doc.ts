@@ -7,7 +7,7 @@ import { parseModels, parseControllers, parseModelsJsDoc, parseBoundRoutes, pars
 import { getUniqueTagsFromPath } from './utils';
 import { generateSchemas, generatePaths, generateDefaultModelTags } from './generators';
 import { OpenApi } from '../types/openapi';
-import { mergeModelJsDoc, mergeTags, mergeComponents, mergeControllerJsDoc, transformSailsPathsToSwaggerPaths } from './transformations';
+import { mergeModelJsDoc, mergeTags, mergeComponents, mergeControllerJsDoc, transformSailsPathsToSwaggerPaths, aggregateAssociationRoutes } from './transformations';
 
 export default async (sails: Sails.Sails, sailsRoutes: Array<Sails.Route>, context: Sails.Hook<SwaggerGenerator>): Promise<OpenApi.OpenApi | undefined> => {
 
@@ -55,6 +55,7 @@ export default async (sails: Sails.Sails, sailsRoutes: Array<Sails.Route>, conte
   }
 
   transformSailsPathsToSwaggerPaths(routes);
+  routes = aggregateAssociationRoutes(routes);
 
   mergeModelJsDoc(models, modelsJsDoc);
   mergeControllerJsDoc(controllers, controllersJsDoc);

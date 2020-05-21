@@ -1,9 +1,11 @@
 import { expect } from 'chai';
-import { NameKeyMap, SwaggerSailsModel, SwaggerSailsController, SwaggerModelAttribute, SwaggerControllerAttribute, SwaggerSailsControllers, SwaggerRouteInfo } from '../lib/interfaces';
+import { NameKeyMap, SwaggerSailsModel, SwaggerModelAttribute, SwaggerControllerAttribute, SwaggerSailsControllers, SwaggerRouteInfo } from '../lib/interfaces';
 import { OpenApi } from '../types/openapi';
-import { mergeComponents, mergeTags, mergeModelJsDoc, mergeControllerJsDoc, transformSailsPathsToSwaggerPaths } from '../lib/transformations';
+import { mergeComponents, mergeTags, mergeModelJsDoc, mergeControllerJsDoc, transformSailsPathsToSwaggerPaths, aggregateAssociationRoutes } from '../lib/transformations';
 import { cloneDeep, defaults } from 'lodash';
 import { generateDefaultModelTags } from '../lib/generators';
+
+import parsedRoutesFixture from './fixtures/parsedRoutes.json';
 
 // const sailsConfig = {
 //     paths: {
@@ -54,6 +56,53 @@ describe('Transformations', () => {
       transformSailsPathsToSwaggerPaths(routes);
       const paths = routes.map(r => r.path);
       expect(paths).to.deep.equal(expectedOutputPaths);
+
+    })
+  })
+
+  describe('aggregateAssociationRoutes', () => {
+    it('should aggreggate association-based blueprint routes', () => {
+
+      let routes = parsedRoutesFixture as SwaggerRouteInfo[];
+
+      const expectedOutputPaths = [
+        '/user',
+        '/actions2',
+        '/user/login',
+        '/user/logout',
+        '/user/list',
+        '/user/list2',
+        '/user/upload',
+        '/user/roles',
+        '/user/test/{phoneNumber}',
+        '/clients/{client_id}/user/{id}',
+        '/oldpet',
+        '/oldpet/{petID}',
+        '/oldpet',
+        '/oldpet/{petID}',
+        '/oldpet/{petID}',
+        '/oldpet/{petID}/{association}',
+        '/pet',
+        '/pet/{petID}',
+        '/pet',
+        '/pet/{petID}',
+        '/pet/{petID}',
+        '/pet/{petID}/{association}',
+        '/user',
+        '/user/{id}',
+        '/user/{id}',
+        '/user/{id}',
+        '/user/{id}/{association}/{childid}',
+        '/user/{id}/{association}',
+        '/user/{id}/{association}/{childid}',
+        '/user/{id}/{association}'
+      ];
+
+      transformSailsPathsToSwaggerPaths(routes);
+      routes = aggregateAssociationRoutes(routes);
+      const paths = routes.map(r => r.path);
+      expect(paths).to.deep.equal(expectedOutputPaths);
+
     })
   })
 
