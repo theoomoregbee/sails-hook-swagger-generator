@@ -159,6 +159,7 @@ describe('Transformations', () => {
   } as SwaggerSailsControllers;
   const controllersJsDoc = {
     user: {
+      tags: [{ name: 'controllersJsDocTag' }],
       actions: {
         logout: {
           summary: 'Perform Logout',
@@ -207,10 +208,10 @@ describe('Transformations', () => {
 
       const destComponents = cloneDeep(componentsFromConfiguration);
 
-      mergeComponents(destComponents, models, modelsJsDoc);
+      mergeComponents(destComponents, models, modelsJsDoc, controllers, controllersJsDoc);
 
       expect(Object.keys(destComponents.schemas!)).to.deep.equal([
-        'existingSchema', 'modelSchema', // WIP 'controllerSchema', 'action2Schema'
+        'existingSchema', 'modelSchema', 'controllerSchema' // WIP , 'action2Schema'
       ], 'merge of components props to existing components');
 
     })
@@ -227,11 +228,13 @@ describe('Transformations', () => {
         name: 'User'
       };
 
-      mergeTags(destTags, models, modelsJsDoc, defaultModelTags);
+      mergeTags(destTags, models, modelsJsDoc, controllers, controllersJsDoc, defaultModelTags);
       expect(destTags).to.deep.equal([
         tagsFromConfiguration[0],
         models.user.swagger!.tags![0],
         modelsJsDoc.user.tags![0],
+        controllers.controllerFiles.user.swagger!.tags![0],
+        controllersJsDoc.user.tags![0],
         expectedDefaultModelTags
       ], 'merge of tag definitions to existing tags');
 
