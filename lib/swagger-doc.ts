@@ -1,5 +1,5 @@
 import * as fs from 'fs';
-import { SwaggerGenerator, SwaggerSailsModel } from './interfaces';
+import { SwaggerGenerator, SwaggerSailsModel, SwaggerRouteInfo } from './interfaces';
 import cloneDeep from 'lodash/cloneDeep'
 import uniqBy from 'lodash/uniqBy';
 import { blueprintActionTemplates as defaultBlueprintActionTemplates, defaults as configurationDefaults, blueprintParameterTemplates } from './type-formatter';
@@ -7,7 +7,7 @@ import { parseModels, parseControllers, parseModelsJsDoc, parseBoundRoutes, pars
 import { getUniqueTagsFromPath } from './utils';
 import { generateSchemas, generatePaths, generateDefaultModelTags } from './generators';
 import { OpenApi } from '../types/openapi';
-import { mergeModelJsDoc, mergeTags, mergeComponents, mergeControllerJsDoc } from './transformations';
+import { mergeModelJsDoc, mergeTags, mergeComponents, mergeControllerJsDoc, transformSailsPathsToSwaggerPaths } from './transformations';
 
 export default async (sails: Sails.Sails, sailsRoutes: Array<Sails.Route>, context: Sails.Hook<SwaggerGenerator>): Promise<OpenApi.OpenApi | undefined> => {
 
@@ -42,12 +42,19 @@ export default async (sails: Sails.Sails, sailsRoutes: Array<Sails.Route>, conte
 
   let routes = parseBoundRoutes(sailsRoutes, models, sails);
 
+  /*
+   * transformations phase - filter, transform, merge into consistent single model
+   * of SwaggerRouteInfo[]
+   */
+
   // remove globally excluded routes
   routes = routes.filter(route => route.path !== '/__getcookie')
 
   if (hookConfig.includeRoute) {
     routes = routes.filter(route => hookConfig.includeRoute!(route));
   }
+
+  transformSailsPathsToSwaggerPaths(routes);
 
   mergeModelJsDoc(models, modelsJsDoc);
   mergeControllerJsDoc(controllers, controllersJsDoc);
