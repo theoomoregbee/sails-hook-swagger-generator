@@ -74,8 +74,8 @@ export default async (sails: Sails.Sails, sailsRoutes: Array<Sails.Route>, conte
   const defaultModelTags = generateDefaultModelTags(models);
 
   // merge model, controller and action2 .components and .tags
-  mergeComponents(specifications.components, /* routesJsDoc, */ models, modelsJsDoc/*, controllers, controllersJsDoc*/);
-  mergeTags(specifications.tags, models, modelsJsDoc, /*controllers, controllersJsDoc,*/ defaultModelTags);
+  mergeComponents(specifications.components, /* routesJsDoc, */ models, modelsJsDoc, controllers, controllersJsDoc);
+  mergeTags(specifications.tags, models, modelsJsDoc, controllers, controllersJsDoc, defaultModelTags);
 
   specifications.paths = generatePaths(routes, blueprintActionTemplates, theDefaults, {}, specifications, models);
 

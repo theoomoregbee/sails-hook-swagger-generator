@@ -286,9 +286,8 @@ export const mergeComponents = (dest: OpenApi.Components,
   // routesJsDoc: OpenApi.OpenApi,
   models: NameKeyMap<SwaggerSailsModel>,
   modelsJsDoc: NameKeyMap<SwaggerModelAttribute>,
-  // controllers: SwaggerSailsControllers,
-  // controllersJsDoc: NameKeyMap<SwaggerControllerAttribute>
-  ): void => {
+  controllers: SwaggerSailsControllers,
+  controllersJsDoc: NameKeyMap<SwaggerControllerAttribute>): void => {
 
   const mergeIntoDest = (source: OpenApi.Components | undefined) => {
     if (!source) { return; }
@@ -306,8 +305,8 @@ export const mergeComponents = (dest: OpenApi.Components,
   forEach(models, model => mergeIntoDest(model.swagger?.components));
   forEach(modelsJsDoc, jsDoc => mergeIntoDest(jsDoc.components));
 
-  // WIP forEach(controllers.controllerFiles, controllerFile => mergeIntoDest(controllerFile.swagger?.components));
-  // WIP forEach(controllersJsDoc, jsDoc => mergeIntoDest(jsDoc.components));
+  forEach(controllers.controllerFiles, controllerFile => mergeIntoDest(controllerFile.swagger?.components));
+  forEach(controllersJsDoc, jsDoc => mergeIntoDest(jsDoc.components));
 
 }
 
@@ -329,8 +328,8 @@ export const mergeTags = (dest: Tag[],
   // routesJsDoc: OpenApi.OpenApi,
   models: NameKeyMap<SwaggerSailsModel>,
   modelsJsDoc: NameKeyMap<SwaggerModelAttribute>,
-  // WIP controllers: SwaggerSailsControllers,
-  // WIP controllersJsDoc: NameKeyMap<SwaggerControllerAttribute>,
+  controllers: SwaggerSailsControllers,
+  controllersJsDoc: NameKeyMap<SwaggerControllerAttribute>,
   defaultModelTags: Tag[]): void => {
 
   const mergeIntoDest = (source: Tag[] | undefined) => {
@@ -350,8 +349,8 @@ export const mergeTags = (dest: Tag[],
   forEach(models, model => mergeIntoDest(model.swagger?.tags));
   forEach(modelsJsDoc, jsDoc => mergeIntoDest(jsDoc.tags));
 
-  // WIP forEach(controllers.controllerFiles, controllerFile => mergeIntoDest(controllerFile.swagger?.tags));
-  // WIP forEach(controllersJsDoc, jsDoc => mergeIntoDest(jsDoc.tags));
+  forEach(controllers.controllerFiles, controllerFile => mergeIntoDest(controllerFile.swagger?.tags));
+  forEach(controllersJsDoc, jsDoc => mergeIntoDest(jsDoc.tags));
 
   mergeIntoDest(defaultModelTags);
 
