@@ -1,7 +1,7 @@
 import { expect } from 'chai';
-import { NameKeyMap, SwaggerSailsModel, SwaggerSailsController, SwaggerModelAttribute, SwaggerControllerAttribute, SwaggerSailsControllers } from '../lib/interfaces';
+import { NameKeyMap, SwaggerSailsModel, SwaggerSailsController, SwaggerModelAttribute, SwaggerControllerAttribute, SwaggerSailsControllers, SwaggerRouteInfo } from '../lib/interfaces';
 import { OpenApi } from '../types/openapi';
-import { mergeComponents, mergeTags, mergeModelJsDoc, mergeControllerJsDoc } from '../lib/transformations';
+import { mergeComponents, mergeTags, mergeModelJsDoc, mergeControllerJsDoc, transformSailsPathsToSwaggerPaths } from '../lib/transformations';
 import { cloneDeep, defaults } from 'lodash';
 import { generateDefaultModelTags } from '../lib/generators';
 
@@ -12,6 +12,50 @@ import { generateDefaultModelTags } from '../lib/generators';
 // }
 
 describe('Transformations', () => {
+
+  describe('transformSailsPathsToSwaggerPaths', () => {
+    it('should convert `/:id` paths to `/{id}` paths (for all such variables)', () => {
+
+      const inputPaths = [
+        '/user',
+        '/actions2',
+        '/user/login',
+        '/user/logout',
+        '/user/list',
+        '/user/list2',
+        '/user/upload',
+        '/user/roles',
+        '/user/test/:phoneNumber',
+        '/clients/:client_id/user/:id',
+        '/user',
+        '/user/:id',
+        '/user/:id',
+        '/user/:id?'
+      ];
+
+      const expectedOutputPaths = [
+        '/user',
+        '/actions2',
+        '/user/login',
+        '/user/logout',
+        '/user/list',
+        '/user/list2',
+        '/user/upload',
+        '/user/roles',
+        '/user/test/{phoneNumber}',
+        '/clients/{client_id}/user/{id}',
+        '/user',
+        '/user/{id}',
+        '/user/{id}',
+        '/user/{id}'
+      ];
+
+      const routes = inputPaths.map(p => ({ path:p } as SwaggerRouteInfo));
+      transformSailsPathsToSwaggerPaths(routes);
+      const paths = routes.map(r => r.path);
+      expect(paths).to.deep.equal(expectedOutputPaths);
+    })
+  })
 
   const componentsFromConfiguration = {
     schemas: { existingSchema: {} }

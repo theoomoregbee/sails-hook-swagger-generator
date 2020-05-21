@@ -1,8 +1,38 @@
-import { NameKeyMap, SwaggerSailsModel, SwaggerModelAttribute, SwaggerSailsControllers, SwaggerControllerAttribute } from "./interfaces";
+import { NameKeyMap, SwaggerSailsModel, SwaggerModelAttribute, SwaggerSailsControllers, SwaggerControllerAttribute, SwaggerRouteInfo } from "./interfaces";
 import { forEach, defaults, cloneDeep } from "lodash";
 import { Tag } from "swagger-schema-official";
 import { OpenApi } from "../types/openapi";
 
+
+const transformSailsPathToSwaggerPath = (path: string): string => {
+  return path
+    .split('/')
+    .map(v => v.replace(/^:([^/:?]+)\??$/, '{$1}'))
+    .join('/');
+}
+
+/**
+ * Maps from a Sails route path of the form `/path/:id` to a
+ * Swagger path of the form `/path/{id}`.
+ *
+ * Also transform standard Sails '{id}' to '{primaryKeyAttributeName}' where
+ * primary key is not `id`.
+ */
+export const transformSailsPathsToSwaggerPaths = (routes: SwaggerRouteInfo[]): void => {
+
+  routes.map(route => {
+
+    route.path = transformSailsPathToSwaggerPath(route.path);
+
+    if (route.model?.primaryKey && route.model.primaryKey !== 'id') {
+      route.path = route.path.replace('{id}', `{${route.model.primaryKey}}`);
+      route.variables = route.variables.map(v => v === 'id' ? route.model!.primaryKey : v);
+      route.optionalVariables = route.optionalVariables.map(v => v === 'id' ? route.model!.primaryKey : v);
+    }
+
+  });
+
+};
 
 /**
  * Merges JSDoc `actions` and `model` elements **but not** `components` and `tags`
