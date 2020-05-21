@@ -50,17 +50,25 @@ module.exports = {
     },
     email: {
       type: "string",
-      email: true,
+      isEmail: true,
       description: "Just any old email",
     },
     sex: {
       type: "string",
-      enum: ["Male", "Female"],
+      isIn: ["Male", "Female"],
     },
     ageLimit: {
       type: "number",
       min: 15,
       max: 100,
+    },
+    pets: {
+      collection: "Pet",
+      via: "owner",
+    },
+    neighboursPets: {
+      collection: "Pet",
+      via: "caredForBy",
     },
   },
 

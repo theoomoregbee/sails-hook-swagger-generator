@@ -20,6 +20,7 @@ module.exports = {
    *   tags:
    *     - Ditto
    */
+
   friendlyName: 'Friendly',
 
   description: 'Friendly description',

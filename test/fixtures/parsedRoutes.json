@@ -1,189 +1,2813 @@
 [
-    {
-        "verb": "delete",
-        "path": "/clients/{client_id}/user/{id}",
-        "variables": [
-            "client_id",
-            "id"
-        ],
-        "controller": "UserController",
-        "action": "destroy"
-    },
-    {
-        "verb": "post",
-        "path": "/user",
-        "variables": [],
-        "controller": "UserController",
-        "action": "create"
-    },
-    {
-        "verb": "post",
-        "path": "/user/login",
-        "variables": [],
-        "controller": "UserController",
-        "action": "login",
-        "swagger": {
-            "summary": "Authentication",
-            "description": "This is for authentication of any user",
-            "requestBody": {
-                "content": {
-                    "application/json": {
-                        "schema": {
-                            "properties": {
-                                "email": {
-                                    "type": "string"
-                                },
-                                "password": {
-                                    "type": "string",
-                                    "format": "password"
-                                }
-                            },
-                            "required": [
-                                "email",
-                                "password"
-                            ]
-                        }
-                    }
+  {
+    "middlewareType": "ACTION",
+    "verb": "post",
+    "path": "/user",
+    "variables": [],
+    "optionalVariables": [],
+    "action": "user/create",
+    "actionType": "function"
+  },
+  {
+    "middlewareType": "ACTION",
+    "verb": "get",
+    "path": "/actions2",
+    "variables": [],
+    "optionalVariables": [],
+    "action": "subdir/actions2",
+    "actionType": "function"
+  },
+  {
+    "middlewareType": "ACTION",
+    "verb": "post",
+    "path": "/user/login",
+    "variables": [],
+    "optionalVariables": [],
+    "action": "user/login",
+    "actionType": "function",
+    "swagger": {
+      "summary": "Authentication",
+      "description": "This is for authentication of any user",
+      "requestBody": {
+        "content": {
+          "application/json": {
+            "schema": {
+              "properties": {
+                "email": {
+                  "type": "string"
+                },
+                "password": {
+                  "type": "string",
+                  "format": "password"
                 }
-            },
-            "responses": {
-                "200": {
-                    "description": "Success"
-                }
+              },
+              "required": [
+                "email",
+                "password"
+              ]
             }
+          }
         }
-    },
-    {
-        "verb": "get",
-        "path": "/user/logout",
-        "variables": [],
-        "controller": "UserController",
-        "action": "logout"
-    },
-    {
-        "verb": "get",
-        "path": "/user/list",
-        "variables": [],
-        "controller": "UserController",
-        "action": "list"
-    },
-    {
-        "verb": "get",
-        "path": "/user/list2",
-        "variables": [],
-        "controller": "UserController",
-        "action": "list2"
-    },
-    {
-        "verb": "get",
-        "path": "/user/list3",
-        "variables": [],
-        "controller": "UserController",
-        "action": "list3"
-    },
-    {
-        "verb": "post",
-        "path": "/user/list3",
-        "variables": [],
-        "controller": "UserController",
-        "action": "list3"
-    },
-    {
-        "verb": "put",
-        "path": "/user/list3",
-        "variables": [],
-        "controller": "UserController",
-        "action": "list3"
-    },
-    {
-        "verb": "patch",
-        "path": "/user/list3",
-        "variables": [],
-        "controller": "UserController",
-        "action": "list3"
-    },
-    {
-        "verb": "delete",
-        "path": "/user/list3",
-        "variables": [],
-        "controller": "UserController",
-        "action": "list3"
-    },
-    {
-        "verb": "get",
-        "path": "/actions2",
-        "variables": [],
-        "action": "subdir/actions2"
-    },
-    {
-        "verb": "get",
-        "path": "/user/test/{phoneNumber}",
-        "variables": [
-            "phoneNumber"
-        ],
-        "action": "user/logout",
-        "swagger": {
-            "summary": "Phone No. Logout",
-            "description": "Alternate description (of no real significance)"
+      },
+      "responses": {
+        "200": {
+          "description": "Success"
         }
-    },
-    {
-        "verb": "get",
-        "path": "/user/upload",
-        "variables": [],
-        "controller": "UserController",
-        "action": "upload",
-        "swagger": {
-            "parameters": [
-                {
-                    "in": "query",
-                    "name": "data",
-                    "required": true,
-                    "schema": {
-                        "type": "string"
-                    },
-                    "description": "The data"
-                }
-            ],
-            "responses": {
-                "200": {
-                    "description": "Success"
-                }
-            }
-        }
-    },
-    {
-        "verb": "put",
-        "path": "/user/roles",
-        "variables": [],
-        "controller": "UserController",
-        "action": "roles",
-        "swagger": {
-            "summary": "update user roles",
-            "requestBody": {
-                "content": {
-                    "application/json": {
-                        "schema": {
-                            "properties": {
-                                "roles": {
-                                    "type": "array",
-                                    "items": {
-                                        "type": "string"
-                                    }
-                                }
-                            },
-                            "required": [
-                                "roles"
-                            ]
-                        }
-                    }
-                }
-            },
-            "responses": {
-                "200": {
-                    "description": "Success"
-                }
-            }
-        }
+      }
     }
+  },
+  {
+    "middlewareType": "ACTION",
+    "verb": "get",
+    "path": "/user/logout",
+    "variables": [],
+    "optionalVariables": [],
+    "action": "user/logout",
+    "actionType": "function"
+  },
+  {
+    "middlewareType": "ACTION",
+    "verb": "get",
+    "path": "/user/list",
+    "variables": [],
+    "optionalVariables": [],
+    "action": "user/list",
+    "actionType": "function"
+  },
+  {
+    "middlewareType": "ACTION",
+    "verb": "get",
+    "path": "/user/list2",
+    "variables": [],
+    "optionalVariables": [],
+    "action": "user/list2",
+    "actionType": "function"
+  },
+  {
+    "middlewareType": "ACTION",
+    "verb": "get",
+    "path": "/user/upload",
+    "variables": [],
+    "optionalVariables": [],
+    "action": "user/upload",
+    "actionType": "function",
+    "swagger": {
+      "parameters": [
+        {
+          "in": "query",
+          "name": "data",
+          "required": true,
+          "schema": {
+            "type": "string"
+          },
+          "description": "The data"
+        }
+      ],
+      "responses": {
+        "200": {
+          "description": "Success"
+        }
+      }
+    }
+  },
+  {
+    "middlewareType": "ACTION",
+    "verb": "put",
+    "path": "/user/roles",
+    "variables": [],
+    "optionalVariables": [],
+    "action": "user/roles",
+    "actionType": "function",
+    "swagger": {
+      "summary": "update user roles",
+      "requestBody": {
+        "content": {
+          "application/json": {
+            "schema": {
+              "properties": {
+                "roles": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              },
+              "required": [
+                "roles"
+              ]
+            }
+          }
+        }
+      },
+      "responses": {
+        "200": {
+          "description": "Success"
+        }
+      }
+    }
+  },
+  {
+    "middlewareType": "ACTION",
+    "verb": "get",
+    "path": "/user/test/:phoneNumber",
+    "variables": [
+      "phoneNumber"
+    ],
+    "optionalVariables": [],
+    "action": "user/logout",
+    "actionType": "function",
+    "swagger": {
+      "summary": "Phone No. Logout",
+      "description": "Alternate description (of no real significance)"
+    }
+  },
+  {
+    "middlewareType": "ACTION",
+    "verb": "delete",
+    "path": "/clients/:client_id/user/:id",
+    "variables": [
+      "client_id",
+      "id"
+    ],
+    "optionalVariables": [],
+    "action": "user/destroy",
+    "actionType": "function"
+  },
+  {
+    "middlewareType": "BLUEPRINT",
+    "verb": "get",
+    "path": "/oldpet",
+    "variables": [],
+    "optionalVariables": [],
+    "action": "find",
+    "actionType": "blueprint",
+    "model": {
+      "globalId": "OldPet",
+      "primaryKey": "petID",
+      "identity": "oldpet",
+      "attributes": {
+        "petID": {
+          "type": "number",
+          "meta": {
+            "swagger": {
+              "readOnly": true
+            }
+          },
+          "autoMigrations": {
+            "autoIncrement": true,
+            "unique": true,
+            "columnType": "_numberkey"
+          },
+          "required": false
+        },
+        "names": {
+          "type": "string",
+          "required": true,
+          "example": "Pet's full name",
+          "autoMigrations": {
+            "unique": false,
+            "autoIncrement": false,
+            "columnType": "_string"
+          }
+        },
+        "_internalField": {
+          "type": "string",
+          "meta": {
+            "swagger": {
+              "exclude": true
+            }
+          },
+          "autoMigrations": {
+            "unique": false,
+            "autoIncrement": false,
+            "columnType": "_string"
+          },
+          "required": false
+        },
+        "owner": {
+          "model": "user",
+          "autoMigrations": {
+            "unique": false,
+            "autoIncrement": false,
+            "columnType": "_numberkey"
+          },
+          "required": false
+        },
+        "caredForBy": {
+          "model": "user",
+          "autoMigrations": {
+            "unique": false,
+            "autoIncrement": false,
+            "columnType": "_numberkey"
+          },
+          "required": false
+        }
+      },
+      "associations": [
+        {
+          "alias": "owner",
+          "type": "model",
+          "model": "user"
+        },
+        {
+          "alias": "caredForBy",
+          "type": "model",
+          "model": "user"
+        }
+      ],
+      "swagger": {
+        "model": {
+          "exclude": true
+        }
+      }
+    },
+    "associationAliases": []
+  },
+  {
+    "middlewareType": "BLUEPRINT",
+    "verb": "get",
+    "path": "/oldpet/:id",
+    "variables": [
+      "id"
+    ],
+    "optionalVariables": [],
+    "action": "findone",
+    "actionType": "blueprint",
+    "model": {
+      "globalId": "OldPet",
+      "primaryKey": "petID",
+      "identity": "oldpet",
+      "attributes": {
+        "petID": {
+          "type": "number",
+          "meta": {
+            "swagger": {
+              "readOnly": true
+            }
+          },
+          "autoMigrations": {
+            "autoIncrement": true,
+            "unique": true,
+            "columnType": "_numberkey"
+          },
+          "required": false
+        },
+        "names": {
+          "type": "string",
+          "required": true,
+          "example": "Pet's full name",
+          "autoMigrations": {
+            "unique": false,
+            "autoIncrement": false,
+            "columnType": "_string"
+          }
+        },
+        "_internalField": {
+          "type": "string",
+          "meta": {
+            "swagger": {
+              "exclude": true
+            }
+          },
+          "autoMigrations": {
+            "unique": false,
+            "autoIncrement": false,
+            "columnType": "_string"
+          },
+          "required": false
+        },
+        "owner": {
+          "model": "user",
+          "autoMigrations": {
+            "unique": false,
+            "autoIncrement": false,
+            "columnType": "_numberkey"
+          },
+          "required": false
+        },
+        "caredForBy": {
+          "model": "user",
+          "autoMigrations": {
+            "unique": false,
+            "autoIncrement": false,
+            "columnType": "_numberkey"
+          },
+          "required": false
+        }
+      },
+      "associations": [
+        {
+          "alias": "owner",
+          "type": "model",
+          "model": "user"
+        },
+        {
+          "alias": "caredForBy",
+          "type": "model",
+          "model": "user"
+        }
+      ],
+      "swagger": {
+        "model": {
+          "exclude": true
+        }
+      }
+    },
+    "associationAliases": []
+  },
+  {
+    "middlewareType": "BLUEPRINT",
+    "verb": "post",
+    "path": "/oldpet",
+    "variables": [],
+    "optionalVariables": [],
+    "action": "create",
+    "actionType": "blueprint",
+    "model": {
+      "globalId": "OldPet",
+      "primaryKey": "petID",
+      "identity": "oldpet",
+      "attributes": {
+        "petID": {
+          "type": "number",
+          "meta": {
+            "swagger": {
+              "readOnly": true
+            }
+          },
+          "autoMigrations": {
+            "autoIncrement": true,
+            "unique": true,
+            "columnType": "_numberkey"
+          },
+          "required": false
+        },
+        "names": {
+          "type": "string",
+          "required": true,
+          "example": "Pet's full name",
+          "autoMigrations": {
+            "unique": false,
+            "autoIncrement": false,
+            "columnType": "_string"
+          }
+        },
+        "_internalField": {
+          "type": "string",
+          "meta": {
+            "swagger": {
+              "exclude": true
+            }
+          },
+          "autoMigrations": {
+            "unique": false,
+            "autoIncrement": false,
+            "columnType": "_string"
+          },
+          "required": false
+        },
+        "owner": {
+          "model": "user",
+          "autoMigrations": {
+            "unique": false,
+            "autoIncrement": false,
+            "columnType": "_numberkey"
+          },
+          "required": false
+        },
+        "caredForBy": {
+          "model": "user",
+          "autoMigrations": {
+            "unique": false,
+            "autoIncrement": false,
+            "columnType": "_numberkey"
+          },
+          "required": false
+        }
+      },
+      "associations": [
+        {
+          "alias": "owner",
+          "type": "model",
+          "model": "user"
+        },
+        {
+          "alias": "caredForBy",
+          "type": "model",
+          "model": "user"
+        }
+      ],
+      "swagger": {
+        "model": {
+          "exclude": true
+        }
+      }
+    },
+    "associationAliases": []
+  },
+  {
+    "middlewareType": "BLUEPRINT",
+    "verb": "patch",
+    "path": "/oldpet/:id",
+    "variables": [
+      "id"
+    ],
+    "optionalVariables": [],
+    "action": "update",
+    "actionType": "blueprint",
+    "model": {
+      "globalId": "OldPet",
+      "primaryKey": "petID",
+      "identity": "oldpet",
+      "attributes": {
+        "petID": {
+          "type": "number",
+          "meta": {
+            "swagger": {
+              "readOnly": true
+            }
+          },
+          "autoMigrations": {
+            "autoIncrement": true,
+            "unique": true,
+            "columnType": "_numberkey"
+          },
+          "required": false
+        },
+        "names": {
+          "type": "string",
+          "required": true,
+          "example": "Pet's full name",
+          "autoMigrations": {
+            "unique": false,
+            "autoIncrement": false,
+            "columnType": "_string"
+          }
+        },
+        "_internalField": {
+          "type": "string",
+          "meta": {
+            "swagger": {
+              "exclude": true
+            }
+          },
+          "autoMigrations": {
+            "unique": false,
+            "autoIncrement": false,
+            "columnType": "_string"
+          },
+          "required": false
+        },
+        "owner": {
+          "model": "user",
+          "autoMigrations": {
+            "unique": false,
+            "autoIncrement": false,
+            "columnType": "_numberkey"
+          },
+          "required": false
+        },
+        "caredForBy": {
+          "model": "user",
+          "autoMigrations": {
+            "unique": false,
+            "autoIncrement": false,
+            "columnType": "_numberkey"
+          },
+          "required": false
+        }
+      },
+      "associations": [
+        {
+          "alias": "owner",
+          "type": "model",
+          "model": "user"
+        },
+        {
+          "alias": "caredForBy",
+          "type": "model",
+          "model": "user"
+        }
+      ],
+      "swagger": {
+        "model": {
+          "exclude": true
+        }
+      }
+    },
+    "associationAliases": []
+  },
+  {
+    "middlewareType": "BLUEPRINT",
+    "verb": "delete",
+    "path": "/oldpet/:id?",
+    "variables": [
+      "id"
+    ],
+    "optionalVariables": [
+      "id"
+    ],
+    "action": "destroy",
+    "actionType": "blueprint",
+    "model": {
+      "globalId": "OldPet",
+      "primaryKey": "petID",
+      "identity": "oldpet",
+      "attributes": {
+        "petID": {
+          "type": "number",
+          "meta": {
+            "swagger": {
+              "readOnly": true
+            }
+          },
+          "autoMigrations": {
+            "autoIncrement": true,
+            "unique": true,
+            "columnType": "_numberkey"
+          },
+          "required": false
+        },
+        "names": {
+          "type": "string",
+          "required": true,
+          "example": "Pet's full name",
+          "autoMigrations": {
+            "unique": false,
+            "autoIncrement": false,
+            "columnType": "_string"
+          }
+        },
+        "_internalField": {
+          "type": "string",
+          "meta": {
+            "swagger": {
+              "exclude": true
+            }
+          },
+          "autoMigrations": {
+            "unique": false,
+            "autoIncrement": false,
+            "columnType": "_string"
+          },
+          "required": false
+        },
+        "owner": {
+          "model": "user",
+          "autoMigrations": {
+            "unique": false,
+            "autoIncrement": false,
+            "columnType": "_numberkey"
+          },
+          "required": false
+        },
+        "caredForBy": {
+          "model": "user",
+          "autoMigrations": {
+            "unique": false,
+            "autoIncrement": false,
+            "columnType": "_numberkey"
+          },
+          "required": false
+        }
+      },
+      "associations": [
+        {
+          "alias": "owner",
+          "type": "model",
+          "model": "user"
+        },
+        {
+          "alias": "caredForBy",
+          "type": "model",
+          "model": "user"
+        }
+      ],
+      "swagger": {
+        "model": {
+          "exclude": true
+        }
+      }
+    },
+    "associationAliases": []
+  },
+  {
+    "middlewareType": "BLUEPRINT",
+    "verb": "get",
+    "path": "/oldpet/:parentid/owner",
+    "variables": [
+      "parentid"
+    ],
+    "optionalVariables": [],
+    "action": "populate",
+    "actionType": "blueprint",
+    "model": {
+      "globalId": "OldPet",
+      "primaryKey": "petID",
+      "identity": "oldpet",
+      "attributes": {
+        "petID": {
+          "type": "number",
+          "meta": {
+            "swagger": {
+              "readOnly": true
+            }
+          },
+          "autoMigrations": {
+            "autoIncrement": true,
+            "unique": true,
+            "columnType": "_numberkey"
+          },
+          "required": false
+        },
+        "names": {
+          "type": "string",
+          "required": true,
+          "example": "Pet's full name",
+          "autoMigrations": {
+            "unique": false,
+            "autoIncrement": false,
+            "columnType": "_string"
+          }
+        },
+        "_internalField": {
+          "type": "string",
+          "meta": {
+            "swagger": {
+              "exclude": true
+            }
+          },
+          "autoMigrations": {
+            "unique": false,
+            "autoIncrement": false,
+            "columnType": "_string"
+          },
+          "required": false
+        },
+        "owner": {
+          "model": "user",
+          "autoMigrations": {
+            "unique": false,
+            "autoIncrement": false,
+            "columnType": "_numberkey"
+          },
+          "required": false
+        },
+        "caredForBy": {
+          "model": "user",
+          "autoMigrations": {
+            "unique": false,
+            "autoIncrement": false,
+            "columnType": "_numberkey"
+          },
+          "required": false
+        }
+      },
+      "associations": [
+        {
+          "alias": "owner",
+          "type": "model",
+          "model": "user"
+        },
+        {
+          "alias": "caredForBy",
+          "type": "model",
+          "model": "user"
+        }
+      ],
+      "swagger": {
+        "model": {
+          "exclude": true
+        }
+      }
+    },
+    "associationAliases": [
+      "owner"
+    ]
+  },
+  {
+    "middlewareType": "BLUEPRINT",
+    "verb": "get",
+    "path": "/oldpet/:parentid/caredForBy",
+    "variables": [
+      "parentid"
+    ],
+    "optionalVariables": [],
+    "action": "populate",
+    "actionType": "blueprint",
+    "model": {
+      "globalId": "OldPet",
+      "primaryKey": "petID",
+      "identity": "oldpet",
+      "attributes": {
+        "petID": {
+          "type": "number",
+          "meta": {
+            "swagger": {
+              "readOnly": true
+            }
+          },
+          "autoMigrations": {
+            "autoIncrement": true,
+            "unique": true,
+            "columnType": "_numberkey"
+          },
+          "required": false
+        },
+        "names": {
+          "type": "string",
+          "required": true,
+          "example": "Pet's full name",
+          "autoMigrations": {
+            "unique": false,
+            "autoIncrement": false,
+            "columnType": "_string"
+          }
+        },
+        "_internalField": {
+          "type": "string",
+          "meta": {
+            "swagger": {
+              "exclude": true
+            }
+          },
+          "autoMigrations": {
+            "unique": false,
+            "autoIncrement": false,
+            "columnType": "_string"
+          },
+          "required": false
+        },
+        "owner": {
+          "model": "user",
+          "autoMigrations": {
+            "unique": false,
+            "autoIncrement": false,
+            "columnType": "_numberkey"
+          },
+          "required": false
+        },
+        "caredForBy": {
+          "model": "user",
+          "autoMigrations": {
+            "unique": false,
+            "autoIncrement": false,
+            "columnType": "_numberkey"
+          },
+          "required": false
+        }
+      },
+      "associations": [
+        {
+          "alias": "owner",
+          "type": "model",
+          "model": "user"
+        },
+        {
+          "alias": "caredForBy",
+          "type": "model",
+          "model": "user"
+        }
+      ],
+      "swagger": {
+        "model": {
+          "exclude": true
+        }
+      }
+    },
+    "associationAliases": [
+      "caredForBy"
+    ]
+  },
+  {
+    "middlewareType": "BLUEPRINT",
+    "verb": "get",
+    "path": "/pet",
+    "variables": [],
+    "optionalVariables": [],
+    "action": "find",
+    "actionType": "blueprint",
+    "model": {
+      "globalId": "Pet",
+      "primaryKey": "petID",
+      "identity": "pet",
+      "attributes": {
+        "petID": {
+          "type": "number",
+          "meta": {
+            "swagger": {
+              "readOnly": true
+            }
+          },
+          "autoMigrations": {
+            "autoIncrement": true,
+            "unique": true,
+            "columnType": "_numberkey"
+          },
+          "required": false
+        },
+        "names": {
+          "type": "string",
+          "required": true,
+          "example": "Pet's full name",
+          "autoMigrations": {
+            "unique": false,
+            "autoIncrement": false,
+            "columnType": "_string"
+          }
+        },
+        "_internalField": {
+          "type": "string",
+          "meta": {
+            "swagger": {
+              "exclude": true
+            }
+          },
+          "autoMigrations": {
+            "unique": false,
+            "autoIncrement": false,
+            "columnType": "_string"
+          },
+          "required": false
+        },
+        "owner": {
+          "model": "user",
+          "autoMigrations": {
+            "unique": false,
+            "autoIncrement": false,
+            "columnType": "_numberkey"
+          },
+          "required": false
+        },
+        "caredForBy": {
+          "model": "user",
+          "autoMigrations": {
+            "unique": false,
+            "autoIncrement": false,
+            "columnType": "_numberkey"
+          },
+          "required": false
+        }
+      },
+      "associations": [
+        {
+          "alias": "owner",
+          "type": "model",
+          "model": "user"
+        },
+        {
+          "alias": "caredForBy",
+          "type": "model",
+          "model": "user"
+        }
+      ],
+      "swagger": {}
+    },
+    "associationAliases": []
+  },
+  {
+    "middlewareType": "BLUEPRINT",
+    "verb": "get",
+    "path": "/pet/:id",
+    "variables": [
+      "id"
+    ],
+    "optionalVariables": [],
+    "action": "findone",
+    "actionType": "blueprint",
+    "model": {
+      "globalId": "Pet",
+      "primaryKey": "petID",
+      "identity": "pet",
+      "attributes": {
+        "petID": {
+          "type": "number",
+          "meta": {
+            "swagger": {
+              "readOnly": true
+            }
+          },
+          "autoMigrations": {
+            "autoIncrement": true,
+            "unique": true,
+            "columnType": "_numberkey"
+          },
+          "required": false
+        },
+        "names": {
+          "type": "string",
+          "required": true,
+          "example": "Pet's full name",
+          "autoMigrations": {
+            "unique": false,
+            "autoIncrement": false,
+            "columnType": "_string"
+          }
+        },
+        "_internalField": {
+          "type": "string",
+          "meta": {
+            "swagger": {
+              "exclude": true
+            }
+          },
+          "autoMigrations": {
+            "unique": false,
+            "autoIncrement": false,
+            "columnType": "_string"
+          },
+          "required": false
+        },
+        "owner": {
+          "model": "user",
+          "autoMigrations": {
+            "unique": false,
+            "autoIncrement": false,
+            "columnType": "_numberkey"
+          },
+          "required": false
+        },
+        "caredForBy": {
+          "model": "user",
+          "autoMigrations": {
+            "unique": false,
+            "autoIncrement": false,
+            "columnType": "_numberkey"
+          },
+          "required": false
+        }
+      },
+      "associations": [
+        {
+          "alias": "owner",
+          "type": "model",
+          "model": "user"
+        },
+        {
+          "alias": "caredForBy",
+          "type": "model",
+          "model": "user"
+        }
+      ],
+      "swagger": {}
+    },
+    "associationAliases": []
+  },
+  {
+    "middlewareType": "BLUEPRINT",
+    "verb": "post",
+    "path": "/pet",
+    "variables": [],
+    "optionalVariables": [],
+    "action": "create",
+    "actionType": "blueprint",
+    "model": {
+      "globalId": "Pet",
+      "primaryKey": "petID",
+      "identity": "pet",
+      "attributes": {
+        "petID": {
+          "type": "number",
+          "meta": {
+            "swagger": {
+              "readOnly": true
+            }
+          },
+          "autoMigrations": {
+            "autoIncrement": true,
+            "unique": true,
+            "columnType": "_numberkey"
+          },
+          "required": false
+        },
+        "names": {
+          "type": "string",
+          "required": true,
+          "example": "Pet's full name",
+          "autoMigrations": {
+            "unique": false,
+            "autoIncrement": false,
+            "columnType": "_string"
+          }
+        },
+        "_internalField": {
+          "type": "string",
+          "meta": {
+            "swagger": {
+              "exclude": true
+            }
+          },
+          "autoMigrations": {
+            "unique": false,
+            "autoIncrement": false,
+            "columnType": "_string"
+          },
+          "required": false
+        },
+        "owner": {
+          "model": "user",
+          "autoMigrations": {
+            "unique": false,
+            "autoIncrement": false,
+            "columnType": "_numberkey"
+          },
+          "required": false
+        },
+        "caredForBy": {
+          "model": "user",
+          "autoMigrations": {
+            "unique": false,
+            "autoIncrement": false,
+            "columnType": "_numberkey"
+          },
+          "required": false
+        }
+      },
+      "associations": [
+        {
+          "alias": "owner",
+          "type": "model",
+          "model": "user"
+        },
+        {
+          "alias": "caredForBy",
+          "type": "model",
+          "model": "user"
+        }
+      ],
+      "swagger": {}
+    },
+    "associationAliases": []
+  },
+  {
+    "middlewareType": "BLUEPRINT",
+    "verb": "patch",
+    "path": "/pet/:id",
+    "variables": [
+      "id"
+    ],
+    "optionalVariables": [],
+    "action": "update",
+    "actionType": "blueprint",
+    "model": {
+      "globalId": "Pet",
+      "primaryKey": "petID",
+      "identity": "pet",
+      "attributes": {
+        "petID": {
+          "type": "number",
+          "meta": {
+            "swagger": {
+              "readOnly": true
+            }
+          },
+          "autoMigrations": {
+            "autoIncrement": true,
+            "unique": true,
+            "columnType": "_numberkey"
+          },
+          "required": false
+        },
+        "names": {
+          "type": "string",
+          "required": true,
+          "example": "Pet's full name",
+          "autoMigrations": {
+            "unique": false,
+            "autoIncrement": false,
+            "columnType": "_string"
+          }
+        },
+        "_internalField": {
+          "type": "string",
+          "meta": {
+            "swagger": {
+              "exclude": true
+            }
+          },
+          "autoMigrations": {
+            "unique": false,
+            "autoIncrement": false,
+            "columnType": "_string"
+          },
+          "required": false
+        },
+        "owner": {
+          "model": "user",
+          "autoMigrations": {
+            "unique": false,
+            "autoIncrement": false,
+            "columnType": "_numberkey"
+          },
+          "required": false
+        },
+        "caredForBy": {
+          "model": "user",
+          "autoMigrations": {
+            "unique": false,
+            "autoIncrement": false,
+            "columnType": "_numberkey"
+          },
+          "required": false
+        }
+      },
+      "associations": [
+        {
+          "alias": "owner",
+          "type": "model",
+          "model": "user"
+        },
+        {
+          "alias": "caredForBy",
+          "type": "model",
+          "model": "user"
+        }
+      ],
+      "swagger": {}
+    },
+    "associationAliases": []
+  },
+  {
+    "middlewareType": "BLUEPRINT",
+    "verb": "delete",
+    "path": "/pet/:id?",
+    "variables": [
+      "id"
+    ],
+    "optionalVariables": [
+      "id"
+    ],
+    "action": "destroy",
+    "actionType": "blueprint",
+    "model": {
+      "globalId": "Pet",
+      "primaryKey": "petID",
+      "identity": "pet",
+      "attributes": {
+        "petID": {
+          "type": "number",
+          "meta": {
+            "swagger": {
+              "readOnly": true
+            }
+          },
+          "autoMigrations": {
+            "autoIncrement": true,
+            "unique": true,
+            "columnType": "_numberkey"
+          },
+          "required": false
+        },
+        "names": {
+          "type": "string",
+          "required": true,
+          "example": "Pet's full name",
+          "autoMigrations": {
+            "unique": false,
+            "autoIncrement": false,
+            "columnType": "_string"
+          }
+        },
+        "_internalField": {
+          "type": "string",
+          "meta": {
+            "swagger": {
+              "exclude": true
+            }
+          },
+          "autoMigrations": {
+            "unique": false,
+            "autoIncrement": false,
+            "columnType": "_string"
+          },
+          "required": false
+        },
+        "owner": {
+          "model": "user",
+          "autoMigrations": {
+            "unique": false,
+            "autoIncrement": false,
+            "columnType": "_numberkey"
+          },
+          "required": false
+        },
+        "caredForBy": {
+          "model": "user",
+          "autoMigrations": {
+            "unique": false,
+            "autoIncrement": false,
+            "columnType": "_numberkey"
+          },
+          "required": false
+        }
+      },
+      "associations": [
+        {
+          "alias": "owner",
+          "type": "model",
+          "model": "user"
+        },
+        {
+          "alias": "caredForBy",
+          "type": "model",
+          "model": "user"
+        }
+      ],
+      "swagger": {}
+    },
+    "associationAliases": []
+  },
+  {
+    "middlewareType": "BLUEPRINT",
+    "verb": "get",
+    "path": "/pet/:parentid/owner",
+    "variables": [
+      "parentid"
+    ],
+    "optionalVariables": [],
+    "action": "populate",
+    "actionType": "blueprint",
+    "model": {
+      "globalId": "Pet",
+      "primaryKey": "petID",
+      "identity": "pet",
+      "attributes": {
+        "petID": {
+          "type": "number",
+          "meta": {
+            "swagger": {
+              "readOnly": true
+            }
+          },
+          "autoMigrations": {
+            "autoIncrement": true,
+            "unique": true,
+            "columnType": "_numberkey"
+          },
+          "required": false
+        },
+        "names": {
+          "type": "string",
+          "required": true,
+          "example": "Pet's full name",
+          "autoMigrations": {
+            "unique": false,
+            "autoIncrement": false,
+            "columnType": "_string"
+          }
+        },
+        "_internalField": {
+          "type": "string",
+          "meta": {
+            "swagger": {
+              "exclude": true
+            }
+          },
+          "autoMigrations": {
+            "unique": false,
+            "autoIncrement": false,
+            "columnType": "_string"
+          },
+          "required": false
+        },
+        "owner": {
+          "model": "user",
+          "autoMigrations": {
+            "unique": false,
+            "autoIncrement": false,
+            "columnType": "_numberkey"
+          },
+          "required": false
+        },
+        "caredForBy": {
+          "model": "user",
+          "autoMigrations": {
+            "unique": false,
+            "autoIncrement": false,
+            "columnType": "_numberkey"
+          },
+          "required": false
+        }
+      },
+      "associations": [
+        {
+          "alias": "owner",
+          "type": "model",
+          "model": "user"
+        },
+        {
+          "alias": "caredForBy",
+          "type": "model",
+          "model": "user"
+        }
+      ],
+      "swagger": {}
+    },
+    "associationAliases": [
+      "owner"
+    ]
+  },
+  {
+    "middlewareType": "BLUEPRINT",
+    "verb": "get",
+    "path": "/pet/:parentid/caredForBy",
+    "variables": [
+      "parentid"
+    ],
+    "optionalVariables": [],
+    "action": "populate",
+    "actionType": "blueprint",
+    "model": {
+      "globalId": "Pet",
+      "primaryKey": "petID",
+      "identity": "pet",
+      "attributes": {
+        "petID": {
+          "type": "number",
+          "meta": {
+            "swagger": {
+              "readOnly": true
+            }
+          },
+          "autoMigrations": {
+            "autoIncrement": true,
+            "unique": true,
+            "columnType": "_numberkey"
+          },
+          "required": false
+        },
+        "names": {
+          "type": "string",
+          "required": true,
+          "example": "Pet's full name",
+          "autoMigrations": {
+            "unique": false,
+            "autoIncrement": false,
+            "columnType": "_string"
+          }
+        },
+        "_internalField": {
+          "type": "string",
+          "meta": {
+            "swagger": {
+              "exclude": true
+            }
+          },
+          "autoMigrations": {
+            "unique": false,
+            "autoIncrement": false,
+            "columnType": "_string"
+          },
+          "required": false
+        },
+        "owner": {
+          "model": "user",
+          "autoMigrations": {
+            "unique": false,
+            "autoIncrement": false,
+            "columnType": "_numberkey"
+          },
+          "required": false
+        },
+        "caredForBy": {
+          "model": "user",
+          "autoMigrations": {
+            "unique": false,
+            "autoIncrement": false,
+            "columnType": "_numberkey"
+          },
+          "required": false
+        }
+      },
+      "associations": [
+        {
+          "alias": "owner",
+          "type": "model",
+          "model": "user"
+        },
+        {
+          "alias": "caredForBy",
+          "type": "model",
+          "model": "user"
+        }
+      ],
+      "swagger": {}
+    },
+    "associationAliases": [
+      "caredForBy"
+    ]
+  },
+  {
+    "middlewareType": "BLUEPRINT",
+    "verb": "get",
+    "path": "/user",
+    "variables": [],
+    "optionalVariables": [],
+    "action": "find",
+    "actionType": "blueprint",
+    "model": {
+      "globalId": "User",
+      "primaryKey": "id",
+      "identity": "user",
+      "attributes": {
+        "id": {
+          "type": "number",
+          "autoMigrations": {
+            "autoIncrement": true,
+            "unique": true,
+            "columnType": "_numberkey"
+          },
+          "required": false
+        },
+        "names": {
+          "type": "string",
+          "required": true,
+          "example": "First Middle Last",
+          "autoMigrations": {
+            "unique": false,
+            "autoIncrement": false,
+            "columnType": "_string"
+          }
+        },
+        "email": {
+          "type": "string",
+          "description": "Just any old email",
+          "validations": {
+            "isEmail": true
+          },
+          "autoMigrations": {
+            "unique": false,
+            "autoIncrement": false,
+            "columnType": "_string"
+          },
+          "required": false
+        },
+        "sex": {
+          "type": "string",
+          "validations": {
+            "isIn": [
+              "Male",
+              "Female"
+            ]
+          },
+          "autoMigrations": {
+            "unique": false,
+            "autoIncrement": false,
+            "columnType": "_string"
+          },
+          "required": false
+        },
+        "ageLimit": {
+          "type": "number",
+          "validations": {
+            "min": 15,
+            "max": 100
+          },
+          "autoMigrations": {
+            "unique": false,
+            "autoIncrement": false,
+            "columnType": "_number"
+          },
+          "required": false
+        },
+        "pets": {
+          "collection": "pet",
+          "via": "owner",
+          "required": false
+        },
+        "neighboursPets": {
+          "collection": "pet",
+          "via": "caredForBy",
+          "required": false
+        }
+      },
+      "associations": [
+        {
+          "alias": "pets",
+          "type": "collection",
+          "collection": "pet",
+          "via": "owner"
+        },
+        {
+          "alias": "neighboursPets",
+          "type": "collection",
+          "collection": "pet",
+          "via": "caredForBy"
+        }
+      ],
+      "swagger": {
+        "actions": {
+          "findone": {
+            "description": "_Alternate description_: Look up the **User** record with the specified ID."
+          }
+        },
+        "tags": [
+          {
+            "name": "User (ORM duplicate)",
+            "externalDocs": {
+              "url": "https://somewhere.com/alternate",
+              "description": "Refer to these alternate docs"
+            }
+          }
+        ],
+        "components": {
+          "parameters": []
+        }
+      }
+    },
+    "associationAliases": []
+  },
+  {
+    "middlewareType": "BLUEPRINT",
+    "verb": "get",
+    "path": "/user/:id",
+    "variables": [
+      "id"
+    ],
+    "optionalVariables": [],
+    "action": "findone",
+    "actionType": "blueprint",
+    "model": {
+      "globalId": "User",
+      "primaryKey": "id",
+      "identity": "user",
+      "attributes": {
+        "id": {
+          "type": "number",
+          "autoMigrations": {
+            "autoIncrement": true,
+            "unique": true,
+            "columnType": "_numberkey"
+          },
+          "required": false
+        },
+        "names": {
+          "type": "string",
+          "required": true,
+          "example": "First Middle Last",
+          "autoMigrations": {
+            "unique": false,
+            "autoIncrement": false,
+            "columnType": "_string"
+          }
+        },
+        "email": {
+          "type": "string",
+          "description": "Just any old email",
+          "validations": {
+            "isEmail": true
+          },
+          "autoMigrations": {
+            "unique": false,
+            "autoIncrement": false,
+            "columnType": "_string"
+          },
+          "required": false
+        },
+        "sex": {
+          "type": "string",
+          "validations": {
+            "isIn": [
+              "Male",
+              "Female"
+            ]
+          },
+          "autoMigrations": {
+            "unique": false,
+            "autoIncrement": false,
+            "columnType": "_string"
+          },
+          "required": false
+        },
+        "ageLimit": {
+          "type": "number",
+          "validations": {
+            "min": 15,
+            "max": 100
+          },
+          "autoMigrations": {
+            "unique": false,
+            "autoIncrement": false,
+            "columnType": "_number"
+          },
+          "required": false
+        },
+        "pets": {
+          "collection": "pet",
+          "via": "owner",
+          "required": false
+        },
+        "neighboursPets": {
+          "collection": "pet",
+          "via": "caredForBy",
+          "required": false
+        }
+      },
+      "associations": [
+        {
+          "alias": "pets",
+          "type": "collection",
+          "collection": "pet",
+          "via": "owner"
+        },
+        {
+          "alias": "neighboursPets",
+          "type": "collection",
+          "collection": "pet",
+          "via": "caredForBy"
+        }
+      ],
+      "swagger": {
+        "actions": {
+          "findone": {
+            "description": "_Alternate description_: Look up the **User** record with the specified ID."
+          }
+        },
+        "tags": [
+          {
+            "name": "User (ORM duplicate)",
+            "externalDocs": {
+              "url": "https://somewhere.com/alternate",
+              "description": "Refer to these alternate docs"
+            }
+          }
+        ],
+        "components": {
+          "parameters": []
+        }
+      }
+    },
+    "associationAliases": []
+  },
+  {
+    "middlewareType": "BLUEPRINT",
+    "verb": "patch",
+    "path": "/user/:id",
+    "variables": [
+      "id"
+    ],
+    "optionalVariables": [],
+    "action": "update",
+    "actionType": "blueprint",
+    "model": {
+      "globalId": "User",
+      "primaryKey": "id",
+      "identity": "user",
+      "attributes": {
+        "id": {
+          "type": "number",
+          "autoMigrations": {
+            "autoIncrement": true,
+            "unique": true,
+            "columnType": "_numberkey"
+          },
+          "required": false
+        },
+        "names": {
+          "type": "string",
+          "required": true,
+          "example": "First Middle Last",
+          "autoMigrations": {
+            "unique": false,
+            "autoIncrement": false,
+            "columnType": "_string"
+          }
+        },
+        "email": {
+          "type": "string",
+          "description": "Just any old email",
+          "validations": {
+            "isEmail": true
+          },
+          "autoMigrations": {
+            "unique": false,
+            "autoIncrement": false,
+            "columnType": "_string"
+          },
+          "required": false
+        },
+        "sex": {
+          "type": "string",
+          "validations": {
+            "isIn": [
+              "Male",
+              "Female"
+            ]
+          },
+          "autoMigrations": {
+            "unique": false,
+            "autoIncrement": false,
+            "columnType": "_string"
+          },
+          "required": false
+        },
+        "ageLimit": {
+          "type": "number",
+          "validations": {
+            "min": 15,
+            "max": 100
+          },
+          "autoMigrations": {
+            "unique": false,
+            "autoIncrement": false,
+            "columnType": "_number"
+          },
+          "required": false
+        },
+        "pets": {
+          "collection": "pet",
+          "via": "owner",
+          "required": false
+        },
+        "neighboursPets": {
+          "collection": "pet",
+          "via": "caredForBy",
+          "required": false
+        }
+      },
+      "associations": [
+        {
+          "alias": "pets",
+          "type": "collection",
+          "collection": "pet",
+          "via": "owner"
+        },
+        {
+          "alias": "neighboursPets",
+          "type": "collection",
+          "collection": "pet",
+          "via": "caredForBy"
+        }
+      ],
+      "swagger": {
+        "actions": {
+          "findone": {
+            "description": "_Alternate description_: Look up the **User** record with the specified ID."
+          }
+        },
+        "tags": [
+          {
+            "name": "User (ORM duplicate)",
+            "externalDocs": {
+              "url": "https://somewhere.com/alternate",
+              "description": "Refer to these alternate docs"
+            }
+          }
+        ],
+        "components": {
+          "parameters": []
+        }
+      }
+    },
+    "associationAliases": []
+  },
+  {
+    "middlewareType": "ACTION",
+    "verb": "delete",
+    "path": "/user/:id?",
+    "variables": [
+      "id"
+    ],
+    "optionalVariables": [
+      "id"
+    ],
+    "action": "user/destroy",
+    "actionType": "function"
+  },
+  {
+    "middlewareType": "BLUEPRINT",
+    "verb": "put",
+    "path": "/user/:parentid/pets/:childid",
+    "variables": [
+      "parentid",
+      "childid"
+    ],
+    "optionalVariables": [],
+    "action": "add",
+    "actionType": "blueprint",
+    "model": {
+      "globalId": "User",
+      "primaryKey": "id",
+      "identity": "user",
+      "attributes": {
+        "id": {
+          "type": "number",
+          "autoMigrations": {
+            "autoIncrement": true,
+            "unique": true,
+            "columnType": "_numberkey"
+          },
+          "required": false
+        },
+        "names": {
+          "type": "string",
+          "required": true,
+          "example": "First Middle Last",
+          "autoMigrations": {
+            "unique": false,
+            "autoIncrement": false,
+            "columnType": "_string"
+          }
+        },
+        "email": {
+          "type": "string",
+          "description": "Just any old email",
+          "validations": {
+            "isEmail": true
+          },
+          "autoMigrations": {
+            "unique": false,
+            "autoIncrement": false,
+            "columnType": "_string"
+          },
+          "required": false
+        },
+        "sex": {
+          "type": "string",
+          "validations": {
+            "isIn": [
+              "Male",
+              "Female"
+            ]
+          },
+          "autoMigrations": {
+            "unique": false,
+            "autoIncrement": false,
+            "columnType": "_string"
+          },
+          "required": false
+        },
+        "ageLimit": {
+          "type": "number",
+          "validations": {
+            "min": 15,
+            "max": 100
+          },
+          "autoMigrations": {
+            "unique": false,
+            "autoIncrement": false,
+            "columnType": "_number"
+          },
+          "required": false
+        },
+        "pets": {
+          "collection": "pet",
+          "via": "owner",
+          "required": false
+        },
+        "neighboursPets": {
+          "collection": "pet",
+          "via": "caredForBy",
+          "required": false
+        }
+      },
+      "associations": [
+        {
+          "alias": "pets",
+          "type": "collection",
+          "collection": "pet",
+          "via": "owner"
+        },
+        {
+          "alias": "neighboursPets",
+          "type": "collection",
+          "collection": "pet",
+          "via": "caredForBy"
+        }
+      ],
+      "swagger": {
+        "actions": {
+          "findone": {
+            "description": "_Alternate description_: Look up the **User** record with the specified ID."
+          }
+        },
+        "tags": [
+          {
+            "name": "User (ORM duplicate)",
+            "externalDocs": {
+              "url": "https://somewhere.com/alternate",
+              "description": "Refer to these alternate docs"
+            }
+          }
+        ],
+        "components": {
+          "parameters": []
+        }
+      }
+    },
+    "associationAliases": [
+      "pets"
+    ]
+  },
+  {
+    "middlewareType": "BLUEPRINT",
+    "verb": "put",
+    "path": "/user/:parentid/pets",
+    "variables": [
+      "parentid"
+    ],
+    "optionalVariables": [],
+    "action": "replace",
+    "actionType": "blueprint",
+    "model": {
+      "globalId": "User",
+      "primaryKey": "id",
+      "identity": "user",
+      "attributes": {
+        "id": {
+          "type": "number",
+          "autoMigrations": {
+            "autoIncrement": true,
+            "unique": true,
+            "columnType": "_numberkey"
+          },
+          "required": false
+        },
+        "names": {
+          "type": "string",
+          "required": true,
+          "example": "First Middle Last",
+          "autoMigrations": {
+            "unique": false,
+            "autoIncrement": false,
+            "columnType": "_string"
+          }
+        },
+        "email": {
+          "type": "string",
+          "description": "Just any old email",
+          "validations": {
+            "isEmail": true
+          },
+          "autoMigrations": {
+            "unique": false,
+            "autoIncrement": false,
+            "columnType": "_string"
+          },
+          "required": false
+        },
+        "sex": {
+          "type": "string",
+          "validations": {
+            "isIn": [
+              "Male",
+              "Female"
+            ]
+          },
+          "autoMigrations": {
+            "unique": false,
+            "autoIncrement": false,
+            "columnType": "_string"
+          },
+          "required": false
+        },
+        "ageLimit": {
+          "type": "number",
+          "validations": {
+            "min": 15,
+            "max": 100
+          },
+          "autoMigrations": {
+            "unique": false,
+            "autoIncrement": false,
+            "columnType": "_number"
+          },
+          "required": false
+        },
+        "pets": {
+          "collection": "pet",
+          "via": "owner",
+          "required": false
+        },
+        "neighboursPets": {
+          "collection": "pet",
+          "via": "caredForBy",
+          "required": false
+        }
+      },
+      "associations": [
+        {
+          "alias": "pets",
+          "type": "collection",
+          "collection": "pet",
+          "via": "owner"
+        },
+        {
+          "alias": "neighboursPets",
+          "type": "collection",
+          "collection": "pet",
+          "via": "caredForBy"
+        }
+      ],
+      "swagger": {
+        "actions": {
+          "findone": {
+            "description": "_Alternate description_: Look up the **User** record with the specified ID."
+          }
+        },
+        "tags": [
+          {
+            "name": "User (ORM duplicate)",
+            "externalDocs": {
+              "url": "https://somewhere.com/alternate",
+              "description": "Refer to these alternate docs"
+            }
+          }
+        ],
+        "components": {
+          "parameters": []
+        }
+      }
+    },
+    "associationAliases": [
+      "pets"
+    ]
+  },
+  {
+    "middlewareType": "BLUEPRINT",
+    "verb": "delete",
+    "path": "/user/:parentid/pets/:childid",
+    "variables": [
+      "parentid",
+      "childid"
+    ],
+    "optionalVariables": [],
+    "action": "remove",
+    "actionType": "blueprint",
+    "model": {
+      "globalId": "User",
+      "primaryKey": "id",
+      "identity": "user",
+      "attributes": {
+        "id": {
+          "type": "number",
+          "autoMigrations": {
+            "autoIncrement": true,
+            "unique": true,
+            "columnType": "_numberkey"
+          },
+          "required": false
+        },
+        "names": {
+          "type": "string",
+          "required": true,
+          "example": "First Middle Last",
+          "autoMigrations": {
+            "unique": false,
+            "autoIncrement": false,
+            "columnType": "_string"
+          }
+        },
+        "email": {
+          "type": "string",
+          "description": "Just any old email",
+          "validations": {
+            "isEmail": true
+          },
+          "autoMigrations": {
+            "unique": false,
+            "autoIncrement": false,
+            "columnType": "_string"
+          },
+          "required": false
+        },
+        "sex": {
+          "type": "string",
+          "validations": {
+            "isIn": [
+              "Male",
+              "Female"
+            ]
+          },
+          "autoMigrations": {
+            "unique": false,
+            "autoIncrement": false,
+            "columnType": "_string"
+          },
+          "required": false
+        },
+        "ageLimit": {
+          "type": "number",
+          "validations": {
+            "min": 15,
+            "max": 100
+          },
+          "autoMigrations": {
+            "unique": false,
+            "autoIncrement": false,
+            "columnType": "_number"
+          },
+          "required": false
+        },
+        "pets": {
+          "collection": "pet",
+          "via": "owner",
+          "required": false
+        },
+        "neighboursPets": {
+          "collection": "pet",
+          "via": "caredForBy",
+          "required": false
+        }
+      },
+      "associations": [
+        {
+          "alias": "pets",
+          "type": "collection",
+          "collection": "pet",
+          "via": "owner"
+        },
+        {
+          "alias": "neighboursPets",
+          "type": "collection",
+          "collection": "pet",
+          "via": "caredForBy"
+        }
+      ],
+      "swagger": {
+        "actions": {
+          "findone": {
+            "description": "_Alternate description_: Look up the **User** record with the specified ID."
+          }
+        },
+        "tags": [
+          {
+            "name": "User (ORM duplicate)",
+            "externalDocs": {
+              "url": "https://somewhere.com/alternate",
+              "description": "Refer to these alternate docs"
+            }
+          }
+        ],
+        "components": {
+          "parameters": []
+        }
+      }
+    },
+    "associationAliases": [
+      "pets"
+    ]
+  },
+  {
+    "middlewareType": "BLUEPRINT",
+    "verb": "put",
+    "path": "/user/:parentid/neighboursPets/:childid",
+    "variables": [
+      "parentid",
+      "childid"
+    ],
+    "optionalVariables": [],
+    "action": "add",
+    "actionType": "blueprint",
+    "model": {
+      "globalId": "User",
+      "primaryKey": "id",
+      "identity": "user",
+      "attributes": {
+        "id": {
+          "type": "number",
+          "autoMigrations": {
+            "autoIncrement": true,
+            "unique": true,
+            "columnType": "_numberkey"
+          },
+          "required": false
+        },
+        "names": {
+          "type": "string",
+          "required": true,
+          "example": "First Middle Last",
+          "autoMigrations": {
+            "unique": false,
+            "autoIncrement": false,
+            "columnType": "_string"
+          }
+        },
+        "email": {
+          "type": "string",
+          "description": "Just any old email",
+          "validations": {
+            "isEmail": true
+          },
+          "autoMigrations": {
+            "unique": false,
+            "autoIncrement": false,
+            "columnType": "_string"
+          },
+          "required": false
+        },
+        "sex": {
+          "type": "string",
+          "validations": {
+            "isIn": [
+              "Male",
+              "Female"
+            ]
+          },
+          "autoMigrations": {
+            "unique": false,
+            "autoIncrement": false,
+            "columnType": "_string"
+          },
+          "required": false
+        },
+        "ageLimit": {
+          "type": "number",
+          "validations": {
+            "min": 15,
+            "max": 100
+          },
+          "autoMigrations": {
+            "unique": false,
+            "autoIncrement": false,
+            "columnType": "_number"
+          },
+          "required": false
+        },
+        "pets": {
+          "collection": "pet",
+          "via": "owner",
+          "required": false
+        },
+        "neighboursPets": {
+          "collection": "pet",
+          "via": "caredForBy",
+          "required": false
+        }
+      },
+      "associations": [
+        {
+          "alias": "pets",
+          "type": "collection",
+          "collection": "pet",
+          "via": "owner"
+        },
+        {
+          "alias": "neighboursPets",
+          "type": "collection",
+          "collection": "pet",
+          "via": "caredForBy"
+        }
+      ],
+      "swagger": {
+        "actions": {
+          "findone": {
+            "description": "_Alternate description_: Look up the **User** record with the specified ID."
+          }
+        },
+        "tags": [
+          {
+            "name": "User (ORM duplicate)",
+            "externalDocs": {
+              "url": "https://somewhere.com/alternate",
+              "description": "Refer to these alternate docs"
+            }
+          }
+        ],
+        "components": {
+          "parameters": []
+        }
+      }
+    },
+    "associationAliases": [
+      "neighboursPets"
+    ]
+  },
+  {
+    "middlewareType": "BLUEPRINT",
+    "verb": "put",
+    "path": "/user/:parentid/neighboursPets",
+    "variables": [
+      "parentid"
+    ],
+    "optionalVariables": [],
+    "action": "replace",
+    "actionType": "blueprint",
+    "model": {
+      "globalId": "User",
+      "primaryKey": "id",
+      "identity": "user",
+      "attributes": {
+        "id": {
+          "type": "number",
+          "autoMigrations": {
+            "autoIncrement": true,
+            "unique": true,
+            "columnType": "_numberkey"
+          },
+          "required": false
+        },
+        "names": {
+          "type": "string",
+          "required": true,
+          "example": "First Middle Last",
+          "autoMigrations": {
+            "unique": false,
+            "autoIncrement": false,
+            "columnType": "_string"
+          }
+        },
+        "email": {
+          "type": "string",
+          "description": "Just any old email",
+          "validations": {
+            "isEmail": true
+          },
+          "autoMigrations": {
+            "unique": false,
+            "autoIncrement": false,
+            "columnType": "_string"
+          },
+          "required": false
+        },
+        "sex": {
+          "type": "string",
+          "validations": {
+            "isIn": [
+              "Male",
+              "Female"
+            ]
+          },
+          "autoMigrations": {
+            "unique": false,
+            "autoIncrement": false,
+            "columnType": "_string"
+          },
+          "required": false
+        },
+        "ageLimit": {
+          "type": "number",
+          "validations": {
+            "min": 15,
+            "max": 100
+          },
+          "autoMigrations": {
+            "unique": false,
+            "autoIncrement": false,
+            "columnType": "_number"
+          },
+          "required": false
+        },
+        "pets": {
+          "collection": "pet",
+          "via": "owner",
+          "required": false
+        },
+        "neighboursPets": {
+          "collection": "pet",
+          "via": "caredForBy",
+          "required": false
+        }
+      },
+      "associations": [
+        {
+          "alias": "pets",
+          "type": "collection",
+          "collection": "pet",
+          "via": "owner"
+        },
+        {
+          "alias": "neighboursPets",
+          "type": "collection",
+          "collection": "pet",
+          "via": "caredForBy"
+        }
+      ],
+      "swagger": {
+        "actions": {
+          "findone": {
+            "description": "_Alternate description_: Look up the **User** record with the specified ID."
+          }
+        },
+        "tags": [
+          {
+            "name": "User (ORM duplicate)",
+            "externalDocs": {
+              "url": "https://somewhere.com/alternate",
+              "description": "Refer to these alternate docs"
+            }
+          }
+        ],
+        "components": {
+          "parameters": []
+        }
+      }
+    },
+    "associationAliases": [
+      "neighboursPets"
+    ]
+  },
+  {
+    "middlewareType": "BLUEPRINT",
+    "verb": "delete",
+    "path": "/user/:parentid/neighboursPets/:childid",
+    "variables": [
+      "parentid",
+      "childid"
+    ],
+    "optionalVariables": [],
+    "action": "remove",
+    "actionType": "blueprint",
+    "model": {
+      "globalId": "User",
+      "primaryKey": "id",
+      "identity": "user",
+      "attributes": {
+        "id": {
+          "type": "number",
+          "autoMigrations": {
+            "autoIncrement": true,
+            "unique": true,
+            "columnType": "_numberkey"
+          },
+          "required": false
+        },
+        "names": {
+          "type": "string",
+          "required": true,
+          "example": "First Middle Last",
+          "autoMigrations": {
+            "unique": false,
+            "autoIncrement": false,
+            "columnType": "_string"
+          }
+        },
+        "email": {
+          "type": "string",
+          "description": "Just any old email",
+          "validations": {
+            "isEmail": true
+          },
+          "autoMigrations": {
+            "unique": false,
+            "autoIncrement": false,
+            "columnType": "_string"
+          },
+          "required": false
+        },
+        "sex": {
+          "type": "string",
+          "validations": {
+            "isIn": [
+              "Male",
+              "Female"
+            ]
+          },
+          "autoMigrations": {
+            "unique": false,
+            "autoIncrement": false,
+            "columnType": "_string"
+          },
+          "required": false
+        },
+        "ageLimit": {
+          "type": "number",
+          "validations": {
+            "min": 15,
+            "max": 100
+          },
+          "autoMigrations": {
+            "unique": false,
+            "autoIncrement": false,
+            "columnType": "_number"
+          },
+          "required": false
+        },
+        "pets": {
+          "collection": "pet",
+          "via": "owner",
+          "required": false
+        },
+        "neighboursPets": {
+          "collection": "pet",
+          "via": "caredForBy",
+          "required": false
+        }
+      },
+      "associations": [
+        {
+          "alias": "pets",
+          "type": "collection",
+          "collection": "pet",
+          "via": "owner"
+        },
+        {
+          "alias": "neighboursPets",
+          "type": "collection",
+          "collection": "pet",
+          "via": "caredForBy"
+        }
+      ],
+      "swagger": {
+        "actions": {
+          "findone": {
+            "description": "_Alternate description_: Look up the **User** record with the specified ID."
+          }
+        },
+        "tags": [
+          {
+            "name": "User (ORM duplicate)",
+            "externalDocs": {
+              "url": "https://somewhere.com/alternate",
+              "description": "Refer to these alternate docs"
+            }
+          }
+        ],
+        "components": {
+          "parameters": []
+        }
+      }
+    },
+    "associationAliases": [
+      "neighboursPets"
+    ]
+  },
+  {
+    "middlewareType": "BLUEPRINT",
+    "verb": "get",
+    "path": "/user/:parentid/pets",
+    "variables": [
+      "parentid"
+    ],
+    "optionalVariables": [],
+    "action": "populate",
+    "actionType": "blueprint",
+    "model": {
+      "globalId": "User",
+      "primaryKey": "id",
+      "identity": "user",
+      "attributes": {
+        "id": {
+          "type": "number",
+          "autoMigrations": {
+            "autoIncrement": true,
+            "unique": true,
+            "columnType": "_numberkey"
+          },
+          "required": false
+        },
+        "names": {
+          "type": "string",
+          "required": true,
+          "example": "First Middle Last",
+          "autoMigrations": {
+            "unique": false,
+            "autoIncrement": false,
+            "columnType": "_string"
+          }
+        },
+        "email": {
+          "type": "string",
+          "description": "Just any old email",
+          "validations": {
+            "isEmail": true
+          },
+          "autoMigrations": {
+            "unique": false,
+            "autoIncrement": false,
+            "columnType": "_string"
+          },
+          "required": false
+        },
+        "sex": {
+          "type": "string",
+          "validations": {
+            "isIn": [
+              "Male",
+              "Female"
+            ]
+          },
+          "autoMigrations": {
+            "unique": false,
+            "autoIncrement": false,
+            "columnType": "_string"
+          },
+          "required": false
+        },
+        "ageLimit": {
+          "type": "number",
+          "validations": {
+            "min": 15,
+            "max": 100
+          },
+          "autoMigrations": {
+            "unique": false,
+            "autoIncrement": false,
+            "columnType": "_number"
+          },
+          "required": false
+        },
+        "pets": {
+          "collection": "pet",
+          "via": "owner",
+          "required": false
+        },
+        "neighboursPets": {
+          "collection": "pet",
+          "via": "caredForBy",
+          "required": false
+        }
+      },
+      "associations": [
+        {
+          "alias": "pets",
+          "type": "collection",
+          "collection": "pet",
+          "via": "owner"
+        },
+        {
+          "alias": "neighboursPets",
+          "type": "collection",
+          "collection": "pet",
+          "via": "caredForBy"
+        }
+      ],
+      "swagger": {
+        "actions": {
+          "findone": {
+            "description": "_Alternate description_: Look up the **User** record with the specified ID."
+          }
+        },
+        "tags": [
+          {
+            "name": "User (ORM duplicate)",
+            "externalDocs": {
+              "url": "https://somewhere.com/alternate",
+              "description": "Refer to these alternate docs"
+            }
+          }
+        ],
+        "components": {
+          "parameters": []
+        }
+      }
+    },
+    "associationAliases": [
+      "pets"
+    ]
+  },
+  {
+    "middlewareType": "BLUEPRINT",
+    "verb": "get",
+    "path": "/user/:parentid/neighboursPets",
+    "variables": [
+      "parentid"
+    ],
+    "optionalVariables": [],
+    "action": "populate",
+    "actionType": "blueprint",
+    "model": {
+      "globalId": "User",
+      "primaryKey": "id",
+      "identity": "user",
+      "attributes": {
+        "id": {
+          "type": "number",
+          "autoMigrations": {
+            "autoIncrement": true,
+            "unique": true,
+            "columnType": "_numberkey"
+          },
+          "required": false
+        },
+        "names": {
+          "type": "string",
+          "required": true,
+          "example": "First Middle Last",
+          "autoMigrations": {
+            "unique": false,
+            "autoIncrement": false,
+            "columnType": "_string"
+          }
+        },
+        "email": {
+          "type": "string",
+          "description": "Just any old email",
+          "validations": {
+            "isEmail": true
+          },
+          "autoMigrations": {
+            "unique": false,
+            "autoIncrement": false,
+            "columnType": "_string"
+          },
+          "required": false
+        },
+        "sex": {
+          "type": "string",
+          "validations": {
+            "isIn": [
+              "Male",
+              "Female"
+            ]
+          },
+          "autoMigrations": {
+            "unique": false,
+            "autoIncrement": false,
+            "columnType": "_string"
+          },
+          "required": false
+        },
+        "ageLimit": {
+          "type": "number",
+          "validations": {
+            "min": 15,
+            "max": 100
+          },
+          "autoMigrations": {
+            "unique": false,
+            "autoIncrement": false,
+            "columnType": "_number"
+          },
+          "required": false
+        },
+        "pets": {
+          "collection": "pet",
+          "via": "owner",
+          "required": false
+        },
+        "neighboursPets": {
+          "collection": "pet",
+          "via": "caredForBy",
+          "required": false
+        }
+      },
+      "associations": [
+        {
+          "alias": "pets",
+          "type": "collection",
+          "collection": "pet",
+          "via": "owner"
+        },
+        {
+          "alias": "neighboursPets",
+          "type": "collection",
+          "collection": "pet",
+          "via": "caredForBy"
+        }
+      ],
+      "swagger": {
+        "actions": {
+          "findone": {
+            "description": "_Alternate description_: Look up the **User** record with the specified ID."
+          }
+        },
+        "tags": [
+          {
+            "name": "User (ORM duplicate)",
+            "externalDocs": {
+              "url": "https://somewhere.com/alternate",
+              "description": "Refer to these alternate docs"
+            }
+          }
+        ],
+        "components": {
+          "parameters": []
+        }
+      }
+    },
+    "associationAliases": [
+      "neighboursPets"
+    ]
+  }
 ]
