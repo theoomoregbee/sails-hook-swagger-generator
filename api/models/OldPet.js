@@ -37,7 +37,7 @@ module.exports = {
   },
 
   swagger: {
-    model: { exclude: true }
+    modelSchema: { exclude: true }
   },
 
 };

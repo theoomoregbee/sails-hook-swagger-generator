@@ -5,7 +5,7 @@
 /**
  * @swagger
  *
- * /NomodelTwo:
+ * /allActions:
  *   summary: Example only
  *   description: You would not usually apply the same summary/description to all actions/paths :)
  *
