@@ -256,6 +256,96 @@ export const mergeControllerJsDoc = (controllers: SwaggerSailsControllers, contr
 }
 
 /**
+ * Merges controller file Swagger/JSDoc into `routes` from controller files and controller file JSDoc.
+ *
+ * The merge includes JSDoc `actions` and `exclude` elements **but not** `components` and `tags`
+ * (which are merged in `mergeComponents()` and `mergeTags()`).
+ *
+ * Specifically, in order of precedence:
+ * 1. Route itself; in `SwaggerRouteInfo` and taken from `route.options` (from `config/routes.js` or route bound by hook)
+ * 2. Controller file action function `swagger` element (`controllers.actions[].swagger` below)
+ * 3. Controller file `swagger` element export (`controllers.controllerFiles[].swagger.actions[]` below) incl `allActions`.
+ * 4. Controller file JSDoc `@swagger` comments under the `/{action}` path (`controllersJsDoc[].actions[]` below) incl `allActions`.
+ *
+ * This function also merges the Actions2Machine details (inputs, exits etc) into `routes`.
+ *
+ * @param sails
+ * @param routes
+ * @param controllers
+ * @param controllersJsDoc
+ */
+export const mergeControllerSwaggerIntoRouteInfo = (sails: Sails.Sails, routes: SwaggerRouteInfo[],
+  controllers: SwaggerSailsControllers, controllersJsDoc: NameKeyMap<SwaggerControllerAttribute>): void => {
+
+  routes.map(route => {
+
+    if(route.middlewareType !== MiddlewareType.ACTION) {
+      return;
+    }
+
+    const mergeIntoDest = (source: SwaggerActionAttribute | undefined) => {
+      if(!source) { return; }
+      if(!route.swagger) {
+        route.swagger = { ...source };
+      } else {
+        defaults(route.swagger, source);
+      }
+    }
+
+    const actionNameLookup = path.basename(route.action);
+
+    const controllerAction = controllers.actions[route.action];
+    if (controllerAction) {
+
+      // for actions, route will have action type 'function' --> update from controller info
+      route.actionType = controllerAction.actionType;
+      route.defaultTagName = controllerAction.defaultTagName;
+
+      // for actions2, store machine metadata (inputs, exits etc) into route
+      if(route.actionType === 'actions2') {
+        route.actions2Machine = controllerAction;
+      }
+
+      /*
+       * Step 2: Controller file action function `swagger` element
+       */
+      mergeIntoDest(controllerAction.swagger);
+
+      /*
+       * Step 3: Controller file `swagger` element export
+       */
+      const controllerFileIdentity = controllerAction.actionType === 'controller' ? path.dirname(route.action) : route.action;
+
+      const controllerFile = controllers.controllerFiles[controllerFileIdentity];
+      if(controllerFile) {
+        if (controllerFile.swagger) {
+          if (controllerFile.swagger.actions) {
+            mergeIntoDest(controllerFile.swagger.actions[actionNameLookup]);
+          }
+          mergeIntoDest(controllerFile.swagger.actions?.allactions);
+        }
+      } else {
+        sails.log.error(`ERROR: sails-hook-swagger-generator: Error resolving/loading controller file '${controllerFileIdentity}'`);
+      }
+
+      /*
+       * Step 4: Controller file JSDoc `@swagger` comments under the `/{action}` path
+       */
+      const controllerJsDoc = controllersJsDoc[controllerFileIdentity];
+      if(controllerJsDoc && controllerJsDoc.actions) {
+        mergeIntoDest(controllerJsDoc.actions[actionNameLookup]);
+        mergeIntoDest(controllerJsDoc.actions.allactions);
+      }
+
+    } else {
+      sails.log.error(`ERROR: sails-hook-swagger-generator: Error resolving/loading controller action '${route.action}' source file`);
+    }
+
+  });
+
+}
+
+/**
  * Merge elements of components from `config/routes.js`, model definition files and
  * controller definition files.
  *

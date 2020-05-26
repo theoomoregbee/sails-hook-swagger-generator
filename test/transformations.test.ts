@@ -1,17 +1,20 @@
 import { expect } from 'chai';
 import { NameKeyMap, SwaggerSailsModel, SwaggerModelAttribute, SwaggerControllerAttribute, SwaggerSailsControllers, SwaggerRouteInfo } from '../lib/interfaces';
 import { OpenApi } from '../types/openapi';
-import { mergeComponents, mergeTags, mergeModelJsDoc, mergeControllerJsDoc, transformSailsPathsToSwaggerPaths, aggregateAssociationRoutes } from '../lib/transformations';
+import { mergeComponents, mergeTags, mergeModelJsDoc, mergeControllerJsDoc, transformSailsPathsToSwaggerPaths, aggregateAssociationRoutes, mergeControllerSwaggerIntoRouteInfo } from '../lib/transformations';
 import { cloneDeep, defaults } from 'lodash';
 import { generateDefaultModelTags } from '../lib/generators';
 
 import parsedRoutesFixture from './fixtures/parsedRoutes.json';
 
-// const sailsConfig = {
-//     paths: {
-//         models: '../../api/models'
-//     }
-// }
+const sails = {
+  log: {
+      // eslint-disable-next-line @typescript-eslint/no-empty-function
+      warn: () => {},
+      // eslint-disable-next-line @typescript-eslint/no-empty-function
+      error: ()=> {}
+  },
+} as unknown as Sails.Sails;
 
 describe('Transformations', () => {
 
@@ -68,12 +71,17 @@ describe('Transformations', () => {
       const expectedOutputPaths = [
         '/user',
         '/actions2',
+        '/twofind',
+        '/twoclear',
         '/user/login',
         '/user/logout',
         '/user/list',
         '/user/list2',
         '/user/upload',
         '/user/roles',
+        '/nomodel/deep-url/more/find',
+        '/nomodel/deep-url/more/clear',
+        '/nomodel/deep-url/more/should_be_excluded',
         '/user/test/{phoneNumber}',
         '/clients/{client_id}/user/{id}',
         '/oldpet',
@@ -146,16 +154,29 @@ describe('Transformations', () => {
       user: {
         globalId: 'User',
         identity: 'user',
+        actionType: 'controller',
         defaultTagName: 'User',
         swagger: {
           components: {
             schemas: { controllerSchema: {} }
           },
-          tags: [{ name: 'controllerTag' }]
+          tags: [{ name: 'controllerTag' }],
+          actions: {
+            upload: {
+              tags: ['controllerTag']
+            }
+          }
         }
       }
     },
-    actions: {},
+    actions: {
+      'user/upload': {
+        actionType: 'controller',
+        defaultTagName: 'User',
+        // eslint-disable-next-line @typescript-eslint/no-empty-function
+        fn: () => {},
+      }
+    },
   } as SwaggerSailsControllers;
   const controllersJsDoc = {
     user: {
@@ -196,10 +217,28 @@ describe('Transformations', () => {
       const destControllers = cloneDeep(controllers);
       mergeControllerJsDoc(destControllers, controllersJsDoc);
       const expected = cloneDeep(controllers);
-      defaults(expected.controllerFiles.user!.swagger, {
-        actions: cloneDeep(controllersJsDoc.user.actions)
-      });
+      defaults(expected.controllerFiles.user!.swagger.actions, cloneDeep(controllersJsDoc.user.actions));
       expect(destControllers).to.deep.equal(expected);
+    })
+  })
+
+  describe('mergeControllerSwaggerIntoRouteInfo', () => {
+    it('should merge controller file Swagger/JSDoc into `routes` from controller files', () => {
+
+      const routes = cloneDeep(parsedRoutesFixture as SwaggerRouteInfo[]);
+
+      const expected = cloneDeep(parsedRoutesFixture as SwaggerRouteInfo[]);
+      expected.map(route => {
+        if(route.action === 'user/upload') {
+          route.actionType = 'controller';
+          route.defaultTagName = 'User';
+          route.swagger!.tags = [ 'controllerTag' ];
+        }
+      });
+
+      mergeControllerSwaggerIntoRouteInfo(sails, routes, controllers, controllersJsDoc);
+      expect(routes).to.deep.equal(expected);
+
     })
   })
 
