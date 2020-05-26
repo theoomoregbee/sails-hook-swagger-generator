@@ -38,7 +38,8 @@ export enum Modifiers {
     ADD_RESULT_OF_MODEL = 'addResultOfModel',
     ADD_RESULT_NOT_FOUND = 'addResultNotFound',
     ADD_RESULT_VALIDATION_ERROR = 'addResultValidationError',
-    ADD_FKS_BODY_PARAM = 'addFksBodyParam'
+    ADD_FKS_BODY_PARAM = 'addFksBodyParam',
+    ADD_SHORTCUT_BLUEPRINT_ROUTE_NOTE = 'addShortCutBlueprintRouteNote',
 }
 
 type Modifier = Modifiers | ((template: BluePrintActionTemplate, route: SwaggerRouteInfo, path: OpenApi.Operation, tags: Tag[], components: OpenApi.Components) => void)
