@@ -9,15 +9,15 @@ module.exports = {
     find: function (req, res) {
 
     },
-    exclude: function (req, res) {
+    actionToBeExcluded: function (req, res) {
 
     },
     swagger: {
-      controller: {
-        tags: [ 'No Model Example'],
-      },
       actions: {
-        exclude: {
+        allActions: {
+          tags: ['No Model Example'],
+        },
+        actionToBeExcluded: {
           exclude: true,
         }
       },

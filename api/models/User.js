@@ -9,9 +9,17 @@
  * @swagger
  *
  * /User:
+ *   description: |
+ *     You might write a short summary of how this **User** model works and what it represents here.
+ *
  *   tags:
  *     - User (ORM)
  *     - User (ORM duplicate)
+ *
+ * /allActions:
+ *   externalDocs:
+ *     url: https://somewhere.com/yep
+ *     description: Refer to these docs for more info
  *
  * /find:
  *   description: >

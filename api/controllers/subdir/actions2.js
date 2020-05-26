@@ -1,8 +1,8 @@
 /**
  * @swagger
  * tags:
- *   name: Action2 Mgt
- *   description: Action2 testing
+ *   name: Actions2 Mgt
+ *   description: Actions2 testing
  *
  * components:
  *   examples:
@@ -16,7 +16,7 @@ module.exports = {
   /**
    * @swagger
    * /actions2:
-   *   summary: Swagger element below should take precedence
+   *   description: Swagger element below should take precedence
    *   tags:
    *     - Ditto
    */
@@ -27,13 +27,28 @@ module.exports = {
 
   inputs: {
     userId: {
-      description: 'The ID of the user to look up.',
+      description: 'The ID of the user to look up',
       type: 'number',
-      required: true
+      isInteger: true,
+      required: true,
+      meta: { swagger: { readOnly: true } },
     }
   },
 
   exits: {
+    success: {
+      description: 'Another success',
+      outputExample: 'Some dynamic message like this.'
+    },
+    successAgain: {
+      description: 'Another success (2)',
+      outputExample: {
+        weatherPerson: 'Joaquin',
+        days: [
+          { tempCelsius: 21, windSpeedMph: 392 }
+        ]
+      }
+    },
     notFound: {
       description: 'No user with the specified ID was found in the database',
       responseType: 'notFound',
@@ -48,11 +63,18 @@ module.exports = {
         description: 'Return a user list',
         responses: {
           '200': {
+            description: 'Done/Success',
             content: {
+              'text/html': {
+                schema: { type: 'string', description: 'Human readable result', },
+              },
               'application/json': {
-                schema: { type: 'number', default: 123, },
+                schema: { type: 'number', default: 123, description: 'The **123** result' },
               },
             },
+          },
+          '500': {
+            description: 'An unexpected error occurred'
           }
         },
       },

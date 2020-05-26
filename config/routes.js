@@ -98,9 +98,24 @@ module.exports.routes = {
     action: 'user/logout',
     swagger: {
       summary: 'Phone No. Logout',
-      description: 'Alternate description (of no real significance)'
+      description: 'Alternate description (of no real significance)',
+      operationId: 'user/logout',
     }
   },
+
+  'get /nomodel/deep-url/more/find': 'nomodel/find',
+  'get /nomodel/deep-url/more/clear': {
+    action: 'Nomodel/clear'
+  },
+  'get /nomodel/deep-url/more/should_be_excluded': 'nomodel/actionToBeExcluded',
+
+  'get /twofind': 'subdir2/nomodeltwo/find',
+  'get /twoclear': {
+    controller: 'subDir2/NoModelTwoController',
+    action: 'clear'
+  },
+
+  'post /othernomodel': 'othernomodel/find',
 
   'get /user/upload': {
     controller: 'UserController',
@@ -126,6 +141,7 @@ module.exports.routes = {
     action: 'roles',
     swagger: {
       summary: 'update user roles',
+      tags: ['User (Extra)'],
       requestBody: {
         content: {
           'application/json': {
@@ -145,6 +161,14 @@ module.exports.routes = {
         '200': { description: 'Success' },
       }
     }
-  }
+  },
+
+  'GET r|^/app/.*$|': {
+    skipAssets: true,
+    view: 'homepage',
+    locals: {
+      layout: false
+    },
+  },
 
 };
