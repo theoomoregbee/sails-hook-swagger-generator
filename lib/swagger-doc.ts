@@ -7,7 +7,8 @@ import { parseModels, parseControllers, parseModelsJsDoc, parseBoundRoutes, pars
 import { getUniqueTagsFromPath } from './utils';
 import { generateSchemas, generatePaths, generateDefaultModelTags } from './generators';
 import { OpenApi } from '../types/openapi';
-import { mergeModelJsDoc, mergeTags, mergeComponents, mergeControllerJsDoc, transformSailsPathsToSwaggerPaths, aggregateAssociationRoutes } from './transformations';
+import { mergeModelJsDoc, mergeTags, mergeComponents, mergeControllerJsDoc, transformSailsPathsToSwaggerPaths, aggregateAssociationRoutes, mergeControllerSwaggerIntoRouteInfo } from './transformations';
+import { Tag } from 'swagger-schema-official';
 
 export default async (sails: Sails.Sails, sailsRoutes: Array<Sails.Route>, context: Sails.Hook<SwaggerGenerator>): Promise<OpenApi.OpenApi | undefined> => {
 
@@ -22,11 +23,7 @@ export default async (sails: Sails.Sails, sailsRoutes: Array<Sails.Route>, conte
     blueprintActionTemplates = hookConfig.updateBlueprintActionTemplates(blueprintActionTemplates);
   }
 
-  const specifications = {
-    tags: [],
-    components: {},
-    ...cloneDeep(hookConfig.swagger)
-  } as OpenApi.OpenApi;
+  const specifications = cloneDeep(hookConfig.swagger) as OpenApi.OpenApi;
 
   const theDefaults = hookConfig.defaults || configurationDefaults;
 
@@ -50,15 +47,21 @@ export default async (sails: Sails.Sails, sailsRoutes: Array<Sails.Route>, conte
   // remove globally excluded routes
   routes = routes.filter(route => route.path !== '/__getcookie')
 
+  transformSailsPathsToSwaggerPaths(routes);
+  routes = aggregateAssociationRoutes(routes);
+
   if (hookConfig.includeRoute) {
     routes = routes.filter(route => hookConfig.includeRoute!(route));
   }
 
-  transformSailsPathsToSwaggerPaths(routes);
-  routes = aggregateAssociationRoutes(routes);
-
   mergeModelJsDoc(models, modelsJsDoc);
   mergeControllerJsDoc(controllers, controllersJsDoc);
+
+  mergeControllerSwaggerIntoRouteInfo(sails, routes, controllers, controllersJsDoc);
+
+  /*
+   * generation phase
+   */
 
   if (!specifications.tags) specifications.tags = [];
   if (!specifications.components) specifications.components = {};
@@ -75,7 +78,7 @@ export default async (sails: Sails.Sails, sailsRoutes: Array<Sails.Route>, conte
 
   // merge model, controller and action2 .components and .tags
   mergeComponents(specifications.components, /* routesJsDoc, */ models, modelsJsDoc, controllers, controllersJsDoc);
-  mergeTags(specifications.tags, models, modelsJsDoc, controllers, controllersJsDoc, defaultModelTags);
+  mergeTags(specifications.tags, /* routesJsDoc, */ models, modelsJsDoc, controllers, controllersJsDoc, defaultModelTags);
 
   specifications.paths = generatePaths(routes, blueprintActionTemplates, theDefaults, {}, specifications, models);
 
