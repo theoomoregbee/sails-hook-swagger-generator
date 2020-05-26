@@ -341,13 +341,15 @@ export const generatePaths = (routes: SwaggerRouteInfo[], templates: BlueprintAc
 
         addSelectQueryParam: () => {
           if (isParam('query', 'select')) return;
+          const attributes = route.model!.attributes || {};
+          const csv = reduce(attributes, (acc, a, n) => ((a.meta?.swagger?.exclude === true) ? acc : [...acc, n]), [] as string[]);
           pathEntry.parameters.push({
             in: 'query',
             name: 'select',
             required: false,
             schema: {
               type: 'string',
-              example: [...keys(route.model!.attributes || {})].join(','),
+              example: csv.join(','),
             },
             description: 'The attributes to include in the result, specified as a comma-delimited list.'
               + ' By default, all attributes are selected.'
@@ -358,13 +360,15 @@ export const generatePaths = (routes: SwaggerRouteInfo[], templates: BlueprintAc
 
         addOmitQueryParam: () => {
           if (isParam('query', 'omit')) return;
+          const attributes = route.model!.attributes || {};
+          const csv = reduce(attributes, (acc, a, n) => ((a.meta?.swagger?.exclude === true) ? acc : [...acc, n]), [] as string[]);
           pathEntry.parameters.push({
             in: 'query',
             name: 'omit',
             required: false,
             schema: {
               type: 'string',
-              example: [...keys(route.model!.attributes || {})].join(','),
+              example: csv.join(','),
             },
             description: 'The attributes to exclude from the result, specified as a comma-delimited list.'
               + ' Cannot be used in conjuction with `select`.'
