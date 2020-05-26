@@ -83,7 +83,7 @@ export const blueprintActionTemplates: BlueprintActionTemplates = {
     resultDescription: 'Responds with a single **{globalId}** record as a JSON dictionary',
     notFoundDescription: 'Response denoting **{globalId}** record with specified ID **NOT** found',
     // if functions, each called with (blueprintActionTemplate, routeInfo, pathEntry)
-    modifiers: [Modifiers.ADD_SELECT_QUERY_PARAM, Modifiers.ADD_OMIT_QUERY_PARAM, Modifiers.ADD_POPULATE_QUERY_PARAM, Modifiers.ADD_RESULT_OF_MODEL, Modifiers.ADD_RESULT_NOT_FOUND],
+    modifiers: [Modifiers.ADD_SELECT_QUERY_PARAM, Modifiers.ADD_OMIT_QUERY_PARAM, Modifiers.ADD_POPULATE_QUERY_PARAM, Modifiers.ADD_RESULT_OF_MODEL, Modifiers.ADD_RESULT_NOT_FOUND, Modifiers.ADD_SHORTCUT_BLUEPRINT_ROUTE_NOTE],
   },
   find: {
     summary: 'List {globalId} (find where)',
@@ -100,7 +100,7 @@ export const blueprintActionTemplates: BlueprintActionTemplates = {
       { $ref: '#/components/parameters/SortQueryParam' },
     ],
     resultDescription: 'Responds with a paged list of **{globalId}** records that match the specified criteria',
-    modifiers:[Modifiers.ADD_SELECT_QUERY_PARAM, Modifiers.ADD_OMIT_QUERY_PARAM, Modifiers.ADD_POPULATE_QUERY_PARAM, Modifiers.ADD_RESULT_OF_MODEL]
+    modifiers:[Modifiers.ADD_SELECT_QUERY_PARAM, Modifiers.ADD_OMIT_QUERY_PARAM, Modifiers.ADD_POPULATE_QUERY_PARAM, Modifiers.ADD_RESULT_OF_MODEL, Modifiers.ADD_SHORTCUT_BLUEPRINT_ROUTE_NOTE]
   },
   create: {
     summary: 'Create {globalId}',
@@ -111,7 +111,7 @@ export const blueprintActionTemplates: BlueprintActionTemplates = {
     },
     parameters: [],
     resultDescription: 'Responds with a JSON dictionary representing the newly created **{globalId}** instance',
-    modifiers: [Modifiers.ADD_MODEL_BODY_PARAM, Modifiers.ADD_RESULT_OF_MODEL, Modifiers.ADD_RESULT_VALIDATION_ERROR]
+    modifiers: [Modifiers.ADD_MODEL_BODY_PARAM, Modifiers.ADD_RESULT_OF_MODEL, Modifiers.ADD_RESULT_VALIDATION_ERROR, Modifiers.ADD_SHORTCUT_BLUEPRINT_ROUTE_NOTE]
   },
   update: {
     summary: 'Update {globalId}',
@@ -125,7 +125,7 @@ export const blueprintActionTemplates: BlueprintActionTemplates = {
     ],
     resultDescription: 'Responds with the newly updated **{globalId}** record as a JSON dictionary',
     notFoundDescription: 'Cannot update, **{globalId}** record with specified ID **NOT** found',
-    modifiers: [Modifiers.ADD_MODEL_BODY_PARAM, Modifiers.ADD_RESULT_OF_MODEL, Modifiers.ADD_RESULT_VALIDATION_ERROR, Modifiers.ADD_RESULT_NOT_FOUND]
+    modifiers: [Modifiers.ADD_MODEL_BODY_PARAM, Modifiers.ADD_RESULT_OF_MODEL, Modifiers.ADD_RESULT_VALIDATION_ERROR, Modifiers.ADD_RESULT_NOT_FOUND, Modifiers.ADD_SHORTCUT_BLUEPRINT_ROUTE_NOTE]
   },
   destroy: {
     summary: 'Delete {globalId} (destroy)',
@@ -139,7 +139,7 @@ export const blueprintActionTemplates: BlueprintActionTemplates = {
     ],
     resultDescription: 'Responds with a JSON dictionary representing the destroyed **{globalId}** instance',
     notFoundDescription: 'Cannot destroy, **{globalId}** record with specified ID **NOT** found',
-    modifiers: [Modifiers.ADD_RESULT_OF_MODEL, Modifiers.ADD_RESULT_NOT_FOUND],
+    modifiers: [Modifiers.ADD_RESULT_OF_MODEL, Modifiers.ADD_RESULT_NOT_FOUND, Modifiers.ADD_SHORTCUT_BLUEPRINT_ROUTE_NOTE],
   },
   populate: {
     summary: 'Populate association for {globalId}',
@@ -157,7 +157,7 @@ export const blueprintActionTemplates: BlueprintActionTemplates = {
     ],
     resultDescription: 'Responds with the list of associated records as JSON dictionaries',
     notFoundDescription: 'Cannot populate, **{globalId}** record with specified ID **NOT** found',
-    modifiers: [Modifiers.ADD_ASSOCIATION_PATH_PARAM, Modifiers.ADD_SELECT_QUERY_PARAM, Modifiers.ADD_OMIT_QUERY_PARAM, Modifiers.ADD_ASSOCIATION_RESULT_OF_ARRAY, Modifiers.ADD_RESULT_NOT_FOUND],
+    modifiers: [Modifiers.ADD_ASSOCIATION_PATH_PARAM, Modifiers.ADD_SELECT_QUERY_PARAM, Modifiers.ADD_OMIT_QUERY_PARAM, Modifiers.ADD_ASSOCIATION_RESULT_OF_ARRAY, Modifiers.ADD_RESULT_NOT_FOUND, Modifiers.ADD_SHORTCUT_BLUEPRINT_ROUTE_NOTE],
   },
   add: {
     summary: 'Add to for {globalId}',
@@ -171,7 +171,7 @@ export const blueprintActionTemplates: BlueprintActionTemplates = {
     ],
     resultDescription: 'Responds with the newly updated **{globalId}** record as a JSON dictionary',
     notFoundDescription: 'Cannot perform add to, **{globalId}** record OR **FK record** with specified ID **NOT** found',
-    modifiers: [Modifiers.ADD_ASSOCIATION_PATH_PARAM, Modifiers.ADD_ASSOCIATION_FK_PATH_PARAM,Modifiers.ADD_RESULT_OF_MODEL, Modifiers.ADD_RESULT_NOT_FOUND],
+    modifiers: [Modifiers.ADD_ASSOCIATION_PATH_PARAM, Modifiers.ADD_ASSOCIATION_FK_PATH_PARAM,Modifiers.ADD_RESULT_OF_MODEL, Modifiers.ADD_RESULT_NOT_FOUND, Modifiers.ADD_SHORTCUT_BLUEPRINT_ROUTE_NOTE],
   },
   remove: {
     summary: 'Remove from for {globalId}',
@@ -185,7 +185,7 @@ export const blueprintActionTemplates: BlueprintActionTemplates = {
     ],
     resultDescription: 'Responds with the newly updated **{globalId}** record as a JSON dictionary',
     notFoundDescription: 'Cannot perform remove from, **{globalId}** record OR **FK record** with specified ID **NOT** found',
-    modifiers: [Modifiers.ADD_ASSOCIATION_PATH_PARAM, Modifiers.ADD_ASSOCIATION_FK_PATH_PARAM, Modifiers.ADD_RESULT_OF_MODEL, Modifiers.ADD_RESULT_NOT_FOUND]
+    modifiers: [Modifiers.ADD_ASSOCIATION_PATH_PARAM, Modifiers.ADD_ASSOCIATION_FK_PATH_PARAM, Modifiers.ADD_RESULT_OF_MODEL, Modifiers.ADD_RESULT_NOT_FOUND, Modifiers.ADD_SHORTCUT_BLUEPRINT_ROUTE_NOTE]
   },
   replace: {
     summary: 'Replace for {globalId}',
@@ -199,7 +199,7 @@ export const blueprintActionTemplates: BlueprintActionTemplates = {
     ],
     resultDescription: 'Responds with the newly updated **{globalId}** record as a JSON dictionary',
     notFoundDescription: 'Cannot replace, **{globalId}** record with specified ID **NOT** found',
-    modifiers: [Modifiers.ADD_ASSOCIATION_PATH_PARAM, Modifiers.ADD_FKS_BODY_PARAM, Modifiers.ADD_RESULT_OF_MODEL, Modifiers.ADD_RESULT_NOT_FOUND],
+    modifiers: [Modifiers.ADD_ASSOCIATION_PATH_PARAM, Modifiers.ADD_FKS_BODY_PARAM, Modifiers.ADD_RESULT_OF_MODEL, Modifiers.ADD_RESULT_NOT_FOUND, Modifiers.ADD_SHORTCUT_BLUEPRINT_ROUTE_NOTE],
   },
 };
 

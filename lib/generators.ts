@@ -320,7 +320,9 @@ export const generatePaths = (routes: SwaggerRouteInfo[], templates: BlueprintAc
       };
 
       const isParam = (inType: string, name: string): boolean => !!pathEntry.parameters.find(parameter => parameter.in == inType && parameter.name == name);
+
       const modifiers = {
+
         addPopulateQueryParam: () => {
           const assoc = route.model?.associations || [];
           if (isParam('query', 'populate') || assoc.length == 0) return;
@@ -495,6 +497,15 @@ export const generatePaths = (routes: SwaggerRouteInfo[], templates: BlueprintAc
             },
           };
         },
+
+        addShortCutBlueprintRouteNote: () => {
+          if(route.actionType !== 'shortcutBlueprint') { return; }
+          pathEntry.summary += ' *';
+          pathEntry.description += `\n\n(\\*) Note that this is a`
+            + ` [Sails blueprint shortcut route](https://sailsjs.com/documentation/concepts/blueprints/blueprint-routes#?shortcut-blueprint-routes)`
+            + ` (recommended for **development-mode only**)`;
+        },
+
       };
 
       // apply changes for blueprint action
