@@ -1,4 +1,4 @@
-import { NameKeyMap, SwaggerSailsModel, SwaggerModelAttribute, SwaggerSailsControllers, SwaggerControllerAttribute, SwaggerRouteInfo, BluePrintAction, MiddlewareType } from "./interfaces";
+import { NameKeyMap, SwaggerSailsModel, SwaggerModelAttribute, SwaggerSailsControllers, SwaggerControllerAttribute, SwaggerRouteInfo, BluePrintAction, MiddlewareType, SwaggerActionAttribute } from "./interfaces";
 import { forEach, defaults, cloneDeep, groupBy, mapValues, map } from "lodash";
 import { Tag } from "swagger-schema-official";
 import { OpenApi } from "../types/openapi";
@@ -190,11 +190,11 @@ export const mergeModelJsDoc = (models: NameKeyMap<SwaggerSailsModel>, modelsJsD
         });
       }
 
-      if(modelJsDoc.model) {
-        if(!model.swagger.model) {
-          model.swagger.model = { ...modelJsDoc.model };
+      if(modelJsDoc.modelSchema) {
+        if(!model.swagger.modelSchema) {
+          model.swagger.modelSchema = { ...modelJsDoc.modelSchema };
         } else {
-          defaults(model.swagger.model, modelJsDoc.model);
+          defaults(model.swagger.modelSchema, modelJsDoc.modelSchema);
         }
       }
 
@@ -240,16 +240,6 @@ export const mergeControllerJsDoc = (controllers: SwaggerSailsControllers, contr
         });
       }
 
-      if(controllerJsDoc.controller) {
-        // if (!controllerFile.swagger) {
-        //   controllerFile.swagger = {};
-        // }
-        if(!controllerFile.swagger.controller) {
-          controllerFile.swagger.controller = { ...controllerJsDoc.controller };
-        } else {
-          defaults(controllerFile.swagger.controller, controllerJsDoc.controller);
-        }
-      }
 
       // if(controllerJsDoc.exclude !== undefined) {
       //   if (!controllerFile.swagger) {
