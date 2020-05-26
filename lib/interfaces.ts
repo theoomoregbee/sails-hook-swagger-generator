@@ -55,6 +55,10 @@ export interface SwaggerActionAttribute extends OpenApi.Operation {
   exclude?: boolean;
 }
 
+export interface SwaggerModelSchemaAttribute extends OpenApi.UpdatedSchema {
+  tags?: string[];
+  exclude?: boolean;
+}
 /**
  * JSON used to desribe/document Sails Controller file, describing global `tags` and
  * `components` to be added, `controller` documentation to be applied to **all**
@@ -72,8 +76,8 @@ export interface SwaggerControllerAttribute {
  * `components` to be added, `model` documentation to be applied to **all**
  * blueprint actions for the model and per-action documentation.
  */
-export interface SwaggerModelAttribute extends Omit<SwaggerControllerAttribute, 'controller'> {
-  model?: SwaggerActionAttribute;
+export interface SwaggerModelAttribute extends SwaggerControllerAttribute {
+  modelSchema?: SwaggerModelSchemaAttribute;
 }
 
 /**
@@ -132,6 +136,7 @@ export interface SwaggerSailsControllers {
 
   /// Controller files keyed on controller file identity
   controllerFiles: NameKeyMap<IncludeAll.File & {
+    actionType: ActionType;
     defaultTagName: string;
     swagger: SwaggerControllerAttribute;
   }>;

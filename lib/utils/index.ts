@@ -26,7 +26,7 @@ const componentReference: Array<keyof OpenApi.Components> = [
     "callbacks"
 ]
 
-export const bluerprintActions: Array<BluePrintAction> = ['findone', 'find', 'create', 'update', 'destroy', 'populate', 'add', 'remove', 'replace'];
+export const blueprintActions: Array<BluePrintAction> = ['findone', 'find', 'create', 'update', 'destroy', 'populate', 'add', 'remove', 'replace'];
 
 export const mergeSwaggerSpec = (destination: SwaggerControllerAttribute, source: SwaggerControllerAttribute): SwaggerControllerAttribute => {
     const dest: SwaggerControllerAttribute = cloneDeep(destination)

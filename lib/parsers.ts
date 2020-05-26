@@ -480,6 +480,9 @@ export const parseControllers = async (sails: Sails.Sails): Promise<SwaggerSails
 
 /**
  * Loads and parses model JSDoc, returning a map keyed on model identity.
+ *
+ * @note Identities lowercase.
+ *
  * @param sails
  * @param models
  */
@@ -496,23 +499,38 @@ export const parseModelsJsDoc = async (sails: Sails.Sails, models: NameKeyMap<Sw
         const modelFile = require.resolve(path.join(sails.config.paths.models, model.globalId));
         const swaggerDoc = await loadSwaggerDocComments(modelFile);
 
+        const modelJsDocPath = '/' + model.globalId;
+
         ret[identity] = {
           tags: swaggerDoc.tags,
           components: swaggerDoc.components,
+          actions: {},
         };
+
+        // check for paths for which an action dne AND convert to case-insensitive identities
+        forEach(swaggerDoc.paths, (swaggerDef, actionName) => {
+          if(actionName === modelJsDocPath) {
+            return;
+          } else if(actionName === '/allActions') {
+            // proceed
+          } else if (!actionName.startsWith('/') || !blueprintActions.includes(actionName.slice(1) as BluePrintAction)) {
+            sails.log.warn(`WARNING: sails-hook-swagger-generator: Model file '${model.globalId}' contains Swagger JSDoc action definition for unknown blueprint action '${actionName}'`);
+            return;
+          }
+          const actionIdentity = actionName.substring(1).toLowerCase(); // convert '/{action}' --> '{action}'
+          if (ret[identity].actions![actionIdentity]) {
+            sails.log.warn(`WARNING: sails-hook-swagger-generator: Model file '${model.globalId}' contains Swagger JSDoc action definition '${actionName}' which conflicts with a previously-loaded definition`);
+          }
+          // note coercion as non-standard swaggerDoc i.e. '/{action}' contains operation contents (no HTTP method specified)
+          ret[identity].actions![actionIdentity] = swaggerDef as SwaggerActionAttribute;
+        });
 
         const modelJsDoc = swaggerDoc.paths['/' + model.globalId];
         if(modelJsDoc) {
           // note coercion as non-standard swaggerDoc i.e. '/{globalId}' contains operation contents (no HTTP method specified)
-          ret[identity].model = modelJsDoc as SwaggerActionAttribute;
+          ret[identity].modelSchema = modelJsDoc as SwaggerModelSchemaAttribute;
         }
 
-        // note coercion as non-standard swaggerDoc i.e. '/{action}' contains operation contents (no HTTP method specified)
-        const actionNames = ['findone', 'find', 'create', 'update', 'destroy', 'populate', 'add', 'remove', 'replace'];
-        ret[identity].actions = mapKeys(
-          pickBy(swaggerDoc.paths, (action, path) => actionNames.includes(path.substring(1))),
-          (action, path) => path.substring(1) // convert '/findone' --> 'findone'
-        ) as NameKeyMap<SwaggerActionAttribute>;
 
       } catch (err) {
         sails.log.error(`ERROR: sails-hook-swagger-generator: Error resolving/loading model ${model.globalId}: ${err.message || ''}` /* , err */);
@@ -526,6 +544,9 @@ export const parseModelsJsDoc = async (sails: Sails.Sails, models: NameKeyMap<Sw
 
 /**
  * Loads and parses controller JSDoc, returning a map keyed on controller file identity.
+ *
+ * @note Identities lowercase.
+ *
  * @param sails
  * @param controllers
  */
@@ -543,19 +564,33 @@ export const parseControllerJsDoc = async (sails: Sails.Sails, controllers: Swag
         ret[identity] = {
           tags: swaggerDoc.tags,
           components: swaggerDoc.components,
+          actions: {},
         };
 
-        const controllerJsDoc = swaggerDoc.paths['/' + controller.defaultTagName];
-        if(controllerJsDoc) {
-          // note coercion as non-standard swaggerDoc i.e. '/{controller}' contains operation contents (no HTTP method specified)
-          ret[identity].controller = controllerJsDoc as SwaggerActionAttribute;
-        }
+        // check for paths for which an action dne AND convert to case-insensitive identities
+        forEach(swaggerDoc.paths, (swaggerDef, actionName) => {
+          if(actionName === '/allActions') {
+            // proceed
+          } else if (controller.actionType === 'standalone' || controller.actionType === 'actions2') {
+            if(actionName !== `/${controller.defaultTagName}`) {
+              sails.log.warn(`WARNING: sails-hook-swagger-generator: ${controller.actionType} action '${controller.globalId}' contains Swagger JSDoc action definition for unknown action '${actionName}' (expected '/${controller.defaultTagName}')`);
+              return;
+            }
+          } else {
+            if (!actionName.startsWith('/') || !controller[actionName.slice(1)]) {
+              sails.log.warn(`WARNING: sails-hook-swagger-generator: Controller file '${controller.globalId}' contains Swagger JSDoc action defintion for unknown action '${actionName}'`);
+              return;
+            }
+          }
+          const actionIdentity = actionName.substring(1).toLowerCase(); // convert '/{action}' --> '{action}'
+          if (ret[identity].actions![actionIdentity]) {
+            sails.log.warn(`WARNING: sails-hook-swagger-generator: Controller file '${controller.globalId}' contains Swagger JSDoc action definition '${actionName}' which conflicts with a previously-loaded definition`);
+          }
+          // note coercion as non-standard swaggerDoc i.e. '/{action}' contains operation contents (no HTTP method specified)
+          ret[identity].actions![actionIdentity] = swaggerDef as SwaggerActionAttribute;
+        });
 
         // note coercion as non-standard swaggerDoc i.e. '/{action}' contains operation contents (no HTTP method specified)
-        ret[identity].actions = mapKeys(
-          swaggerDoc.paths,
-          (action, path) => path.substring(1) // convert '/{action}' --> '{action'
-        ) as NameKeyMap<SwaggerActionAttribute>;
 
       } catch (err) {
         sails.log.error(`ERROR: sails-hook-swagger-generator: Error resolving/loading controller ${controller.globalId}: ${err.message || ''}` /* , err */);

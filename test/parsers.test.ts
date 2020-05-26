@@ -2,7 +2,7 @@
 import { expect } from 'chai';
 import { parseModels, parseBoundRoutes, parseControllers, parseControllerJsDoc, parseModelsJsDoc } from '../lib/parsers';
 import { BluePrintAction, MiddlewareType, SwaggerSailsControllers, NameKeyMap, SwaggerControllerAttribute, SwaggerModelAttribute, SwaggerSailsModel } from '../lib/interfaces';
-import { bluerprintActions } from '../lib/utils';
+import { blueprintActions } from '../lib/utils';
 import path from 'path';
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
@@ -198,7 +198,7 @@ describe ('Parsers', () => {
             expect(actual.map(r => r.path)).to.deep.equal(expectedPaths);
             expect(actual.every(route => {
               if(route.middlewareType === MiddlewareType.BLUEPRINT) {
-                return bluerprintActions.includes(route.action as BluePrintAction);
+                return blueprintActions.includes(route.action as BluePrintAction);
               } else {
                 return route.middlewareType === MiddlewareType.ACTION;
               }
