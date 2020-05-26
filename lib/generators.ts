@@ -223,8 +223,9 @@ export const generateSchemas = (models: NameKeyMap<SwaggerSailsModel>): NameKeyM
       }
 
       const schema: OpenApi.UpdatedSchema = {
-        description: get(model, 'swagger.description', `Sails ORM Model **${model.globalId}**`),
+        description: model.swagger.modelSchema?.description || `Sails ORM Model **${model.globalId}**`,
         required: [],
+        ...omit(model.swagger?.modelSchema || {}, 'exclude', 'description', 'tags'),
       }
 
       const attributes = model.attributes || {}
@@ -311,11 +312,11 @@ export const generatePaths = (routes: SwaggerRouteInfo[], templates: BlueprintAc
         summary: subst(template.summary),
         description: subst(template.description),
         externalDocs: template.externalDocs || undefined,
-        tags: route.swagger?.tags || [route.model.globalId],
+        tags: route.swagger?.tags || route.model.swagger.modelSchema?.tags || route.model.swagger.actions?.allactions?.tags || [route.model.globalId],
         parameters,
         responses: cloneDeep(defaultsValues.responses || {}),
-        ...(route.model.swagger?.model || {}),
-        ...(route.swagger || {})
+        ...omit(route.model.swagger.actions?.allactions || {}, 'exclude'),
+        ...omit(route.swagger || {}, 'exclude')
       };
 
       const isParam = (inType: string, name: string): boolean => !!pathEntry.parameters.find(parameter => parameter.in == inType && parameter.name == name);
