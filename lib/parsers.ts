@@ -2,10 +2,10 @@
  * Created by theophy on 02/08/2017.
  */
 import * as path from 'path';
-import { SwaggerSailsModel, SwaggerSailsRouteControllerTarget, HTTPMethodVerb, ParsedCustomRoute, ParsedBindRoute, MiddlewareType, SwaggerRouteInfo, SwaggerSailsController, NameKeyMap, SwaggerActionAttribute, SwaggerModelAttribute, ActionType, SwaggerSailsControllers, AnnotatedFunction, SwaggerControllerAttribute } from './interfaces';
+import { SwaggerSailsModel, HTTPMethodVerb, MiddlewareType, SwaggerRouteInfo, NameKeyMap, SwaggerActionAttribute, SwaggerModelAttribute, ActionType, SwaggerSailsControllers, AnnotatedFunction, SwaggerControllerAttribute, BluePrintAction, SwaggerModelSchemaAttribute } from './interfaces';
 import cloneDeep from 'lodash/cloneDeep';
 import { OpenApi } from '../types/openapi';
-import { loadSwaggerDocComments, mergeSwaggerSpec, mergeSwaggerPaths, getSwaggerAction, getActionNameFromPath } from './utils';
+import { loadSwaggerDocComments, mergeSwaggerSpec, mergeSwaggerPaths, getActionNameFromPath, blueprintActions } from './utils';
 import { map, pickBy, mapValues, mapKeys, forEach, isObject, isArray, isFunction, isString, isUndefined, omit } from 'lodash';
 import includeAll from 'include-all';
 
@@ -252,7 +252,7 @@ export const parseBoundRoutes = (boundRoutes: Array<Sails.Route>,
           return undefined;
         }
       } else {
-        sails.log.warn(`WARNING: sails-hook-swagger-generator: Ignoring bound route '${route.verb} ${route.path}' as middleware type missing`);
+        sails.log.verbose(`WARNING: sails-hook-swagger-generator: Ignoring bound route '${route.verb} ${route.path}' as middleware type missing`);
         return undefined;
       }
 
@@ -277,10 +277,10 @@ export const parseBoundRoutes = (boundRoutes: Array<Sails.Route>,
         // test for shortcut blueprint routes
         if (route.verb === 'get') {
           // 1:prefix, 2:identity, 3:shortcut-action, 4:id
-          const re = /^(\/.*)\/([^/]+)\/(find|create|update|destroy)(\/:id)?$/;
+          const re = /^(\/.+)?\/([^/]+)\/(find|create|update|destroy)(\/:id)?$/;
 
           // 1:prefix, 2:identity, 3:id, 4:association, 5:shortcut-action, 6:id
-          const re2 = /^(\/.*)\/([^/]+)\/(:parentid)\/([^/]+)\/(add|remove|replace)(\/:childid)?$/;
+          const re2 = /^(\/.+)?\/([^/]+)\/(:parentid)\/([^/]+)\/(add|remove|replace)(\/:childid)?$/;
 
           if (route.path.match(re) || route.path.match(re2)) {
             actionType = 'shortcutBlueprint';
@@ -369,23 +369,42 @@ export const parseControllers = async (sails: Sails.Sails): Promise<SwaggerSails
     if (match) {
 
       if (!isObject(moduleDef) || isArray(moduleDef) || isFunction(moduleDef)) { return; }
-      const identity = match[1].toLowerCase();
+      const moduleIdentity = match[1].toLowerCase();
       const defaultTagName = path.basename(match[1]);
 
       // store keyed on controller file identity
-      ret.controllerFiles[identity] = {
+      ret.controllerFiles[moduleIdentity] = {
         ...moduleDef,
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         swagger: (moduleDef as any).swagger || {},
+        actionType: 'controller',
         defaultTagName
       };
+
+      // check for swagger.actions[] for which action dne AND convert to case-insensitive identities
+      const swaggerActions: NameKeyMap<SwaggerActionAttribute> = {};
+      forEach(ret.controllerFiles[moduleIdentity].swagger.actions || {}, (swaggerDef, actionName) => {
+        if (actionName === 'allActions') {
+          // proceed
+        } else if(!moduleDef[actionName]) {
+          sails.log.warn(`WARNING: sails-hook-swagger-generator: Controller '${filePath}' contains Swagger action definition for unknown action '${actionName}'`);
+          return;
+        }
+        const actionIdentity = actionName.toLowerCase();
+        if(swaggerActions[actionIdentity]) {
+          sails.log.warn(`WARNING: sails-hook-swagger-generator: Controller '${filePath}' contains Swagger action definition '${actionName}' which conflicts with a previously-loaded definition`);
+        }
+        swaggerActions[actionIdentity] = swaggerDef;
+      });
+
+      ret.controllerFiles[moduleIdentity].swagger.actions = swaggerActions;
 
       forEach(moduleDef, (action, actionName) => {
         if (isString(action)) { /* ignore */ return; }
         else if (actionName === '_config') { /* ignore */ return; }
         else if(actionName === 'swagger') { /* ignore */ return; }
         else if(isFunction(action)) {
-          const actionIdentity = (identity + '/' + actionName).toLowerCase();
+          const actionIdentity = (moduleIdentity + '/' + actionName).toLowerCase();
           if(ret.actions[actionIdentity]) {
             // conflict --> dealt with by Sails loader so just ignore here
           } else {
@@ -411,6 +430,7 @@ export const parseControllers = async (sails: Sails.Sails): Promise<SwaggerSails
         return;
       }
 
+      const actionType: ActionType = isFunction(moduleDef) ? 'standalone' : 'actions2';
       const defaultTagName = path.basename(match[1]);
 
       // store keyed on controller file identity
@@ -418,15 +438,16 @@ export const parseControllers = async (sails: Sails.Sails): Promise<SwaggerSails
         ...moduleDef,
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         swagger: (moduleDef as any).swagger || {},
+        actionType,
         defaultTagName
       };
 
       if(isFunction(moduleDef)) {
         ret.actions[actionIdentity] = {
-          actionType: 'standalone',
+          actionType,
           defaultTagName: path.basename(match[1]),
           fn: moduleDef,
-        };
+        }
         const _action = moduleDef as AnnotatedFunction;
         if (_action.swagger) {
           ret.actions[actionIdentity].swagger = _action.swagger;
@@ -434,11 +455,20 @@ export const parseControllers = async (sails: Sails.Sails): Promise<SwaggerSails
       } else if(!isUndefined(moduleDef.machine) || !isUndefined(moduleDef.friendlyName) || isFunction(moduleDef.fn)) {
         // note no swagger here as this is captured at the controller file level above
         ret.actions[actionIdentity] = {
-          actionType: 'actions2',
+          actionType,
           defaultTagName,
           ...(omit(moduleDef, 'swagger') as unknown as Sails.Actions2Machine)
         };
       }
+
+      // check for swagger.actions[] for which action dne
+      forEach(ret.controllerFiles[actionIdentity].swagger.actions || {}, (swaggerDef, actionName) => {
+        if (actionName === 'allActions') return;
+        if(actionName !== defaultTagName) {
+          sails.log.warn(`WARNING: sails-hook-swagger-generator: ${ret.actions[actionIdentity].actionType} action '${filePath}' contains Swagger action definition for unknown action '${actionName}' (expected '${defaultTagName}')`);
+        }
+      });
+
     }
 
   });
