@@ -601,11 +601,11 @@ export const generateDefaultModelTags = (models: NameKeyMap<SwaggerSailsModel>):
 
     const tagDef: Tag = {
       name: model.globalId,
-      description: model.swagger.model?.description || defaultDescription,
+      description: model.swagger.modelSchema?.description || defaultDescription,
     };
 
-    if(model.swagger.model?.externalDocs) {
-      tagDef.externalDocs = { ...model.swagger.model.externalDocs };
+    if(model.swagger.modelSchema?.externalDocs) {
+      tagDef.externalDocs = { ...model.swagger.modelSchema.externalDocs };
     }
 
     return tagDef;
