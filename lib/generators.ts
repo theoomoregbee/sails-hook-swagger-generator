@@ -164,6 +164,11 @@ export const generateAttributeSchema = (attribute: Sails.AttributeDefinition): O
 
   // note: required --> required[] (not here, needs to be done at model level)
 
+  // finally, overwrite in custom swagger
+  if(ai.meta?.swagger) {
+    assign(schema, omit(ai.meta.swagger, 'exclude'));
+  }
+
   return schema;
 }
 
