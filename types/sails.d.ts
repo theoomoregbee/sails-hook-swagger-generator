@@ -198,7 +198,7 @@ declare namespace Sails {
      */
     export interface Actions2Exit {
       description?: string;
-      responseType?: '' | 'view' | 'redirect';
+      responseType?: '' | 'view' | 'redirect' | 'error';
       statusCode?: string;
       viewTemplatePath?: string;
       outputExample?: any;
@@ -235,6 +235,7 @@ declare namespace Sails {
         models: Record<string, Model>;
         log: {
             silly: (value: string) => void;
+            verbose: (value: string) => void;
             info: (value: string) => void;
             warn: (value: string) => void;
             error: (value: string, err?: any) => void;
