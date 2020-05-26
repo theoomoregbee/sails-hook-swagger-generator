@@ -1,4 +1,4 @@
-import { SwaggerSailsModel, NameKeyMap, SwaggerRouteInfo, BlueprintActionTemplates, Defaults, MiddlewareType, SwaggerSailsController, Action2Response } from './interfaces';
+import { SwaggerSailsModel, NameKeyMap, SwaggerRouteInfo, BlueprintActionTemplates, Defaults, MiddlewareType, Action2Response } from './interfaces';
 import { Reference, Tag } from 'swagger-schema-official';
 import get from 'lodash/get';
 import { swaggerTypes, sailsAttributePropertiesMap, validationsMap, actions2Responses } from './type-formatter';
@@ -12,7 +12,8 @@ import isFunction from 'lodash/isFunction';
 import forEach from 'lodash/forEach';
 import { OpenApi } from '../types/openapi';
 import set from 'lodash/set';
-import { map } from 'lodash';
+import { map, omit, find, isEqual, filter, reduce } from 'lodash';
+import { attributeValidations } from './utils';
 
 /**
  * Maps from a Sails route path of the form `/path/:id` to a
@@ -206,14 +207,21 @@ export const generateModelAssociationFKAttributeSchemas = (model: SwaggerSailsMo
 
 /**
  * Generate Swagger schema content describing specified Sails models.
+ *
  * @see https://swagger.io/docs/specification/data-models/
+ *
  * @param models parsed Sails models as per `parsers.parseModels()`
  * @returns
  */
 export const generateSchemas = (models: NameKeyMap<SwaggerSailsModel>): NameKeyMap<OpenApi.UpdatedSchema | Reference> => {
   return Object.keys(models)
-    .reduce((schemas, identiy) => {
-      const model = models[identiy]
+    .reduce((schemas, identity) => {
+      const model = models[identity]
+
+      if(model.swagger?.modelSchema?.exclude === true) {
+        return schemas;
+      }
+
       const schema: OpenApi.UpdatedSchema = {
         description: get(model, 'swagger.description', `Sails ORM Model **${model.globalId}**`),
         required: [],
@@ -222,8 +230,10 @@ export const generateSchemas = (models: NameKeyMap<SwaggerSailsModel>): NameKeyM
       const attributes = model.attributes || {}
       schema.properties = Object.keys(attributes).reduce((props, attributeName) => {
         const attribute = model.attributes[attributeName];
-        props[attributeName] = generateAttributeSchema(attribute);
-        if (attribute.required) schema.required!.push(attributeName);
+        if(attribute.meta?.swagger?.exclude !== true) {
+          props[attributeName] = generateAttributeSchema(attribute);
+          if (attribute.required) schema.required!.push(attributeName);
+        }
         return props
       }, {} as NameKeyMap<OpenApi.UpdatedSchema>)
 
@@ -257,28 +267,25 @@ export const generatePaths = (routes: SwaggerRouteInfo[], templates: BlueprintAc
     components.parameters = {}
   }
 
-  const addTags = (toAdd: Array<Tag>) => {
-    const newTags = toAdd.filter(newTag => tags.find(tag => newTag.name === tag.name));
-    tags.push(...newTags)
-  }
 
-  const mergeComponents = (toMerge: OpenApi.Components) => {
-    for (const key in toMerge) {
-      const componentName = key as keyof OpenApi.Components
-      if (!components[componentName]) {
-        components[componentName] = {};
-      }
-      defaults(components[componentName], toMerge[componentName]);
+  forEach(routes, route => {
+
+    if(route.swagger?.exclude === true) {
+      return;
     }
-  }
 
-  for (const route of routes) {
-    const path = route.path;
     let pathEntry: OpenApi.Operation;
 
     if (route.middlewareType === MiddlewareType.BLUEPRINT && route.model) {
+
+      if(route.model.swagger?.modelSchema?.exclude === true) {
+        return;
+      }
+
       const template = templates[route.action as keyof BlueprintActionTemplates] || {};
+
       const subst = (str: string) => str ? str.replace('{globalId}', route.model!.globalId) : '';
+
       // handle special case of PK parameter
       const parameters = [...(template.parameters || [])]
         .map(parameter => {
@@ -589,11 +596,9 @@ export const generatePaths = (routes: SwaggerRouteInfo[], templates: BlueprintAc
       });
     }
 
-    addTags(get(route.swagger, 'tags', []) as Tag[]);
-    mergeComponents(get(route.swagger, 'components', {}));
 
-    set(paths, [path, route.verb], pathEntry);
-  }
+    set(paths, [route.path, route.verb], pathEntry);
+  });
 
   return paths
 }
