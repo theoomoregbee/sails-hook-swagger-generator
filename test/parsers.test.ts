@@ -183,7 +183,10 @@ describe ('Parsers', () => {
       })
 
       it('should parse model JSDoc for blueprint actions', () => {
-        const expected = { find: { description: '_Alternate description_: Find a list of **User** records that match the specified criteria.\n' } };
+        const expected = {
+          find: { description: '_Alternate description_: Find a list of **User** records that match the specified criteria.\n' },
+          allactions: { externalDocs: { description: 'Refer to these docs for more info', url: 'https://somewhere.com/yep' } },
+         };
         expect(modelsJsDoc.user.actions).to.deep.equal(expected);
       })
 
@@ -291,10 +294,7 @@ describe ('Parsers', () => {
 
         it('should parse `tags` from actions2 JSDoc', () => {
           const expectedTagsActions2 = [
-            {
-              name: 'Action2 Mgt',
-              description: 'Action2 testing'
-            },
+            { name: 'Actions2 Mgt', description: 'Actions2 testing' },
           ];
           expect(controllersJsDoc['subdir/actions2'].tags).to.deep.equal(expectedTagsActions2);
         })

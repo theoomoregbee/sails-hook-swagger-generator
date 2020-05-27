@@ -2,6 +2,7 @@ import { NameKeyMap, SwaggerSailsModel, SwaggerModelAttribute, SwaggerSailsContr
 import { forEach, defaults, cloneDeep, groupBy, mapValues, map } from "lodash";
 import { Tag } from "swagger-schema-official";
 import { OpenApi } from "../types/openapi";
+import path from "path";
 
 
 const transformSailsPathToSwaggerPath = (path: string): string => {

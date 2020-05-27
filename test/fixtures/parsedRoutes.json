@@ -19,6 +19,24 @@
   },
   {
     "middlewareType": "ACTION",
+    "verb": "get",
+    "path": "/twofind",
+    "variables": [],
+    "optionalVariables": [],
+    "action": "subdir2/nomodeltwo/find",
+    "actionType": "function"
+  },
+  {
+    "middlewareType": "ACTION",
+    "verb": "get",
+    "path": "/twoclear",
+    "variables": [],
+    "optionalVariables": [],
+    "action": "subdir2/nomodeltwo/clear",
+    "actionType": "function"
+  },
+  {
+    "middlewareType": "ACTION",
     "verb": "post",
     "path": "/user/login",
     "variables": [],
@@ -120,6 +138,9 @@
     "actionType": "function",
     "swagger": {
       "summary": "update user roles",
+      "tags": [
+        "User (Extra)"
+      ],
       "requestBody": {
         "content": {
           "application/json": {
@@ -145,6 +166,33 @@
         }
       }
     }
+  },
+  {
+    "middlewareType": "ACTION",
+    "verb": "get",
+    "path": "/nomodel/deep-url/more/find",
+    "variables": [],
+    "optionalVariables": [],
+    "action": "nomodel/find",
+    "actionType": "function"
+  },
+  {
+    "middlewareType": "ACTION",
+    "verb": "get",
+    "path": "/nomodel/deep-url/more/clear",
+    "variables": [],
+    "optionalVariables": [],
+    "action": "nomodel/clear",
+    "actionType": "function"
+  },
+  {
+    "middlewareType": "ACTION",
+    "verb": "get",
+    "path": "/nomodel/deep-url/more/should_be_excluded",
+    "variables": [],
+    "optionalVariables": [],
+    "action": "nomodel/actiontobeexcluded",
+    "actionType": "function"
   },
   {
     "middlewareType": "ACTION",

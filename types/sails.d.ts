@@ -198,7 +198,7 @@ declare namespace Sails {
      */
     export interface Actions2Exit {
       description?: string;
-      responseType?: '' | 'view' | 'redirect' | 'error';
+      responseType?: '' | 'view' | 'redirect' | 'error'; // XXX TODO Or res.{responseType}()
       statusCode?: string;
       viewTemplatePath?: string;
       outputExample?: any;
