@@ -3,10 +3,8 @@
  */
 import * as path from 'path';
 import { SwaggerSailsModel, HTTPMethodVerb, MiddlewareType, SwaggerRouteInfo, NameKeyMap, SwaggerActionAttribute, SwaggerModelAttribute, ActionType, SwaggerSailsControllers, AnnotatedFunction, SwaggerControllerAttribute, BluePrintAction, SwaggerModelSchemaAttribute } from './interfaces';
-import cloneDeep from 'lodash/cloneDeep';
-import { OpenApi } from '../types/openapi';
-import { loadSwaggerDocComments, mergeSwaggerSpec, mergeSwaggerPaths, getActionNameFromPath, blueprintActions } from './utils';
-import { map, pickBy, mapValues, mapKeys, forEach, isObject, isArray, isFunction, isString, isUndefined, omit } from 'lodash';
+import { loadSwaggerDocComments, blueprintActions } from './utils';
+import { map, pickBy, mapValues, forEach, isObject, isArray, isFunction, isString, isUndefined, omit } from 'lodash';
 import includeAll from 'include-all';
 
 
@@ -477,7 +475,6 @@ export const parseControllers = async (sails: Sails.Sails): Promise<SwaggerSails
 
 }
 
-
 /**
  * Loads and parses model JSDoc, returning a map keyed on model identity.
  *
@@ -530,7 +527,6 @@ export const parseModelsJsDoc = async (sails: Sails.Sails, models: NameKeyMap<Sw
           // note coercion as non-standard swaggerDoc i.e. '/{globalId}' contains operation contents (no HTTP method specified)
           ret[identity].modelSchema = modelJsDoc as SwaggerModelSchemaAttribute;
         }
-
 
       } catch (err) {
         sails.log.error(`ERROR: sails-hook-swagger-generator: Error resolving/loading model ${model.globalId}: ${err.message || ''}` /* , err */);
@@ -589,8 +585,6 @@ export const parseControllerJsDoc = async (sails: Sails.Sails, controllers: Swag
           // note coercion as non-standard swaggerDoc i.e. '/{action}' contains operation contents (no HTTP method specified)
           ret[identity].actions![actionIdentity] = swaggerDef as SwaggerActionAttribute;
         });
-
-        // note coercion as non-standard swaggerDoc i.e. '/{action}' contains operation contents (no HTTP method specified)
 
       } catch (err) {
         sails.log.error(`ERROR: sails-hook-swagger-generator: Error resolving/loading controller ${controller.globalId}: ${err.message || ''}` /* , err */);

@@ -178,6 +178,7 @@ describe('Transformations', () => {
       }
     },
   } as SwaggerSailsControllers;
+
   const controllersJsDoc = {
     user: {
       tags: [{ name: 'controllersJsDocTag' }],
@@ -250,7 +251,7 @@ describe('Transformations', () => {
       mergeComponents(destComponents, models, modelsJsDoc, controllers, controllersJsDoc);
 
       expect(Object.keys(destComponents.schemas!)).to.deep.equal([
-        'existingSchema', 'modelSchema', 'controllerSchema' // WIP , 'action2Schema'
+        'existingSchema', 'modelSchema', 'controllerSchema'
       ], 'merge of components props to existing components');
 
     })

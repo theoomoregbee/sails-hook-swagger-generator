@@ -199,11 +199,6 @@ export const mergeModelJsDoc = (models: NameKeyMap<SwaggerSailsModel>, modelsJsD
         }
       }
 
-      // if(modelJsDoc.exclude !== undefined) {
-      //   if(model.swagger.exclude === undefined) {
-      //     model.swagger.exclude = modelJsDoc.exclude;
-      //   }
-      // }
     }
 
   });
@@ -227,9 +222,6 @@ export const mergeControllerJsDoc = (controllers: SwaggerSailsControllers, contr
     if(controllerJsDoc) {
       if(controllerJsDoc.actions) {
         forEach(controllerJsDoc.actions, (action, actionName) => {
-          // if(!controllerFile.swagger) {
-          //   controllerFile.swagger = {};
-          // }
           if(!controllerFile.swagger.actions) {
             controllerFile.swagger.actions = {};
           }
@@ -240,16 +232,6 @@ export const mergeControllerJsDoc = (controllers: SwaggerSailsControllers, contr
           }
         });
       }
-
-
-      // if(controllerJsDoc.exclude !== undefined) {
-      //   if (!controllerFile.swagger) {
-      //     controllerFile.swagger = {};
-      //   }
-      //   if(controllerFile.swagger.exclude === undefined) {
-      //     controllerFile.swagger.exclude = controllerJsDoc.exclude;
-      //   }
-      // }
     }
 
   });

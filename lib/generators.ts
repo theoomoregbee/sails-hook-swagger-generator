@@ -1,6 +1,5 @@
 import { SwaggerSailsModel, NameKeyMap, SwaggerRouteInfo, BlueprintActionTemplates, Defaults, MiddlewareType, Action2Response } from './interfaces';
 import { Reference, Tag } from 'swagger-schema-official';
-import get from 'lodash/get';
 import { swaggerTypes, sailsAttributePropertiesMap, validationsMap, actions2Responses } from './type-formatter';
 import assign from 'lodash/assign';
 import defaults from 'lodash/defaults';
@@ -12,30 +11,9 @@ import isFunction from 'lodash/isFunction';
 import forEach from 'lodash/forEach';
 import { OpenApi } from '../types/openapi';
 import set from 'lodash/set';
-import { map, omit, find, isEqual, filter, reduce } from 'lodash';
+import { map, omit, isEqual, reduce } from 'lodash';
 import { attributeValidations } from './utils';
 
-/**
- * Maps from a Sails route path of the form `/path/:id` to a
- * Swagger path of the form `/path/{id}`. and the path variables
- */
-export const generateSwaggerPath = (path: string): { variables: string[]; path: string } => {
-  const variables: string[] = [];
-  const swaggerPath = path
-    .split('/')
-    .map(v => {
-      // TODO: update this to accept optional route param e.g id?
-      // simply remove the ? in [^/:?]
-      const match = v.match(/^:([^/:?]+)\??$/);
-      if (match) {
-        variables.push(match[1]);
-        return `{${match[1]}}`;
-      }
-      return v;
-    })
-    .join('/');
-  return { path: swaggerPath, variables };
-}
 
 /**
  * Generate Swagger schema content describing the specified Sails attribute.
@@ -269,7 +247,6 @@ export const generatePaths = (routes: SwaggerRouteInfo[], templates: BlueprintAc
   if (!components.parameters) {
     components.parameters = {}
   }
-
 
   forEach(routes, route => {
 
@@ -621,11 +598,6 @@ export const generatePaths = (routes: SwaggerRouteInfo[], templates: BlueprintAc
               const arr = (resp.content!['application/json'].schema as OpenApi.UpdatedSchema)!.oneOf;
               if (arr!.length === 1) {
                 resp.content!['application/json'].schema = arr![0];
-              } else {
-                // let d = `${arr!.length} alternative responses`;
-                // const defaultResponse = find(actions2Responses, _r => _r.statusCode === statusCode);
-                // if(defaultResponse) d = `${defaultResponse.description} (${d})`;
-                // (resp.content!['application/json'].schema as OpenApi.UpdatedSchema).description = d;
               }
             }
           });
@@ -691,7 +663,6 @@ export const generatePaths = (routes: SwaggerRouteInfo[], templates: BlueprintAc
         });
       });
     }
-
 
     set(paths, [route.path, route.verb], pathEntry);
   });
