@@ -493,8 +493,10 @@ export const generatePaths = (routes: SwaggerRouteInfo[], templates: BlueprintAc
         else modifiers[modifier](); // standard modifier
       });
 
-      assign(pathEntry.responses['500'], {
-        description: 'Internal server error',
+      defaults(pathEntry.responses, {
+        '500': {
+          description: 'Internal server error',
+        }
       });
 
     } else { // otherwise action
@@ -593,7 +595,7 @@ export const generatePaths = (routes: SwaggerRouteInfo[], templates: BlueprintAc
           });
 
           // remove oneOf for single entries
-          forEach(exitResponses, (resp, statusCode) => {
+          forEach(exitResponses, resp => {
             if ((resp.content?.['application/json'].schema as OpenApi.UpdatedSchema)?.oneOf) {
               const arr = (resp.content!['application/json'].schema as OpenApi.UpdatedSchema)!.oneOf;
               if (arr!.length === 1) {
