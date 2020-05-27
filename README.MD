@@ -23,7 +23,7 @@ Simply by lifting your sails app `sails lift`, after lifting or starting the app
 
 
 ## Example
-Check the **./swagger/swagger.json** for generated swagger documentation json, then head to [Swagger Editor](http://editor.swagger.io/).
+Check the **./swagger/swagger.json** for generated swagger documentation json, then head to [Swagger Editor](https://editor.swagger.io/).
 
 ## Generated Output
 
@@ -34,15 +34,19 @@ By default, the Swagger Generator Sails Hook generates:
    actions with routes configured in `config/routes.js`; and
 1. Listing of all routes configured in `config/routes.js` (full details cannot be inferred
    for custom routes without additional information being provided - see below).
+1. Creation of default tags for paths based upon Sails Model and Controller `globalId`'s.
 
 ## Adding/Customising Generated Output
 
-Documentation detail and customisation of most aspects of the generated Swagger can be achieved by:
+Documentation detail and customisation of most aspects of the generated Swagger can be achieved by adding:
 1. Top-level configuration to `config/swaggergenerator.js`. This provides direct JSON
    used as the template for the output Swagger/OpenAPI.
-1. Adding objects with the key `swagger` to custom route configuration, controller files, action
-   functions, model definitions and model attribute definitions. A `swagger` must be of type [SwaggerAttribute](./lib/interfaces.ts#L42)
-1. Adding JSDoc ([swagger-jsdoc](https://github.com/Surnet/swagger-jsdoc)) `@swagger` comments to controller/action files and model files.
+1. Objects with the key `swagger` to custom route configuration, controller files, action
+   functions, model definitions and model attribute definitions. The `swagger` element must be of type
+   [SwaggerActionAttribute](./lib/interfaces.ts#L55) for actions (based on OpenApi.Operation)
+   or [SwaggerModelSchemaAttribute](./lib/interfaces.ts#L66) for model schemas (based on OpenApi.UpdatedSchema).
+1. JSDoc ([swagger-jsdoc](https://github.com/Surnet/swagger-jsdoc)) `@swagger` comments
+   to controller/action files and model files.
 
 Top-level Swagger/OpenAPI definitions for `tags` and `components` may be added in all `swagger` objects
 above and in all JSDoc `@swagger` documentation comments. This enables the definition of top-level elements.
@@ -103,14 +107,16 @@ Notes on the use of configuration:
 Documentation detail and customisation of most aspects of the generated Swagger for
 [custom routes](https://sailsjs.com/documentation/concepts/routes/custom-routes) may be achieved by:
 
-1. Adding an object with the key `swagger`(must be of type [OpenApi.Operation](./types/openapi.d.ts#L99)) to individual route configurations in `config/routes.js`.
-1. Adding an object with the key `swagger`(must be of type [SwaggerAttribute](./lib/interfaces.ts#L42)) to the exports of a model file, controller file, standalone action file or actions2 file.
+1. Adding an object with the key `swagger` (must be of type [SwaggerActionAttribute](./lib/interfaces.ts#L55) for actions, based on OpenApi.Operation) to individual route configurations in `config/routes.js`.
+1. Adding an object with the key `swagger` (must be of type [SwaggerControllerAttribute](./lib/interfaces.ts#L76)) to the exports of a controller file, standalone action file or actions2 file.
+1. Adding an object with the key `swagger` (must be of type [SwaggerModelAttribute](./lib/interfaces.ts#L87)) to the exports of a model file.
 1. Adding JSDoc `@swagger` comments to Sails
   [model files](https://sailsjs.com/documentation/concepts/models-and-orm/models),
   [controller files](https://sailsjs.com/documentation/concepts/actions-and-controllers#?controllers),
   [standalone action files](https://sailsjs.com/documentation/concepts/actions-and-controllers#?standalone-actions) or
   [actions2 files](https://sailsjs.com/documentation/concepts/actions-and-controllers#?actions-2); specifically:
-    - JSDoc `@swagger` documentation under the `/{actionName}` path for the route, or
+    - JSDoc `@swagger` documentation under the `/{actionName}` path for the route (controllers/actions), or
+    - JSDoc `@swagger` documentation under the `/{blueprintAction}` path for the route (models), or
     - JSDoc `@swagger` documentation under `tags` and `components` paths for adding to the top-level Swagger/OpenAPI definitions.
 
 
@@ -176,19 +182,44 @@ Documentation detail and customisation of most aspects of the generated Swagger 
 [actions2 files](https://sailsjs.com/documentation/concepts/actions-and-controllers#?actions-2) as follows:
 
 1. Adding an object with the key `swagger` added to a controller file action function.
-1. Adding an object with the key `swagger` to the exports of a controller file, standalone action file or actions2 file: 
-   - For controller files, actions are referenced by adding objects keyed on `swagger.actions.{actionName}` name. See [UserController.js](./api/controllers/UserController.js),
-   - For standalone action or actions2 files, placing content in the `swagger.actions.{actionFileName|actions2FileName}` object. See [actions2.js](./api/controllers/subdir/actions2.js) ***Note**: `actionFileName|actions2FileName` must correspond to the filename*
-   - Adding documentation under `tags` and `components` elements for adding to the top-level Swagger/OpenAPI definitions. See example in either [UserController.js](./api/controllers/UserController.js) or [actions2.js](./api/controllers/subdir/actions2.js)  
+1. Adding an object with the key `swagger` to the exports of a controller file, standalone
+   action file or actions2 file:
+   - For controller files, actions are referenced by adding objects keyed on `swagger.actions.{actionName}`
+     name. See [UserController.js](./api/controllers/UserController.js);
+   - For standalone action or actions2 files, placing content in the
+     `swagger.actions.{actionFileName|actions2FileName}` object. See
+     [actions2.js](./api/controllers/subdir/actions2.js)
+     ***Note**: `actionFileName|actions2FileName` must correspond to the filename*;
+   - For all controller/action files, adding per-action documentation to be
+     applied to **all** actions using the key `swagger.actions.allActions`
+     e.g. use this to apply common tags to all actions for a controller.
+   - Adding documentation under `tags` and `components` elements for adding to the
+     top-level Swagger/OpenAPI definitions. See example in either
+     [UserController.js](./api/controllers/UserController.js)
+     or [actions2.js](./api/controllers/subdir/actions2.js).
 1. Adding JSDoc `@swagger` comments to controller file, standalone action file or actions2 file:
-   - JSDoc `@swagger` documentation under the `/{actionName}` path for the route, or
+   - JSDoc `@swagger` documentation under the `/{actionName}` path for the controller file actions,
+   - JSDoc `@swagger` documentation under the `/{actionFileName|actions2FileName}` path for standalone action or actions2 files,
+   - JSDoc `@swagger` documentation under the `/allActions` path to be applied to **all** actions for the controller, or
    - JSDoc `@swagger` documentation under `tags` and `components` paths for adding to the top-level Swagger/OpenAPI definitions.
+
+An `exclude` property, set to `true`, may be added to any `swagger` element or `@swagger` JSDoc
+action documentation to exclude that action from the generated Swagger. See example in
+[NomodelController.js](api/controllers/NomodelController.js).
+
+The Swagger definition for each action is merged in the order above to form the final
+definition, with `config/routes.js` taking highest precendence and **earlier** definitions
+above taking precedence over later.
 
 #### For actions2 files:
 1. Inputs are parsed to generate parameter documentation.
 2. Exits are parsed to generate response documentation.
 3. Both may be customised/overridden by specifying parameters and/or responses in the `swagger` object
    in actions2 file.
+4. Inputs may also add an object with the key `meta.swagger` to document the attributes
+   Swagger/OpenAPI **schema** associated with the input value. See example in
+   [actions2.js](./api/controllers/subdir/actions2.js).
+5. Inputs may be excluded from the generated Swagger by setting `meta.swagger.exclude` to `true`.
 
 For example, for a route configured as:
 ```javascript
@@ -253,17 +284,44 @@ Documentation detail and customisation of most aspects of the generated Swagger 
 [blueprint routes](https://sailsjs.com/documentation/concepts/blueprints/blueprint-routes) may be achieved by:
 
 1. Adding an object with the key `swagger` to individual models e.g. `api/models/modelName.js`:
-   - Documenting the Swagger **schema** associated with the Sails mode by adding general content.
-   - Adding per-action documentation by adding objects keyed on `actions.{blueprintAction}` name.
-   - Adding documentation under `tags` and `components` elements for adding to the top-level Swagger/OpenAPI definitions.
-1. Adding specific fields to model attributes (supports `description`, `externalDocs` and `example`).
+   - Adding documentation to the model's Swagger **schema** using the key `swagger.modelSchema`
+     e.g. use this to apply detailed documentation via the `description` field;
+   - In additon to the model's schema, the key `swagger.modelSchema` may be used to specify
+     tag names (as a `string[]`) to be assigned all blueprint actions for the model.
+     This is a *non-standard* convenience function i.e. in Swagger/OpenAPI you need to
+     explicitly add tags to **each/every** OpenAPI.Operation;
+   - Adding per-action documentation by adding objects keyed on
+     `swagger.actions.{blueprintAction}` name;
+   - Adding action documentation to **all** actions using the key `swagger.actions.allActions`
+     e.g. use this to apply common `externalDocs` to all blueprint actions for the model; or
+   - Adding documentation under `swagger.tags` and `swagger.components` elements for adding to the top-level Swagger/OpenAPI definitions.
+1. Adding documentation-specific fields to model attributes (supports `description`, `moreInfoUrl` and `example`).
    Note that applicable Sails [attributes](https://sailsjs.com/documentation/concepts/models-and-orm/attributes),
    [automigrations](https://sailsjs.com/documentation/concepts/models-and-orm/attributes#?automigrations) and
    [validations](https://sailsjs.com/documentation/concepts/models-and-orm/validations) are also parsed.
-1. JSDoc `@swagger` documentation under the `/{globalId}` path for models.
-1. JSDoc `@swagger` per-action documentation under the `/{blueprintAction}` path for the
-  [model blueprint actions](https://sailsjs.com/documentation/concepts/blueprints/blueprint-actions).
-1. JSDoc `@swagger` documentation under `tags` and `components` paths for adding to the top-level Swagger definitions.
+1. Adding an object with the key `meta.swagger` to individual model attributes to document
+   the attributes Swagger/OpenAPI **schema**. See example in [Pet.js](./api/models/Pet.js).
+1. Adding JSDoc `@swagger` comments to model files:
+   - JSDoc `@swagger` documentation under the `/{globalId}` to add documentation to
+     the model's Swagger **schema** (or tags as noted above),
+   - JSDoc `@swagger` documentation under the `/{blueprintAction}` to add per-action
+     documentation for the
+     [model blueprint actions](https://sailsjs.com/documentation/concepts/blueprints/blueprint-actions),
+   - JSDoc `@swagger` documentation under the `/allActions` path to be applied to **all**
+     blueprint actions for the model, or
+   - JSDoc `@swagger` documentation under `tags` and `components` paths for adding to the
+     top-level Swagger/OpenAPI definitions.
+
+An `exclude` property, set to `true`, may be added to any `swagger` element of `@swagger` JSDoc
+action documentation to exclude the model *completely* (exclude the **schema**) or a specific
+blueprint action from the generated Swagger. See example in [OldPet.js](api/models/OldPet.js).
+
+Individual model attributes may be excluded from the generated Swagger by setting
+`meta.swagger.exclude` to `true`. See example in [Pet.js](api/models/Pet.js).
+
+The Swagger definition for each action is merged in the order above to form the final
+definition, with `config/routes.js` taking highest precendence and **earlier** definitions
+above taking precedence over later.
 
 For example, in a model `api/models/User.js`:
 
@@ -289,7 +347,8 @@ module.exports = {
   swagger: {
     actions: {
       create: { ... },
-    }
+    },
+    modelSchema: { ... },
     tags: [...]
     components: {...}
   }
@@ -382,6 +441,9 @@ Elements of components are added to the top-level Swagger/OpenAPI definitions as
    they **do not exist**.
 1. Existing elements are **not** overwritten or merged.
 
+For example, the element `components.schemas.pet` will be added as part of a merge process,
+but the contents of multiple definitions of `pet` **will not** be merged.
+
 The following elements (from the OpenAPI 3 specification) are handled:
 ```javascript
 let componentDefinitionReference = {
@@ -420,43 +482,32 @@ Each is configured in `config/swaggergenerator.js`.
 
 This hook parses all routes, custom and blueprint, before commencing the generation of the Swagger output.
 Each route is described by a `SwaggerRouteInfo` object
-(see defintion [here](./lib/interfaces.ts#L126)):
+(see defintion [here](./lib/interfaces.ts#L184)):
 
 ```typescript
 export interface SwaggerRouteInfo {
-    middlewareType?: MiddlewareType;
+  middlewareType: MiddlewareType; //< one of action|blueprint
 
-    tags: Array<Tag>;
-    model?: SwaggerSailsModel;
-    swagger?: OpenApi.Operation;
+  verb: HTTPMethodVerb; //< one of all|get|post|put|patch|delete
+  path: string; //< full Sails URL as per sails.getUrlFor() including prefix
+  variables: string[]; //< list of ALL variables extracted from path e.g. `/pet/:id` --> `id`
+  optionalVariables: string[]; //< list of optional variables from path e.g. `/pet/:id?`
 
-    controller?: string;
-    action: string;
+  action: string; //< either blueprint action (e.g. 'find') or action identity (e.g. 'subdir/reporting/run')
+  actionType: ActionType; //< one of blueprint|shortcutBlueprint|controller|standalone|actions2|function
+  actions2Machine?: Sails.Actions2Machine; //< for actionType === 'actions2', details of the action2 machine
 
-    verb: HTTPMethodVerb;
-    path: string;
-    variables: string[];
+  model?: SwaggerSailsModel; //< reference to Sails Model (blueprints only)
+  associationAliases?: string[]; //< association attribute names (relevant blueprint routes only)
 
-    associations: Sails.RouteAssociation[];
-    alias?: string;
-    aliases: string[];
-    associationsPrimaryKeyAttribute: AssociationPrimaryKeyAttribute[];
+  defaultTagName?: string; //< default tag name for route, if any, based on Sails Model or Controller
+
+  swagger?: SwaggerActionAttribute; //< per-route Swagger (OpenApi Operation)
 }
 ```
 
-Sails **models** are described by a `SwaggerSailsModel` object
-(see defintion [here](./lib/interfaces.ts#L48)):
+Other interfaces for models, `swagger` elements etc may be found in [interfaces.ts](./lib/interfaces.ts).
 
-```typescript
-export interface SwaggerSailsModel extends Omit<Sails.Model, 'attributes'> {
-    attributes: Record<string, Sails.AttributeValue & {
-        description?: string;
-        externalDocs?: OpenApi.ExternalDoc;
-        example?: string;
-    }>;
-    swagger: SwaggerAttribute;
-}
-```
 
 ### Route Filtering
 
@@ -485,6 +536,7 @@ For example:
 module.exports['swagger-generator'] = {
   updateBlueprintActionTemplates: function(blueprintActionTemplates) {
     blueprintActionTemplates.search = { ... };
+    return blueprintActionTemplates;
   }
 }
 ```
@@ -534,6 +586,7 @@ Note that:
      - `addResultNotFound`
      - `addResultValidationError`
      - `addFksBodyParam`
+     - `addShortCutBlueprintRouteNote`
    - Functions are called as `func(blueprintActionTemplate, routeInfo, pathEntry, tags, components)`
      where
      - `blueprintActionTemplate` the blueprint action template (see above) to which the modifier relates
@@ -583,7 +636,7 @@ Do not forget to add a bit of test(s) of what value you adding.
 * While developing, you can run the below command to start nodemon watch too run linting and testing on `.ts` changes
 
 ```sh
-npm run dev 
+npm run dev
 ```
 
 ## Changelog

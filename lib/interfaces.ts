@@ -58,14 +58,19 @@ export interface SwaggerActionAttribute extends Omit<OpenApi.Operation, 'paramet
   exclude?: boolean;
 }
 
+/**
+ * JSON used describe/document Sails Model files, describing the model's **schema**
+ * and a list of Swagger/OpenAPI `tags` to be applied to **all** blueprint actions for
+ * the model.
+ */
 export interface SwaggerModelSchemaAttribute extends OpenApi.UpdatedSchema {
   tags?: string[];
   exclude?: boolean;
 }
 
 /**
- * JSON used to desribe/document Sails Controller file, describing global `tags` and
- * `components` to be added, `controller` documentation to be applied to **all**
+ * JSON used to describe/document Sails Controller file, describing global `tags` and
+ * `components` to be added, 'controller' documentation to be applied to **all**
  * actions in the file and per-action documentation.
  */
 export interface SwaggerControllerAttribute {
