@@ -1,6 +1,6 @@
 import path from 'path';
 import { expect } from 'chai';
-import { mergeSwaggerSpec, mergeSwaggerPaths, loadSwaggerDocComments, normalizeRouteControllerName, normalizeRouteControllerTarget, removeViewRoutes, getSwaggerAction, getActionNameFromPath } from '../lib/utils';
+import { mergeSwaggerSpec, mergeSwaggerPaths, loadSwaggerDocComments, normalizeRouteControllerName, removeViewRoutes, getActionNameFromPath } from '../lib/utils';
 import { SwaggerActionAttribute, NameKeyMap } from '../lib/interfaces';
 import { OpenApi } from '../types/openapi';
 

@@ -49,7 +49,6 @@ export const validationsMap: { [n in keyof Sails.AttributeValidation]: string } 
   min: 'minimum',
   maxLength: 'maxLength',
   minLength: 'minLength',
-  regex: 'pattern',
   isIn: 'enum'
 };
 

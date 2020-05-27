@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
+import additionalConfig from './fixtures/additionalConfig.json';
 import swaggerDocTest from './swagger-doc.test';
 
 /**
@@ -23,7 +24,7 @@ describe('Basic tests ::', function () {
     // Attempt to lift sails
     Sails().lift({
       blueprints: {
-        shortcuts: false,
+        shortcuts: true,
       },
       hooks: {
         // Load the hook
@@ -31,8 +32,10 @@ describe('Basic tests ::', function () {
         // Skip grunt (unless your hook uses it)
         grunt: false
       },
-      log: { level: "silent" }
-
+      log: { level: "silent" },
+      swaggergenerator: { // note: non-default name
+        ...additionalConfig,
+      },
     }, function (err: any, _sails: any) {
       if (err) return done(err);
       sails = _sails;

@@ -256,10 +256,12 @@ export const generateSchemas = (models: NameKeyMap<SwaggerSailsModel>): NameKeyM
  * @param routes
  * @param templates
  * @param defaultsValues
- * @param action2s
- * @param specification
+ * @param models
  */
-export const generatePaths = (routes: SwaggerRouteInfo[], templates: BlueprintActionTemplates, defaultsValues: Defaults, action2s: NameKeyMap<SwaggerSailsController>, specification: Omit<OpenApi.OpenApi, 'paths'>, models: NameKeyMap<SwaggerSailsModel>): OpenApi.Paths => {
+export const generatePaths = (routes: SwaggerRouteInfo[], templates: BlueprintActionTemplates,
+  defaultsValues: Defaults, specification: Omit<OpenApi.OpenApi, 'paths'>,
+  models: NameKeyMap<SwaggerSailsModel>): OpenApi.Paths => {
+
   const paths = {};
   const tags = specification.tags!;
   const components = specification.components!;
@@ -421,7 +423,7 @@ export const generatePaths = (routes: SwaggerRouteInfo[], templates: BlueprintAc
         },
 
         addAssociationFKPathParam: () => {
-          if (isParam('path', 'fk')) return;
+          if (isParam('path', 'fk')) return; // pre-defined/pre-configured --> skip
           pathEntry.parameters.push({
             in: 'path',
             name: 'fk',
@@ -517,11 +519,13 @@ export const generatePaths = (routes: SwaggerRouteInfo[], templates: BlueprintAc
       assign(pathEntry.responses['500'], {
         description: 'Internal server error',
       });
-    } else {
+
+    } else { // otherwise action
+
       pathEntry = {
         parameters: [],
         responses: cloneDeep(defaultsValues.responses || {}),
-        ...(route.swagger || {})
+        ...omit(route.swagger || {}, 'exclude')
       }
 
       if (route.actionType === 'actions2') {
@@ -655,6 +659,10 @@ export const generatePaths = (routes: SwaggerRouteInfo[], templates: BlueprintAc
           tags: route.swagger?.tags || [route.defaultTagName],
         }
       );
+
+      // catch the case where defaultTagName not defined
+      if(isEqual(pathEntry.tags, [undefined])) pathEntry.tags = [];
+
     }
 
     if (route.variables) {

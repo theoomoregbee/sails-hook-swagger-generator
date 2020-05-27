@@ -1,0 +1,83 @@
+{
+  "swagger": {
+    "security": [
+      {
+        "APIKeyHeader": []
+      },
+      {
+        "MyOAuth2": [
+          "read",
+          "write"
+        ]
+      }
+    ],
+    "components": {
+      "securitySchemes": {
+        "APIKeyHeader": {
+          "type": "apiKey",
+          "in": "header",
+          "name": "X-API-Key",
+          "description": "FOO"
+        },
+        "MyOAuth2": {
+          "type": "oauth2",
+          "description": "Some **detail** please",
+          "flows": {
+            "authorizationCode": {
+              "authorizationUrl": "https://example.com/api/oauth/dialog",
+              "tokenUrl": "https://example.com/api/oauth/token",
+              "scopes": {
+                "write": "modify pets in your account",
+                "read": "read your pets"
+              }
+            }
+          }
+        }
+      },
+      "schemas": {
+        "bottle": {
+          "description": "A bottle",
+          "properties": {
+            "id": {
+              "type": "integer",
+              "uniqueItems": true
+            },
+            "names": {
+              "type": "string",
+              "example": "Name"
+            }
+          }
+        }
+      }
+    },
+    "paths": {
+      "/reverse-proxy/deep-url/additional/find": {
+        "get": {
+          "summary": "An externally added path",
+          "parameters": [],
+          "responses": {
+            "200": {
+              "description": "A single bottle",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/bottle"
+                  }
+                }
+              }
+            },
+            "404": {
+              "description": "Resource not found"
+            },
+            "500": {
+              "description": "Internal server error"
+            }
+          },
+          "tags": [
+            "No Model Example"
+          ]
+        }
+      }
+    }
+  }
+}
