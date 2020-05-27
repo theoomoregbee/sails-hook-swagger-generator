@@ -1,4 +1,4 @@
-import { SwaggerControllerAttribute, SwaggerSailsRouteControllerTarget, MiddlewareType, BluePrintAction, SwaggerSailsController, SwaggerRouteInfo, NameKeyMap, SwaggerSailsModel, SwaggerActionAttribute } from '../interfaces';
+import { SwaggerControllerAttribute, MiddlewareType, BluePrintAction, SwaggerRouteInfo, NameKeyMap, SwaggerSailsModel, SwaggerActionAttribute } from '../interfaces';
 import swaggerJSDoc from 'swagger-jsdoc';
 import cloneDeep from 'lodash/cloneDeep';
 import { OpenApi } from '../../types/openapi';
@@ -27,6 +27,30 @@ const componentReference: Array<keyof OpenApi.Components> = [
 ]
 
 export const blueprintActions: Array<BluePrintAction> = ['findone', 'find', 'create', 'update', 'destroy', 'populate', 'add', 'remove', 'replace'];
+
+export const attributeValidations: string[] = [
+  'isAfter',
+  'isBefore',
+  'isBoolean',
+  'isCreditCard',
+  'isEmail',
+  'isHexColor',
+  'isIn',
+  'isInteger',
+  'isIP',
+  'isNotEmptyString',
+  'isNotIn',
+  'isNumber',
+  'isString',
+  'isURL',
+  'isUUID',
+  'max',
+  'min',
+  'maxLength',
+  'minLength',
+  'regex',
+  'custom',
+];
 
 export const mergeSwaggerSpec = (destination: SwaggerControllerAttribute, source: SwaggerControllerAttribute): SwaggerControllerAttribute => {
     const dest: SwaggerControllerAttribute = cloneDeep(destination)

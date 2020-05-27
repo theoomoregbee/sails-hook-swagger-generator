@@ -138,7 +138,7 @@ export interface SwaggerSailsControllers {
   }>;
 
   /// All controller actions keyed on action identity
-  actions: NameKeyMap<(Sails.Action | Sails.Actions2Machine) & {
+  actions: NameKeyMap<(Sails.Action | SwaggerSailsActions2Machine) & {
     actionType: ActionType;
     defaultTagName: string;
     swagger?: SwaggerActionAttribute;
@@ -186,7 +186,7 @@ export interface SwaggerRouteInfo {
 
   action: string; //< either blueprint action (e.g. 'find') or action identity (e.g. 'subdir/reporting/run')
   actionType: ActionType; //< one of blueprint|shortcutBlueprint|controller|standalone|actions2|function
-  actions2Machine?: Sails.Actions2Machine; //< for actionType === 'actions2', details of the action2 machine
+  actions2Machine?: SwaggerSailsActions2Machine; //< for actionType === 'actions2', details of the action2 machine
 
   model?: SwaggerSailsModel; //< reference to Sails Model (blueprints only)
   associationAliases?: string[]; //< association attribute names (relevant blueprint routes only)
