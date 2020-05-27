@@ -237,6 +237,7 @@ describe('Transformations', () => {
         }
       });
 
+      // XXX TODO increase test data in controllers and controllersJsDoc
       mergeControllerSwaggerIntoRouteInfo(sails, routes, controllers, controllersJsDoc);
       expect(routes).to.deep.equal(expected);
 

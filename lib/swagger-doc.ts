@@ -11,6 +11,8 @@ import { Tag } from 'swagger-schema-official';
 
 export default async (sails: Sails.Sails, sailsRoutes: Array<Sails.Route>, context: Sails.Hook<SwaggerGenerator>): Promise<OpenApi.OpenApi | undefined> => {
 
+  // fs.writeFileSync('./test/fixtures/sailsRoutes.json', JSON.stringify(sailsRoutes, null, 2));
+
   const hookConfig: SwaggerGenerator = sails.config[context.configKey!];
 
   if (hookConfig.disabled) {
@@ -37,6 +39,8 @@ export default async (sails: Sails.Sails, sailsRoutes: Array<Sails.Route>, conte
   const controllersJsDoc = await parseControllerJsDoc(sails, controllers);
 
   let routes = parseBoundRoutes(sailsRoutes, models, sails);
+
+  // fs.writeFileSync('./test/fixtures/parsedRoutes.json', JSON.stringify(routes, null, 2));
 
   /*
    * transformations phase - filter, transform, merge into consistent single model

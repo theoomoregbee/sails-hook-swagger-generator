@@ -32,6 +32,13 @@ module.exports = {
       isInteger: true,
       required: true,
       meta: { swagger: { readOnly: true } },
+    },
+    excludedUserId: {
+      description: 'The ID of the user to look up (should be excluded from Swagger)',
+      type: 'number',
+      isInteger: true,
+      required: true,
+      meta: { swagger: { exclude: true } },
     }
   },
 
@@ -39,6 +46,11 @@ module.exports = {
     success: {
       description: 'Another success',
       outputExample: 'Some dynamic message like this.'
+    },
+    excludedSuccess: {
+      description: 'Another success (should be excluded from Swagger)',
+      outputExample: 'Some dynamic message like this.',
+      meta: { swagger: { exclude: true } },
     },
     successAgain: {
       description: 'Another success (2)',
