@@ -524,63 +524,135 @@ export const generatePaths = (routes: SwaggerRouteInfo[], templates: BlueprintAc
         ...(route.swagger || {})
       }
 
-      const action2 = action2s[route.action];
+      if (route.actionType === 'actions2') {
 
-      if (action2) {
         const patternVariables = route.variables || [];
-        if (action2.inputs) {
-          forEach(action2.inputs, (value, key) => {
+        if (route.actions2Machine?.inputs) {
+          forEach(route.actions2Machine.inputs, (value, key) => {
+            if(value.meta?.swagger?.exclude === true) {
+              return;
+            }
             const _in = patternVariables.indexOf(key) >= 0 ? 'path' : 'query';
             const isExisting = pathEntry.parameters.find(p => p.in === _in && p.name === key)
             if (isExisting) {
               return
             }
-            const { description, ...attribute } = value
+            const { description, ..._attribute } = value;
+            const attribute = {
+              ...omit(_attribute, attributeValidations),
+              validations: pick(_attribute, attributeValidations),
+
+            } as Sails.AttributeDefinition;
             pathEntry.parameters.push({
               in: _in,
               name: key,
               required: value.required || false,
-              schema: generateAttributeSchema(attribute) as OpenApi.UpdatedSchema,
+              schema: generateAttributeSchema(attribute),
               description
             })
           })
         }
 
-        if (action2.exits) {
+        if (route.actions2Machine?.exits) {
           const exitResponses: NameKeyMap<OpenApi.Response> = {};
 
-          forEach(action2.exits, (exit, exitName) => {
-            const hasDefaults = actions2Responses[exitName as keyof Action2Response];
-            if (!hasDefaults) {
-              return
-            }
-            const { statusCode = hasDefaults.statusCode, description = hasDefaults.description, headers, content, links } = exit
+          // actions2 may specify more than one 'exit' per 'statusCode' --> use oneOf (and attempt to merge)
+          forEach(route.actions2Machine.exits, (exit, exitName) => {
 
-            exitResponses[statusCode] = {
-              description: description,
-              content,
-              headers,
-              links
-            };
+            if(exit.meta?.swagger?.exclude === true) {
+              return;
+            }
+
+            let { statusCode, description } = actions2Responses[exitName as keyof Action2Response] || actions2Responses.success;
+            statusCode = exit.statusCode || statusCode;
+            description = exit.description || description;
+
+            // XXX TODO review support for responseType, viewTemplatePath, outputExample
+            // XXX TODO use deriveJsonSwaggerTypeFromExample() for 'content' otherwise don't use
+
+            if (exitResponses[statusCode]) {
+
+              // this statusCode already exists --> will contain 'oneOf' so add
+              const arr = (exitResponses[statusCode].content!['application/json'].schema as OpenApi.UpdatedSchema)!.oneOf;
+              arr!.push({ type: 'object', description: description });
+
+            } else if(pathEntry.responses[statusCode]) {
+
+              // if not exists, check for response defined in source swagger and merge/massage to suit 'application/json' oneOf
+              const r = cloneDeep(pathEntry.responses[statusCode]);
+              if(!r.content) r.content = {};
+              if(!r.content['application/json']) r.content['application/json'] = {};
+              if(r.content['application/json'].schema) {
+                if (!(r.content['application/json'].schema as OpenApi.UpdatedSchema).oneOf) {
+                  const s = r.content['application/json'].schema;
+                  r.content['application/json'].schema = { oneOf: [s] };
+                }
+              } else {
+                r.content['application/json'].schema = { oneOf: [] };
+              }
+
+              // now add this exit to the merged/massaged response
+              const arr = (r.content!['application/json'].schema as OpenApi.UpdatedSchema)!.oneOf;
+              arr!.push({ type: 'object', description: description });
+              exitResponses[statusCode] = r;
+
+            } else {
+
+              // dne, so add
+              exitResponses[statusCode] = {
+                description: description,
+                content: {
+                  'application/json': {
+                    schema: { oneOf: [{ type: 'object', description: description }] }
+                  }
+                }
+              };
+
+            }
+          });
+
+          // remove oneOf for single entries
+          forEach(exitResponses, (resp, statusCode) => {
+            if ((resp.content?.['application/json'].schema as OpenApi.UpdatedSchema)?.oneOf) {
+              const arr = (resp.content!['application/json'].schema as OpenApi.UpdatedSchema)!.oneOf;
+              if (arr!.length === 1) {
+                resp.content!['application/json'].schema = arr![0];
+              } else {
+                // let d = `${arr!.length} alternative responses`;
+                // const defaultResponse = find(actions2Responses, _r => _r.statusCode === statusCode);
+                // if(defaultResponse) d = `${defaultResponse.description} (${d})`;
+                // (resp.content!['application/json'].schema as OpenApi.UpdatedSchema).description = d;
+              }
+            }
           });
 
           pathEntry.responses = {
-            ...exitResponses,
             ...pathEntry.responses,
+            ...exitResponses,
           }
-          forEach(pathEntry.responses, (v, k) => { // ensure description
-            if (!v.description) v.description = get(exitResponses, [k, 'description'], '-');
+          forEach(pathEntry.responses, (resp, statusCode) => { // ensure description
+            if (!resp.description) resp.description =  exitResponses[statusCode]?.description || '-';
           });
         }
-      }
 
+        // actions2 summary and description
+        defaults(
+          pathEntry,
+          {
+            summary: route.actions2Machine?.friendlyName || route.path || '',
+            description: route.actions2Machine?.description || undefined,
+            tags: route.swagger?.tags || [route.actions2Machine?.friendlyName || route.defaultTagName],
+          }
+        );
 
-      // actions2 summary and description
+      } // of if(actions2)
+
+      // final populate noting others above
       defaults(
         pathEntry,
         {
-          summary: get(route, ['actions2', 'friendlyName']) || route.path || '',
-          description: get(route, ['actions2', 'description']) || undefined,
+          summary: route.path || '',
+          tags: route.swagger?.tags || [route.defaultTagName],
         }
       );
     }
