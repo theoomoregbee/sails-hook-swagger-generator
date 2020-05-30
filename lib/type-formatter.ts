@@ -124,7 +124,7 @@ export const blueprintActionTemplates: BlueprintActionTemplates = {
     ],
     resultDescription: 'Responds with the newly updated **{globalId}** record as a JSON dictionary',
     notFoundDescription: 'Cannot update, **{globalId}** record with specified ID **NOT** found',
-    modifiers: [Modifiers.ADD_MODEL_BODY_PARAM, Modifiers.ADD_RESULT_OF_MODEL, Modifiers.ADD_RESULT_VALIDATION_ERROR, Modifiers.ADD_RESULT_NOT_FOUND, Modifiers.ADD_SHORTCUT_BLUEPRINT_ROUTE_NOTE]
+    modifiers: [Modifiers.ADD_MODEL_BODY_PARAM_UPDATE, Modifiers.ADD_RESULT_OF_MODEL, Modifiers.ADD_RESULT_VALIDATION_ERROR, Modifiers.ADD_RESULT_NOT_FOUND, Modifiers.ADD_SHORTCUT_BLUEPRINT_ROUTE_NOTE]
   },
   destroy: {
     summary: 'Delete {globalId} (destroy)',

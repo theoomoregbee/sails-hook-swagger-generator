@@ -31,6 +31,7 @@ export enum Modifiers {
     ADD_SELECT_QUERY_PARAM = 'addSelectQueryParam',
     ADD_OMIT_QUERY_PARAM = 'addOmitQueryParam',
     ADD_MODEL_BODY_PARAM = 'addModelBodyParam',
+    ADD_MODEL_BODY_PARAM_UPDATE = 'addModelBodyParamUpdate',
     ADD_RESULT_OF_ARRAY_OF_MODELS = 'addResultOfArrayOfModels',
     ADD_ASSOCIATION_PATH_PARAM = 'addAssociationPathParam',
     ADD_ASSOCIATION_FK_PATH_PARAM = 'addAssociationFKPathParam',
