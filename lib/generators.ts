@@ -295,19 +295,23 @@ export const generateSchemas = (models: NameKeyMap<SwaggerSailsModel>): NameKeyM
 
       const schema: OpenApi.UpdatedSchema = {
         description: model.swagger.modelSchema?.description || `Sails ORM Model **${model.globalId}**`,
+        properties: {},
         required: [],
         ...omit(model.swagger?.modelSchema || {}, 'exclude', 'description', 'tags'),
       }
 
       const attributes = model.attributes || {}
-      schema.properties = Object.keys(attributes).reduce((props, attributeName) => {
-        const attribute = model.attributes[attributeName];
-        if(attribute.meta?.swagger?.exclude !== true) {
-          props[attributeName] = generateAttributeSchema(attribute);
-          if (attribute.required) schema.required!.push(attributeName);
-        }
-        return props
-      }, {} as NameKeyMap<OpenApi.UpdatedSchema>)
+      defaults(
+        schema.properties,
+        Object.keys(attributes).reduce((props, attributeName) => {
+          const attribute = model.attributes[attributeName];
+          if (attribute.meta?.swagger?.exclude !== true) {
+            props[attributeName] = generateAttributeSchema(attribute);
+            if (attribute.required) schema.required!.push(attributeName);
+          }
+          return props
+        }, {} as NameKeyMap<OpenApi.UpdatedSchema>)
+      );
 
       if (schema.required!.length <= 0) delete schema.required;
 
