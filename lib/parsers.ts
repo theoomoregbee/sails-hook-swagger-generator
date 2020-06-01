@@ -196,10 +196,12 @@ export const parseBoundRoutes = (boundRoutes: Array<Sails.Route>,
   return boundRoutes
     .map(route => {
 
+      const verb = route.verb.toLowerCase();
+
       // ignore RegExp-based routes
       if(typeof route.path !== 'string') {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const routeKey = route.verb + '|' + (route.path as any).toString();
+        const routeKey = verb + '|' + (route.path as any).toString();
         if (!ignoreDuplicateCheck[routeKey]) {
           ignoreDuplicateCheck[routeKey] = true;
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -213,7 +215,7 @@ export const parseBoundRoutes = (boundRoutes: Array<Sails.Route>,
       }
 
       // remove duplicates base on verb+path, merging options (overwriting); see notes above
-      const routeKey = route.verb + '|' + route.path;
+      const routeKey = verb + '|' + route.path;
       if(!routeLookup[routeKey]) {
         routeLookup[routeKey] = {
           ...route,
@@ -232,6 +234,7 @@ export const parseBoundRoutes = (boundRoutes: Array<Sails.Route>,
         return undefined;
       }
 
+      const verb = route.verb.toLowerCase();
       const routeOptions = route.options;
       let _middlewareType, mwtAction;
 
@@ -261,7 +264,7 @@ export const parseBoundRoutes = (boundRoutes: Array<Sails.Route>,
 
         return {
           middlewareType: MiddlewareType.ACTION,
-          verb: route.verb as HTTPMethodVerb,
+          verb: verb as HTTPMethodVerb,
           ...parsedPath, // path & variables
           action: routeOptions.action || mwtAction || '_unknown',
           actionType: 'function',
@@ -273,7 +276,7 @@ export const parseBoundRoutes = (boundRoutes: Array<Sails.Route>,
         let actionType: ActionType = 'blueprint';
 
         // test for shortcut blueprint routes
-        if (route.verb === 'get') {
+        if (verb === 'get') {
           // 1:prefix, 2:identity, 3:shortcut-action, 4:id
           const re = /^(\/.+)?\/([^/]+)\/(find|create|update|destroy)(\/:id)?$/;
 
@@ -305,7 +308,7 @@ export const parseBoundRoutes = (boundRoutes: Array<Sails.Route>,
 
         return {
           middlewareType: MiddlewareType.BLUEPRINT,
-          verb: route.verb as HTTPMethodVerb,
+          verb: verb as HTTPMethodVerb,
           ...parsedPath, // path & variables
           action: mwtAction,
           actionType,
