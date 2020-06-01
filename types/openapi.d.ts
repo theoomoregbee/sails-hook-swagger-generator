@@ -1,13 +1,11 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { Reference, Header, Tag, ExternalDocs, XML, ParameterType } from 'swagger-schema-official';
+import { Reference, Header, Tag, ExternalDocs, XML } from 'swagger-schema-official';
 
 // This is simply building from  OpenApi Specification
 // see: https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.2.md
 // TODO: move this to https://github.com/DefinitelyTyped/DefinitelyTyped as openapi-spec
 
 declare namespace OpenApi {
-
-    type EmptyObject = Record<string, any>
 
     export interface Info {
         title: string;
@@ -36,6 +34,8 @@ declare namespace OpenApi {
       mapping?: { [key: string]: string };
     }
 
+    export type DataType = 'string' | 'number' | 'integer' | 'boolean' | 'array' | 'object';
+
     export interface UpdatedSchema {
       nullable?: boolean;
       discriminator?: Discriminator;
@@ -47,7 +47,7 @@ declare namespace OpenApi {
       examples?: any[];
       deprecated?: boolean;
 
-      type?: ParameterType;
+      type?: DataType;
       allOf?: (UpdatedSchema | Reference)[];
       oneOf?: (UpdatedSchema | Reference)[];
       anyOf?: (UpdatedSchema | Reference)[];
@@ -96,7 +96,7 @@ declare namespace OpenApi {
 
     export interface Encoding {
         contentType?: string;
-        headers?: Map<string, Header | Reference>;
+        headers?: Record<string, Header | Reference>;
         style?: string;
         explode?: boolean;
         allowReserved?: boolean;
@@ -105,8 +105,8 @@ declare namespace OpenApi {
     export interface MediaType {
         schema?: UpdatedSchema | Reference;
         example?: any;
-        examples?: Map<string, Example | Reference>;
-        encoding?: Map<string, Encoding>;
+        examples?: Record<string, Example | Reference>;
+        encoding?: Record<string, Encoding>;
 
     }
 
@@ -119,7 +119,7 @@ declare namespace OpenApi {
     export interface Link {
         operationRef?: string;
         operationId?: string;
-        parameters?: Map<string, any>;
+        parameters?: Record<string, any>;
         requestBody?: any;
         description?: string;
         server: Server;
@@ -127,9 +127,9 @@ declare namespace OpenApi {
 
     export interface Response {
         description: string;
-        headers?: Map<string, Header | Reference>;
+        headers?: Record<string, Header | Reference>;
         content?: Record<string, MediaType>;
-        links?: Map<string, Link | Reference>;
+        links?: Record<string, Link | Reference>;
     }
 
     export interface Operation {
@@ -138,7 +138,7 @@ declare namespace OpenApi {
         description?: string;
         externalDocs?: ExternalDocs;
         operationId?: string;
-        parameters: Array<Parameter>;
+        parameters: Array<Parameter | Reference>;
         requestBody?: RequestBody | Reference;
         responses: Record<string, Response>;
         servers?: Array<Server>;
@@ -250,15 +250,15 @@ declare namespace OpenApi {
      */
 
     export interface Components {
-        schemas?: Map<string, UpdatedSchema | Reference> | EmptyObject;
-        responses?: Map<string, Response | Reference> | EmptyObject;
-        parameters?: Record<string, Parameter | Reference> | EmptyObject;
-        examples?: Map<string, Example | Reference> | EmptyObject;
-        requestBodies?: Map<string, RequestBody | Reference> | EmptyObject;
-        headers?: Map<string, Header | Reference> | EmptyObject;
-        securitySchemes?: Map<string, Security | Reference> | EmptyObject;
-        links?: Map<string, Link | Reference> | EmptyObject;
-        callbacks?: Map<string, Path | Reference> | EmptyObject;
+        schemas?: Record<string, UpdatedSchema | Reference>;
+        responses?: Record<string, Response | Reference>;
+        parameters?: Record<string, Parameter | Reference>;
+        examples?: Record<string, Example | Reference>;
+        requestBodies?: Record<string, RequestBody | Reference>;
+        headers?: Record<string, Header | Reference>;
+        securitySchemes?: Record<string, Security | Reference>;
+        links?: Record<string, Link | Reference>;
+        callbacks?: Record<string, Path | Reference>;
     }
 
     export interface OpenApi {

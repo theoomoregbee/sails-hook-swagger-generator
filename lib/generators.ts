@@ -298,7 +298,7 @@ export const generatePaths = (routes: SwaggerRouteInfo[], templates: BlueprintAc
         ...omit(route.swagger || {}, 'exclude')
       };
 
-      const isParam = (inType: string, name: string): boolean => !!pathEntry.parameters.find(parameter => parameter.in == inType && parameter.name == name);
+      const isParam = (inType: string, name: string): boolean => !!pathEntry.parameters.find(parameter => 'in' in parameter && parameter.in == inType && parameter.name == name);
 
       const modifiers = {
 
@@ -516,7 +516,7 @@ export const generatePaths = (routes: SwaggerRouteInfo[], templates: BlueprintAc
               return;
             }
             const _in = patternVariables.indexOf(key) >= 0 ? 'path' : 'query';
-            const isExisting = pathEntry.parameters.find(p => p.in === _in && p.name === key)
+            const isExisting = pathEntry.parameters.find(p => 'in' in p && p.in === _in && p.name === key)
             if (isExisting) {
               return
             }
@@ -642,7 +642,7 @@ export const generatePaths = (routes: SwaggerRouteInfo[], templates: BlueprintAc
     if (route.variables) {
       // first resolve '$ref' parameters
       const resolved = pathEntry.parameters.map(parameter => {
-        let ref = parameter['$ref' as keyof OpenApi.Parameter] as string;
+        let ref = '$ref' in parameter && parameter.$ref;
         if (!ref) return parameter;
         const _prefix = '#/components/parameters/';
         if (ref.startsWith(_prefix)) {
@@ -654,7 +654,7 @@ export const generatePaths = (routes: SwaggerRouteInfo[], templates: BlueprintAc
 
       // now add patternVariables that don't already exist
       route.variables.map(v => {
-        const existing = resolved.find(p => p.in == 'path' && p.name == v);
+        const existing = resolved.find(p => p && 'in' in p && p.in == 'path' && p.name == v);
         if (existing) return;
         pathEntry.parameters.push({
           in: 'path',
