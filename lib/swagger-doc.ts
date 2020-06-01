@@ -57,6 +57,16 @@ export default async (sails: Sails.Sails, sailsRoutes: Array<Sails.Route>, conte
     routes = routes.filter(route => hookConfig.includeRoute!(route));
   }
 
+  /*
+   * Sails 1.0 includes `PUT` and `PATCH` routes to the `update` blueprint although `PUT` deprecated;
+   * default to excluding the `PUT` route.
+   * @see https://sailsjs.com/documentation/reference/blueprint-api/update#?notes
+   * @see https://github.com/balderdashy/sails/blob/master/lib/hooks/blueprints/index.js#L401
+   */
+  if(hookConfig.options?.excludeDeprecatedPutBlueprintRoutes) {
+    routes = routes.filter(route => !(route.actionType === 'blueprint' && route.action === 'update' && route.verb === 'put'));
+  }
+
   mergeModelJsDoc(models, modelsJsDoc);
   mergeControllerJsDoc(controllers, controllersJsDoc);
 
