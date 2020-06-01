@@ -120,7 +120,7 @@ declare namespace Sails {
       // basic semantics
       type: AttributeType;
       required?: boolean;
-      defaultsTo?: string;
+      defaultsTo?: any;
       allowNull?: boolean;
       autoUpdatedAt?: boolean;
       autoCreatedAt?: boolean;
@@ -181,7 +181,7 @@ declare namespace Sails {
       // basic semantics
       type: AttributeType;
       required?: boolean;
-      defaultsTo?: string;
+      defaultsTo?: any;
       allowNull?: boolean;
 
       // documentation related
