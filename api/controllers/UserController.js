@@ -44,7 +44,7 @@ module.exports = {
    *   parameters:
    *     - name: example-only
    *       description: Username to use for logout (dummy for test)
-   *       in: path
+   *       in: query
    *       required: true
    *       schema:
    *         type: string

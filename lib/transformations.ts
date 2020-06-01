@@ -16,8 +16,14 @@ const transformSailsPathToSwaggerPath = (path: string): string => {
  * Maps from a Sails route path of the form `/path/:id` to a
  * Swagger path of the form `/path/{id}`.
  *
- * Also transform standard Sails '{id}' to '{primaryKeyAttributeName}' where
- * primary key is not `id`.
+ * Also transform standard Sails primary key reference '{id}' to
+ * '_{primaryKeyAttributeName}'.
+ *
+ * Add underscore to path variable names, used to differentiate the PK value
+ * used for paths from query variables. Specifically, differentiate the PK value
+ * used for shortcut blueprint update routes, which allow for PK update
+ * using query parameters. Some validators expect unique names across all
+ * parameter types.
  */
 export const transformSailsPathsToSwaggerPaths = (routes: SwaggerRouteInfo[]): void => {
 
@@ -25,10 +31,11 @@ export const transformSailsPathsToSwaggerPaths = (routes: SwaggerRouteInfo[]): v
 
     route.path = transformSailsPathToSwaggerPath(route.path);
 
-    if (route.model?.primaryKey && route.model.primaryKey !== 'id') {
-      route.path = route.path.replace('{id}', `{${route.model.primaryKey}}`);
-      route.variables = route.variables.map(v => v === 'id' ? route.model!.primaryKey : v);
-      route.optionalVariables = route.optionalVariables.map(v => v === 'id' ? route.model!.primaryKey : v);
+    if (route.model?.primaryKey) {
+      const pathVariable = '_' + route.model.primaryKey;
+      route.path = route.path.replace('{id}', `{${pathVariable}}`);
+      route.variables = route.variables.map(v => v === 'id' ? pathVariable : v);
+      route.optionalVariables = route.optionalVariables.map(v => v === 'id' ? pathVariable : v);
     }
 
   });
@@ -123,7 +130,7 @@ export const transformSailsPathsToSwaggerPaths = (routes: SwaggerRouteInfo[]): v
           // first route becomes 'aggregated' version
           const g = actionGroup[0];
           const prefix = g.match[1];
-          const pk = g.route.model!.primaryKey;
+          const pk = '_' + g.route.model!.primaryKey; // note '_' as per transformSailsPathsToSwaggerPaths()
           const shortcutRoutePart = g.match[3] || '';
           const childPart = g.match[4] || '';
           const aggregatedRoute = {

@@ -353,6 +353,12 @@ export const generatePaths = (routes: SwaggerRouteInfo[], templates: BlueprintAc
 
     let pathEntry: OpenApi.Operation;
 
+    const isParam = (inType: string, name: string): boolean => {
+      return !!pathEntry.parameters
+        .map(parameter => resolveRef(specification, parameter) as OpenApi.Parameter)
+        .find(parameter => parameter && 'in' in parameter && parameter.in == inType && parameter.name == name);
+    }
+
     if (route.middlewareType === MiddlewareType.BLUEPRINT && route.model) {
 
       if(route.model.swagger?.modelSchema?.exclude === true) {
@@ -373,7 +379,7 @@ export const generatePaths = (routes: SwaggerRouteInfo[], templates: BlueprintAc
             if (components.parameters && !components.parameters[pname]) {
               components.parameters[pname] = {
                 in: 'path',
-                name: primaryKey,
+                name: '_' + primaryKey, // note '_' as per transformSailsPathsToSwaggerPaths()
                 required: true,
                 schema: generateAttributeSchema(attributeInfo),
                 description: subst('The desired **{globalId}** record\'s primary key value'),
@@ -391,11 +397,9 @@ export const generatePaths = (routes: SwaggerRouteInfo[], templates: BlueprintAc
         tags: route.swagger?.tags || route.model.swagger.modelSchema?.tags || route.model.swagger.actions?.allactions?.tags || [route.model.globalId],
         parameters,
         responses: cloneDeep(defaultsValues.responses || {}),
-        ...omit(route.model.swagger.actions?.allactions || {}, 'exclude'),
-        ...omit(route.swagger || {}, 'exclude')
+        ...cloneDeep(omit(route.model.swagger.actions?.allactions || {}, 'exclude')),
+        ...cloneDeep(omit(route.swagger || {}, 'exclude')),
       };
-
-      const isParam = (inType: string, name: string): boolean => !!pathEntry.parameters.find(parameter => 'in' in parameter && parameter.in == inType && parameter.name == name);
 
       const modifiers = {
 
@@ -625,7 +629,7 @@ export const generatePaths = (routes: SwaggerRouteInfo[], templates: BlueprintAc
       pathEntry = {
         parameters: [],
         responses: cloneDeep(defaultsValues.responses || {}),
-        ...omit(route.swagger || {}, 'exclude')
+        ...cloneDeep(omit(route.swagger || {}, 'exclude')),
       }
 
       if (route.actionType === 'actions2') {
@@ -761,21 +765,9 @@ export const generatePaths = (routes: SwaggerRouteInfo[], templates: BlueprintAc
     }
 
     if (route.variables) {
-      // first resolve '$ref' parameters
-      const resolved = pathEntry.parameters.map(parameter => {
-        let ref = '$ref' in parameter && parameter.$ref;
-        if (!ref) return parameter;
-        const _prefix = '#/components/parameters/';
-        if (ref.startsWith(_prefix)) {
-          ref = ref.substring(_prefix.length);
-          const dereferenced = components.parameters![ref];
-          return dereferenced ? dereferenced : parameter;
-        }
-      }) as OpenApi.Parameter[];
-
       // now add patternVariables that don't already exist
       route.variables.map(v => {
-        const existing = resolved.find(p => p && 'in' in p && p.in == 'path' && p.name == v);
+        const existing = isParam('path', v);
         if (existing) return;
         pathEntry.parameters.push({
           in: 'path',
@@ -785,6 +777,10 @@ export const generatePaths = (routes: SwaggerRouteInfo[], templates: BlueprintAc
           description: `Route pattern variable \`${v}\``,
         });
       });
+    }
+
+    if(pathEntry.tags) {
+      pathEntry.tags.sort();
     }
 
     set(paths, [route.path, route.verb], pathEntry);
