@@ -319,6 +319,10 @@ blueprint action from the generated Swagger. See example in [OldPet.js](api/mode
 Individual model attributes may be excluded from the generated Swagger by setting
 `meta.swagger.exclude` to `true`. See example in [Pet.js](api/models/Pet.js).
 
+OpenAPI 3 specifies the ***Any Type*** by the absence of the `type` property in a schema;
+this may be achieved by setting a model attribute's `meta.swagger.type` value to `null`.
+See example in [User.js](api/models/User.js).
+
 The Swagger definition for each action is merged in the order above to form the final
 definition, with `config/routes.js` taking highest precendence and **earlier** definitions
 above taking precedence over later.

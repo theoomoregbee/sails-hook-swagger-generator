@@ -39,7 +39,10 @@ export const generateAttributeSchema = (attribute: Sails.AttributeDefinition): O
     return ret.join(' ');
   }
 
-  if (ai.model) {
+  if (ai.meta?.swagger && 'type' in ai.meta.swagger) {
+    // OpenAPI 3 stipulates NO type as 'any', allow this by 'type' present but null to achieve this
+    if(ai.meta.swagger.type) schema.type = ai.meta.swagger.type;
+  } else if (ai.model) {
     assign(schema, {
       description: formatDesc(`JSON dictionary representing the **${ai.model}** instance or FK when creating / updating / not populated`),
       // '$ref': '#/components/schemas/' + ai.model,
@@ -146,7 +149,8 @@ export const generateAttributeSchema = (attribute: Sails.AttributeDefinition): O
 
   // finally, overwrite in custom swagger
   if(ai.meta?.swagger) {
-    assign(schema, omit(ai.meta.swagger, 'exclude'));
+    // note: 'type' handled above
+    assign(schema, omit(ai.meta.swagger, 'exclude', 'type'));
   }
 
   return schema;
