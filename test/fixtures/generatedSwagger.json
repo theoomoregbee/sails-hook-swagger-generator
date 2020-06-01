@@ -144,7 +144,7 @@
     "parameters": {
       "ModelPKParam-pet": {
         "in": "path",
-        "name": "petID",
+        "name": "_petID",
         "required": true,
         "schema": {
           "type": "integer",
@@ -157,7 +157,7 @@
       },
       "ModelPKParam-user": {
         "in": "path",
-        "name": "id",
+        "name": "_id",
         "required": true,
         "schema": {
           "type": "integer",
@@ -283,8 +283,8 @@
           "description": "Refer to these docs for more info"
         },
         "tags": [
-          "User (ORM)",
-          "User (ORM duplicate)"
+          "User (ORM duplicate)",
+          "User (ORM)"
         ],
         "parameters": [
           {
@@ -508,7 +508,7 @@
           {
             "name": "example-only",
             "description": "Username to use for logout (dummy for test)",
-            "in": "path",
+            "in": "query",
             "required": true,
             "schema": {
               "type": "string"
@@ -522,15 +522,6 @@
             "schema": {
               "type": "string"
             }
-          },
-          {
-            "in": "path",
-            "name": "phoneNumber",
-            "required": true,
-            "schema": {
-              "type": "string"
-            },
-            "description": "Route pattern variable `phoneNumber`"
           }
         ],
         "responses": {
@@ -690,7 +681,7 @@
           {
             "name": "example-only",
             "description": "Username to use for logout (dummy for test)",
-            "in": "path",
+            "in": "query",
             "required": true,
             "schema": {
               "type": "string"
@@ -848,7 +839,7 @@
         }
       }
     },
-    "/pet/find/{petID}": {
+    "/pet/find/{_petID}": {
       "get": {
         "summary": "Get Pet (find one) *",
         "description": "Look up the **Pet** record with the specified ID.\n\n(\\*) Note that this is a [Sails blueprint shortcut route](https://sailsjs.com/documentation/concepts/blueprints/blueprint-routes#?shortcut-blueprint-routes) (recommended for **development-mode only**)",
@@ -994,7 +985,7 @@
         }
       }
     },
-    "/pet/update/{petID}": {
+    "/pet/update/{_petID}": {
       "get": {
         "summary": "Update Pet *",
         "description": "Update an existing **Pet** record.\n\n(\\*) Note that this is a [Sails blueprint shortcut route](https://sailsjs.com/documentation/concepts/blueprints/blueprint-routes#?shortcut-blueprint-routes) (recommended for **development-mode only**)",
@@ -1077,7 +1068,7 @@
         }
       }
     },
-    "/pet/destroy/{petID}": {
+    "/pet/destroy/{_petID}": {
       "get": {
         "summary": "Delete Pet (destroy) *",
         "description": "Delete the **Pet** record with the specified ID.\n\n(\\*) Note that this is a [Sails blueprint shortcut route](https://sailsjs.com/documentation/concepts/blueprints/blueprint-routes#?shortcut-blueprint-routes) (recommended for **development-mode only**)",
@@ -1122,8 +1113,8 @@
           "description": "Refer to these docs for more info"
         },
         "tags": [
-          "User (ORM)",
-          "User (ORM duplicate)"
+          "User (ORM duplicate)",
+          "User (ORM)"
         ],
         "parameters": [
           {
@@ -1195,7 +1186,7 @@
         }
       }
     },
-    "/user/find/{id}": {
+    "/user/find/{_id}": {
       "get": {
         "summary": "Get User (find one) *",
         "description": "Look up the **User** record with the specified ID.\n\n(\\*) Note that this is a [Sails blueprint shortcut route](https://sailsjs.com/documentation/concepts/blueprints/blueprint-routes#?shortcut-blueprint-routes) (recommended for **development-mode only**)",
@@ -1204,8 +1195,8 @@
           "description": "Refer to these docs for more info"
         },
         "tags": [
-          "User (ORM)",
-          "User (ORM duplicate)"
+          "User (ORM duplicate)",
+          "User (ORM)"
         ],
         "parameters": [
           {
@@ -1282,7 +1273,7 @@
         ]
       }
     },
-    "/user/update/{id}": {
+    "/user/update/{_id}": {
       "get": {
         "summary": "Update User *",
         "description": "Update an existing **User** record.\n\n(\\*) Note that this is a [Sails blueprint shortcut route](https://sailsjs.com/documentation/concepts/blueprints/blueprint-routes#?shortcut-blueprint-routes) (recommended for **development-mode only**)",
@@ -1291,8 +1282,8 @@
           "description": "Refer to these docs for more info"
         },
         "tags": [
-          "User (ORM)",
-          "User (ORM duplicate)"
+          "User (ORM duplicate)",
+          "User (ORM)"
         ],
         "parameters": [
           {
@@ -1437,7 +1428,7 @@
         ]
       }
     },
-    "/user/{id}/{association}/add/{childid}": {
+    "/user/{_id}/{association}/add/{childid}": {
       "get": {
         "summary": "Add to for User *",
         "description": "Add a foreign record to one of this **User** record's collections.\n\n(\\*) Note that this is a [Sails blueprint shortcut route](https://sailsjs.com/documentation/concepts/blueprints/blueprint-routes#?shortcut-blueprint-routes) (recommended for **development-mode only**)",
@@ -1446,8 +1437,8 @@
           "description": "Refer to these docs for more info"
         },
         "tags": [
-          "User (ORM)",
-          "User (ORM duplicate)"
+          "User (ORM duplicate)",
+          "User (ORM)"
         ],
         "parameters": [
           {
@@ -1511,7 +1502,7 @@
         }
       }
     },
-    "/user/{id}/{association}/replace": {
+    "/user/{_id}/{association}/replace": {
       "get": {
         "summary": "Replace for User *",
         "description": "Replace all of the child records in one of this **User** record's associations.\n\nOnly one of the query parameters, that matches the **association** path parameter, should be specified.\n\n(\\*) Note that this is a [Sails blueprint shortcut route](https://sailsjs.com/documentation/concepts/blueprints/blueprint-routes#?shortcut-blueprint-routes) (recommended for **development-mode only**)",
@@ -1520,8 +1511,8 @@
           "description": "Refer to these docs for more info"
         },
         "tags": [
-          "User (ORM)",
-          "User (ORM duplicate)"
+          "User (ORM duplicate)",
+          "User (ORM)"
         ],
         "parameters": [
           {
@@ -1591,7 +1582,7 @@
         }
       }
     },
-    "/user/{id}/{association}/remove/{childid}": {
+    "/user/{_id}/{association}/remove/{childid}": {
       "get": {
         "summary": "Remove from for User *",
         "description": "Remove a foreign record from one of this **User** record's collections.\n\n(\\*) Note that this is a [Sails blueprint shortcut route](https://sailsjs.com/documentation/concepts/blueprints/blueprint-routes#?shortcut-blueprint-routes) (recommended for **development-mode only**)",
@@ -1600,8 +1591,8 @@
           "description": "Refer to these docs for more info"
         },
         "tags": [
-          "User (ORM)",
-          "User (ORM duplicate)"
+          "User (ORM duplicate)",
+          "User (ORM)"
         ],
         "parameters": [
           {
@@ -1787,7 +1778,7 @@
         }
       }
     },
-    "/pet/{petID}": {
+    "/pet/{_petID}": {
       "get": {
         "summary": "Get Pet (find one)",
         "description": "Look up the **Pet** record with the specified ID.",
@@ -1977,7 +1968,7 @@
         }
       }
     },
-    "/pet/{petID}/{association}": {
+    "/pet/{_petID}/{association}": {
       "get": {
         "summary": "Populate association for Pet",
         "description": "Populate and return foreign record(s) for the given association of this **Pet** record.",
@@ -2068,7 +2059,7 @@
         }
       }
     },
-    "/user/{id}": {
+    "/user/{_id}": {
       "get": {
         "summary": "Get User (find one)",
         "description": "Look up the **User** record with the specified ID.",
@@ -2077,8 +2068,8 @@
           "description": "Refer to these docs for more info"
         },
         "tags": [
-          "User (ORM)",
-          "User (ORM duplicate)"
+          "User (ORM duplicate)",
+          "User (ORM)"
         ],
         "parameters": [
           {
@@ -2142,8 +2133,8 @@
           "description": "Refer to these docs for more info"
         },
         "tags": [
-          "User (ORM)",
-          "User (ORM duplicate)"
+          "User (ORM duplicate)",
+          "User (ORM)"
         ],
         "parameters": [
           {
@@ -2180,34 +2171,6 @@
           }
         }
       },
-      "delete": {
-        "parameters": [
-          {
-            "in": "path",
-            "name": "id",
-            "required": true,
-            "schema": {
-              "type": "string"
-            },
-            "description": "Route pattern variable `id`"
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "The requested resource"
-          },
-          "404": {
-            "description": "Resource not found"
-          },
-          "500": {
-            "description": "Internal server error"
-          }
-        },
-        "summary": "/user/{id}",
-        "tags": [
-          "User"
-        ]
-      },
       "put": {
         "summary": "Update User",
         "description": "Update an existing **User** record.",
@@ -2216,8 +2179,8 @@
           "description": "Refer to these docs for more info"
         },
         "tags": [
-          "User (ORM)",
-          "User (ORM duplicate)"
+          "User (ORM duplicate)",
+          "User (ORM)"
         ],
         "parameters": [
           {
@@ -2255,7 +2218,37 @@
         }
       }
     },
-    "/user/{id}/{association}/{childid}": {
+    "/user/{id}": {
+      "delete": {
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Route pattern variable `id`"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The requested resource"
+          },
+          "404": {
+            "description": "Resource not found"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        },
+        "summary": "/user/{id}",
+        "tags": [
+          "User"
+        ]
+      }
+    },
+    "/user/{_id}/{association}/{childid}": {
       "put": {
         "summary": "Add to for User",
         "description": "Add a foreign record to one of this **User** record's collections.",
@@ -2264,8 +2257,8 @@
           "description": "Refer to these docs for more info"
         },
         "tags": [
-          "User (ORM)",
-          "User (ORM duplicate)"
+          "User (ORM duplicate)",
+          "User (ORM)"
         ],
         "parameters": [
           {
@@ -2336,8 +2329,8 @@
           "description": "Refer to these docs for more info"
         },
         "tags": [
-          "User (ORM)",
-          "User (ORM duplicate)"
+          "User (ORM duplicate)",
+          "User (ORM)"
         ],
         "parameters": [
           {
@@ -2401,7 +2394,7 @@
         }
       }
     },
-    "/user/{id}/{association}": {
+    "/user/{_id}/{association}": {
       "put": {
         "summary": "Replace for User",
         "description": "Replace all of the child records in one of this **User** record's associations.",
@@ -2410,8 +2403,8 @@
           "description": "Refer to these docs for more info"
         },
         "tags": [
-          "User (ORM)",
-          "User (ORM duplicate)"
+          "User (ORM duplicate)",
+          "User (ORM)"
         ],
         "parameters": [
           {
@@ -2487,8 +2480,8 @@
           "description": "Refer to these docs for more info"
         },
         "tags": [
-          "User (ORM)",
-          "User (ORM duplicate)"
+          "User (ORM duplicate)",
+          "User (ORM)"
         ],
         "parameters": [
           {
