@@ -357,7 +357,7 @@ export const mergeComponents = (dest: OpenApi.Components,
     for (const key in source) {
       const componentName = key as keyof OpenApi.Components;
       if (!dest[componentName]) {
-        dest[componentName] = {};
+        (dest[componentName] as unknown) = {};
       }
       defaults(dest[componentName], source[componentName]);
     }

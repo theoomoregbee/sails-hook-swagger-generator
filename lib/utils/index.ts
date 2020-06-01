@@ -1,6 +1,8 @@
 import { BluePrintAction } from '../interfaces';
 import swaggerJSDoc from 'swagger-jsdoc';
 import { OpenApi } from '../../types/openapi';
+import { get } from 'lodash';
+import { Reference } from 'swagger-schema-official';
 
 export const blueprintActions: Array<BluePrintAction> = ['findone', 'find', 'create', 'update', 'destroy', 'populate', 'add', 'remove', 'replace'];
 
@@ -59,4 +61,15 @@ export const getUniqueTagsFromPath = (paths: OpenApi.Paths) => {
         }
     }
     return referencedTags
+}
+
+export const resolveRef = (specification: OpenApi.OpenApi, obj: (Reference | unknown)): unknown => {
+
+  const path = (obj as Reference).$ref;
+  if(typeof(path) === 'string' && path.startsWith('#/')) {
+    const pathElements = path.substring(2).split('/');
+    return get(specification, pathElements);
+  }
+  return obj;
+
 }

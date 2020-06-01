@@ -38,6 +38,12 @@ describe('Generators', () => {
                           type: "array",
                           items: { '$ref': "#/components/schemas/Pet", }
                         },
+                        favouritePet: {
+                          description: "JSON dictionary representing the **Pet** instance or FK when creating / updating / not populated",
+                          oneOf: [
+                            { $ref: "#/components/schemas/Pet" }
+                          ]
+                        },
                         neighboursPets: {
                           description: "Array of **Pet**'s or array of FK's when creating / updating / not populated",
                           type: "array",

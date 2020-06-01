@@ -11,7 +11,7 @@ import { BlueprintActionTemplates, Modifiers, Action2Response, Defaults } from '
  * this is used to map our sails types with the allowed type defintions based on swagger specification
  */
 export const swaggerTypes = {
-  integer: { type: 'integer', format: 'int32', /* comments: 'signed 32 bits' */ },
+  integer: { type: 'integer', format: 'int64', /* comments: 'signed 64 bits' */ }, // all JavaScript numbers 64-bit
   long: { type: 'integer', format: 'int64', /* comments: 'signed 64 bits' */ },
   float: { type: 'number', format: 'float' },
   double: { type: 'number', format: 'double' },
@@ -188,7 +188,7 @@ export const blueprintActionTemplates: BlueprintActionTemplates = {
   },
   replace: {
     summary: 'Replace for {globalId}',
-    description: 'Replace all of the foreign **{globalId}** records in one of this record\'s collections.',
+    description: 'Replace all of the child records in one of this **{globalId}** record\'s associations.',
     externalDocs: {
       url: 'https://sailsjs.com/documentation/reference/blueprint-api/replace',
       description: 'See https://sailsjs.com/documentation/reference/blueprint-api/replace'

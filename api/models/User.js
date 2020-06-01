@@ -74,6 +74,9 @@ module.exports = {
       collection: "Pet",
       via: "owner",
     },
+    favouritePet: {
+      model: "Pet",
+    },
     neighboursPets: {
       collection: "Pet",
       via: "caredForBy",
