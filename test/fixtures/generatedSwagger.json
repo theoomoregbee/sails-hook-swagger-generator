@@ -339,7 +339,10 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/user"
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/user"
+                  }
                 }
               }
             }
@@ -828,7 +831,10 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/pet"
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/pet"
+                  }
                 }
               }
             }
@@ -1172,7 +1178,10 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/user"
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/user"
+                  }
                 }
               }
             }
@@ -1720,7 +1729,10 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/pet"
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/pet"
+                  }
                 }
               }
             }

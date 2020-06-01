@@ -99,7 +99,7 @@ export const blueprintActionTemplates: BlueprintActionTemplates = {
       { $ref: '#/components/parameters/SortQueryParam' },
     ],
     resultDescription: 'Responds with a paged list of **{globalId}** records that match the specified criteria',
-    modifiers:[Modifiers.ADD_SELECT_QUERY_PARAM, Modifiers.ADD_OMIT_QUERY_PARAM, Modifiers.ADD_POPULATE_QUERY_PARAM, Modifiers.ADD_RESULT_OF_MODEL, Modifiers.ADD_SHORTCUT_BLUEPRINT_ROUTE_NOTE]
+    modifiers:[Modifiers.ADD_SELECT_QUERY_PARAM, Modifiers.ADD_OMIT_QUERY_PARAM, Modifiers.ADD_POPULATE_QUERY_PARAM, Modifiers.ADD_RESULT_OF_ARRAY_OF_MODELS, Modifiers.ADD_SHORTCUT_BLUEPRINT_ROUTE_NOTE]
   },
   create: {
     summary: 'Create {globalId}',
