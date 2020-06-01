@@ -12,12 +12,13 @@ import forEach from 'lodash/forEach';
 import { OpenApi } from '../types/openapi';
 import set from 'lodash/set';
 import { map, omit, isEqual, reduce } from 'lodash';
-import { attributeValidations } from './utils';
+import { attributeValidations, resolveRef } from './utils';
 
 
 /**
  * Generate Swagger schema content describing the specified Sails attribute.
- * TODO: add test to this function
+ *
+ * XXX TODO: add test to this function
  *
  * @see https://swagger.io/docs/specification/data-models/
  * @param {Record<string, any>} attribute Sails model attribute specification as per `Model.js` file
@@ -155,31 +156,119 @@ export const generateAttributeSchema = (attribute: Sails.AttributeDefinition): O
  * Generate the OpenAPI schemas for the foreign key values used to reference
  * ORM records for the associations of the specified Sails Model.
  *
+ * Used for 'replace' REST blueprint.
+ *
  * @param model
  * @param models
  */
-export const generateModelAssociationFKAttributeSchemas = (model: SwaggerSailsModel, models: NameKeyMap<SwaggerSailsModel>): OpenApi.UpdatedSchema[] => {
+export const generateModelAssociationFKAttributeSchemas = (model: SwaggerSailsModel,
+  aliasesToInclude: string[] | undefined, models: NameKeyMap<SwaggerSailsModel>): OpenApi.UpdatedSchema[] => {
 
   if (!model.associations) { return []; }
 
-  const ret = model.associations.map(association => {
+  return model.associations.map(association => {
+
+    if (!aliasesToInclude || aliasesToInclude.indexOf(association.alias) < 0) return;
 
     const targetModelIdentity = association.type === 'model' ? association.model : association.collection;
     const targetModel = models[targetModelIdentity!];
 
     if (!targetModel) {
-      return {}; // data structure integrity issue should not occur
+      return; // data structure integrity issue should not occur
     }
+
+    const description = association.type === 'model' ?
+      `**${model.globalId}** record's foreign key value to use as the replacement for this attribute`
+      : `**${model.globalId}** record's foreign key values to use as the replacement for this collection`;
 
     const targetFKAttribute = targetModel.attributes[targetModel.primaryKey];
     return generateAttributeSchema({
       ...targetFKAttribute,
-      description: `**${model.globalId}** record's foreign key value (**${association.alias}** association${targetFKAttribute.description ? '; ' + targetFKAttribute.description : ''})`
+      autoMigrations: {
+        ...(targetFKAttribute.autoMigrations || {}),
+        autoIncrement: false, // autoIncrement not relevant for FK parameter
+      },
+      description: `${description} (**${association.alias}** association${targetFKAttribute.description ? '; ' + targetFKAttribute.description : ''})`
     });
 
-  });
+  })
+  .filter(parameter => parameter) as OpenApi.UpdatedSchema[];
 
-  return ret;
+}
+
+/**
+ * Generate the OpenAPI parameters for the foreign key values used to reference
+ * ORM records for the associations of the specified Sails Model.
+ *
+ * Used for 'replace' shortcut blueprint.
+ *
+ * @param model
+ * @param aliasesToInclude
+ * @param models
+ */
+export const generateModelAssociationFKAttributeParameters = (model: SwaggerSailsModel,
+  aliasesToInclude: string[] | undefined, models: NameKeyMap<SwaggerSailsModel>): OpenApi.Parameter[] => {
+
+  if (!model.associations) { return []; }
+
+  return model.associations.map(association => {
+
+    if (!aliasesToInclude || aliasesToInclude.indexOf(association.alias) < 0) return;
+
+    const targetModelIdentity = association.type === 'model' ? association.model : association.collection;
+    const targetModel = models[targetModelIdentity!];
+
+    if (!targetModel) {
+      return; // data structure integrity issue should not occur
+    }
+
+    const description = association.type === 'model' ?
+      `**${model.globalId}** record's foreign key value to use as the replacement for this attribute`
+      : `**${model.globalId}** record's foreign key values to use as the replacement for this collection`;
+
+    const targetFKAttribute = targetModel.attributes[targetModel.primaryKey];
+    const targetFKAttributeSchema = generateAttributeSchema({
+      ...targetFKAttribute,
+      autoMigrations: {
+        ...(targetFKAttribute.autoMigrations || {}),
+        autoIncrement: false, // autoIncrement not relevant for FK parameter
+      },
+      description: `${description} (**${association.alias}** association${targetFKAttribute.description ? '; ' + targetFKAttribute.description : ''})`
+    });
+
+    return {
+      in: 'query' as OpenApi.ParameterLocation,
+      name: association.alias,
+      description: targetFKAttributeSchema.description,
+      schema: {
+        type: 'array',
+        items: targetFKAttributeSchema,
+      },
+    } as OpenApi.Parameter;
+
+  })
+  .filter(parameter => parameter) as OpenApi.Parameter[];
+
+}
+
+export const generateSchemaAsQueryParameters = (schema: OpenApi.UpdatedSchema): OpenApi.Parameter[] => {
+
+  const required = schema.required || [];
+
+  return map(schema.properties || {}, (property, name) => {
+    const parameter = {
+      in: 'query' as OpenApi.ParameterLocation,
+      name: name,
+      schema: property,
+    } as OpenApi.Parameter;
+    if((property as OpenApi.UpdatedSchema).description) {
+      parameter.description = (property as OpenApi.UpdatedSchema).description;
+    }
+    if(required.indexOf(name) >= 0) {
+      parameter.required = true;
+    }
+    return parameter;
+  });
 
 }
 
@@ -237,7 +326,7 @@ export const generateSchemas = (models: NameKeyMap<SwaggerSailsModel>): NameKeyM
  * @param models
  */
 export const generatePaths = (routes: SwaggerRouteInfo[], templates: BlueprintActionTemplates,
-  defaultsValues: Defaults, specification: Omit<OpenApi.OpenApi, 'paths'>,
+  defaultsValues: Defaults, specification: OpenApi.OpenApi,
   models: NameKeyMap<SwaggerSailsModel>): OpenApi.Paths => {
 
   const paths = {};
@@ -359,16 +448,29 @@ export const generatePaths = (routes: SwaggerRouteInfo[], templates: BlueprintAc
         },
 
         addModelBodyParam: () => {
-          if (pathEntry.requestBody) return;
-          pathEntry.requestBody = {
-            description: subst('JSON dictionary representing the {globalId} instance to create.'),
-            required: true,
-            content: {
-              'application/json': {
-                schema: { "$ref": "#/components/schemas/" + route.model!.identity }
+          if(route.actionType === 'shortcutBlueprint') {
+            const schema = specification!.components!.schemas?.[route.model!.identity];
+            if (schema) {
+              const resolvedSchema = resolveRef(specification, schema);
+              if (resolvedSchema) {
+                generateSchemaAsQueryParameters(resolvedSchema as OpenApi.UpdatedSchema).map(p => {
+                  if (isParam('query', p.name)) return;
+                  pathEntry.parameters.push(p);
+                });
+              }
+            }
+          } else {
+            if (pathEntry.requestBody) return;
+            pathEntry.requestBody = {
+              description: subst('JSON dictionary representing the {globalId} instance to create.'),
+              required: true,
+              content: {
+                'application/json': {
+                  schema: { "$ref": "#/components/schemas/" + route.model!.identity }
+                },
               },
-            },
-          };
+            };
+          }
         },
 
         addResultOfArrayOfModels: () => {
@@ -400,13 +502,13 @@ export const generatePaths = (routes: SwaggerRouteInfo[], templates: BlueprintAc
         },
 
         addAssociationFKPathParam: () => {
-          if (isParam('path', 'fk')) return; // pre-defined/pre-configured --> skip
+          if (isParam('path', 'childid')) return; // pre-defined/pre-configured --> skip
           pathEntry.parameters.push({
             in: 'path',
-            name: 'fk',
+            name: 'childid',
             required: true,
             schema: {
-              oneOf: generateModelAssociationFKAttributeSchemas(route.model!, models),
+              oneOf: generateModelAssociationFKAttributeSchemas(route.model!, route.associationAliases, models),
             } as OpenApi.UpdatedSchema,
             description: 'The desired target association record\'s foreign key value'
           });
@@ -460,26 +562,37 @@ export const generatePaths = (routes: SwaggerRouteInfo[], templates: BlueprintAc
         },
 
         addFksBodyParam: () => {
-          if (pathEntry.requestBody) return;
-          pathEntry.requestBody = {
-            description: 'The primary key values (usually IDs) of the child records to use as the new members of this collection',
-            required: true,
-            content: {
-              'application/json': {
-                schema: {
-                  type: 'array',
-                  items: {
-                    oneOf: generateModelAssociationFKAttributeSchemas(route.model!, models),
-                  }
-                } as OpenApi.UpdatedSchema,
+          if(route.actionType === 'shortcutBlueprint') {
+            generateModelAssociationFKAttributeParameters(route.model!, route.associationAliases, models).map(p => {
+              if(!route.associationAliases || route.associationAliases.indexOf(p.name) < 0) return;
+              if (isParam('query', p.name)) return;
+              pathEntry.parameters.push(p);
+            });
+          } else {
+            if (pathEntry.requestBody) return;
+            pathEntry.requestBody = {
+              description: 'The primary key values (usually IDs) of the child records to use as the new members of this collection',
+              required: true,
+              content: {
+                'application/json': {
+                  schema: {
+                    type: 'array',
+                    items: {
+                      oneOf: generateModelAssociationFKAttributeSchemas(route.model!, route.associationAliases, models),
+                    }
+                  } as OpenApi.UpdatedSchema,
+                },
               },
-            },
-          };
+            };
+          }
         },
 
         addShortCutBlueprintRouteNote: () => {
           if(route.actionType !== 'shortcutBlueprint') { return; }
           pathEntry.summary += ' *';
+          if(route.action === 'replace') {
+            pathEntry.description += `\n\nOnly one of the query parameters, that matches the **association** path parameter, should be specified.`;
+          }
           pathEntry.description += `\n\n(\\*) Note that this is a`
             + ` [Sails blueprint shortcut route](https://sailsjs.com/documentation/concepts/blueprints/blueprint-routes#?shortcut-blueprint-routes)`
             + ` (recommended for **development-mode only**)`;
@@ -650,7 +763,7 @@ export const generatePaths = (routes: SwaggerRouteInfo[], templates: BlueprintAc
           const dereferenced = components.parameters![ref];
           return dereferenced ? dereferenced : parameter;
         }
-      });
+      }) as OpenApi.Parameter[];
 
       // now add patternVariables that don't already exist
       route.variables.map(v => {

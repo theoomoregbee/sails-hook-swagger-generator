@@ -55,7 +55,7 @@
         "properties": {
           "petID": {
             "type": "integer",
-            "format": "int32",
+            "format": "int64",
             "uniqueItems": true,
             "description": "Note Sails special attributes: autoIncrement",
             "readOnly": true
@@ -90,7 +90,7 @@
         "properties": {
           "id": {
             "type": "integer",
-            "format": "int32",
+            "format": "int64",
             "uniqueItems": true,
             "description": "Note Sails special attributes: autoIncrement"
           },
@@ -123,6 +123,14 @@
               "$ref": "#/components/schemas/pet"
             }
           },
+          "favouritePet": {
+            "description": "JSON dictionary representing the **pet** instance or FK when creating / updating / not populated",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/pet"
+              }
+            ]
+          },
           "neighboursPets": {
             "description": "Array of **pet**'s or array of FK's when creating / updating / not populated",
             "type": "array",
@@ -140,7 +148,7 @@
         "required": true,
         "schema": {
           "type": "integer",
-          "format": "int32",
+          "format": "int64",
           "uniqueItems": true,
           "description": "Note Sails special attributes: autoIncrement",
           "readOnly": true
@@ -153,7 +161,7 @@
         "required": true,
         "schema": {
           "type": "integer",
-          "format": "int32",
+          "format": "int64",
           "uniqueItems": true,
           "description": "Note Sails special attributes: autoIncrement"
         },
@@ -300,7 +308,7 @@
             "required": false,
             "schema": {
               "type": "string",
-              "example": "id,names,email,sex,ageLimit,pets,neighboursPets"
+              "example": "id,names,email,sex,ageLimit,pets,favouritePet,neighboursPets"
             },
             "description": "The attributes to include in the result, specified as a comma-delimited list. By default, all attributes are selected. Not valid for plural (“collection”) association attributes."
           },
@@ -310,7 +318,7 @@
             "required": false,
             "schema": {
               "type": "string",
-              "example": "id,names,email,sex,ageLimit,pets,neighboursPets"
+              "example": "id,names,email,sex,ageLimit,pets,favouritePet,neighboursPets"
             },
             "description": "The attributes to exclude from the result, specified as a comma-delimited list. Cannot be used in conjuction with `select`. Not valid for plural (“collection”) association attributes."
           },
@@ -320,7 +328,7 @@
             "required": false,
             "schema": {
               "type": "string",
-              "example": "false,pets,neighboursPets"
+              "example": "false,pets,favouritePet,neighboursPets"
             },
             "description": "If specified, overide the default automatic population process. Accepts a comma-separated list of attribute names for which to populate record values, or specify `false` to have no attributes populated."
           }
@@ -354,7 +362,7 @@
             "required": true,
             "schema": {
               "type": "integer",
-              "format": "int32",
+              "format": "int64",
               "readOnly": true
             },
             "description": "The ID of the user to look up"
@@ -911,7 +919,55 @@
         "tags": [
           "Pet"
         ],
-        "parameters": [],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "petID",
+            "schema": {
+              "type": "integer",
+              "format": "int64",
+              "uniqueItems": true,
+              "description": "Note Sails special attributes: autoIncrement",
+              "readOnly": true
+            },
+            "description": "Note Sails special attributes: autoIncrement"
+          },
+          {
+            "in": "query",
+            "name": "names",
+            "schema": {
+              "type": "string",
+              "example": "Pet's full name"
+            },
+            "required": true
+          },
+          {
+            "in": "query",
+            "name": "owner",
+            "schema": {
+              "description": "JSON dictionary representing the **user** instance or FK when creating / updating / not populated",
+              "oneOf": [
+                {
+                  "$ref": "#/components/schemas/user"
+                }
+              ]
+            },
+            "description": "JSON dictionary representing the **user** instance or FK when creating / updating / not populated"
+          },
+          {
+            "in": "query",
+            "name": "caredForBy",
+            "schema": {
+              "description": "JSON dictionary representing the **user** instance or FK when creating / updating / not populated",
+              "oneOf": [
+                {
+                  "$ref": "#/components/schemas/user"
+                }
+              ]
+            },
+            "description": "JSON dictionary representing the **user** instance or FK when creating / updating / not populated"
+          }
+        ],
         "responses": {
           "200": {
             "description": "Responds with a JSON dictionary representing the newly created **Pet** instance",
@@ -928,17 +984,6 @@
           },
           "500": {
             "description": "Internal server error"
-          }
-        },
-        "requestBody": {
-          "description": "JSON dictionary representing the Pet instance to create.",
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/pet"
-              }
-            }
           }
         }
       }
@@ -957,6 +1002,53 @@
         "parameters": [
           {
             "$ref": "#/components/parameters/ModelPKParam-pet"
+          },
+          {
+            "in": "query",
+            "name": "petID",
+            "schema": {
+              "type": "integer",
+              "format": "int64",
+              "uniqueItems": true,
+              "description": "Note Sails special attributes: autoIncrement",
+              "readOnly": true
+            },
+            "description": "Note Sails special attributes: autoIncrement"
+          },
+          {
+            "in": "query",
+            "name": "names",
+            "schema": {
+              "type": "string",
+              "example": "Pet's full name"
+            },
+            "required": true
+          },
+          {
+            "in": "query",
+            "name": "owner",
+            "schema": {
+              "description": "JSON dictionary representing the **user** instance or FK when creating / updating / not populated",
+              "oneOf": [
+                {
+                  "$ref": "#/components/schemas/user"
+                }
+              ]
+            },
+            "description": "JSON dictionary representing the **user** instance or FK when creating / updating / not populated"
+          },
+          {
+            "in": "query",
+            "name": "caredForBy",
+            "schema": {
+              "description": "JSON dictionary representing the **user** instance or FK when creating / updating / not populated",
+              "oneOf": [
+                {
+                  "$ref": "#/components/schemas/user"
+                }
+              ]
+            },
+            "description": "JSON dictionary representing the **user** instance or FK when creating / updating / not populated"
           }
         ],
         "responses": {
@@ -975,17 +1067,6 @@
           },
           "500": {
             "description": "Internal server error"
-          }
-        },
-        "requestBody": {
-          "description": "JSON dictionary representing the Pet instance to create.",
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/pet"
-              }
-            }
           }
         }
       }
@@ -1060,7 +1141,7 @@
             "required": false,
             "schema": {
               "type": "string",
-              "example": "id,names,email,sex,ageLimit,pets,neighboursPets"
+              "example": "id,names,email,sex,ageLimit,pets,favouritePet,neighboursPets"
             },
             "description": "The attributes to include in the result, specified as a comma-delimited list. By default, all attributes are selected. Not valid for plural (“collection”) association attributes."
           },
@@ -1070,7 +1151,7 @@
             "required": false,
             "schema": {
               "type": "string",
-              "example": "id,names,email,sex,ageLimit,pets,neighboursPets"
+              "example": "id,names,email,sex,ageLimit,pets,favouritePet,neighboursPets"
             },
             "description": "The attributes to exclude from the result, specified as a comma-delimited list. Cannot be used in conjuction with `select`. Not valid for plural (“collection”) association attributes."
           },
@@ -1080,7 +1161,7 @@
             "required": false,
             "schema": {
               "type": "string",
-              "example": "false,pets,neighboursPets"
+              "example": "false,pets,favouritePet,neighboursPets"
             },
             "description": "If specified, overide the default automatic population process. Accepts a comma-separated list of attribute names for which to populate record values, or specify `false` to have no attributes populated."
           }
@@ -1127,7 +1208,7 @@
             "required": false,
             "schema": {
               "type": "string",
-              "example": "id,names,email,sex,ageLimit,pets,neighboursPets"
+              "example": "id,names,email,sex,ageLimit,pets,favouritePet,neighboursPets"
             },
             "description": "The attributes to include in the result, specified as a comma-delimited list. By default, all attributes are selected. Not valid for plural (“collection”) association attributes."
           },
@@ -1137,7 +1218,7 @@
             "required": false,
             "schema": {
               "type": "string",
-              "example": "id,names,email,sex,ageLimit,pets,neighboursPets"
+              "example": "id,names,email,sex,ageLimit,pets,favouritePet,neighboursPets"
             },
             "description": "The attributes to exclude from the result, specified as a comma-delimited list. Cannot be used in conjuction with `select`. Not valid for plural (“collection”) association attributes."
           },
@@ -1147,7 +1228,7 @@
             "required": false,
             "schema": {
               "type": "string",
-              "example": "false,pets,neighboursPets"
+              "example": "false,pets,favouritePet,neighboursPets"
             },
             "description": "If specified, overide the default automatic population process. Accepts a comma-separated list of attribute names for which to populate record values, or specify `false` to have no attributes populated."
           }
@@ -1207,6 +1288,94 @@
         "parameters": [
           {
             "$ref": "#/components/parameters/ModelPKParam-user"
+          },
+          {
+            "in": "query",
+            "name": "id",
+            "schema": {
+              "type": "integer",
+              "format": "int64",
+              "uniqueItems": true,
+              "description": "Note Sails special attributes: autoIncrement"
+            },
+            "description": "Note Sails special attributes: autoIncrement"
+          },
+          {
+            "in": "query",
+            "name": "names",
+            "schema": {
+              "type": "string",
+              "example": "First Middle Last"
+            },
+            "required": true
+          },
+          {
+            "in": "query",
+            "name": "email",
+            "schema": {
+              "type": "string",
+              "format": "email",
+              "description": "Just any old email"
+            },
+            "description": "Just any old email"
+          },
+          {
+            "in": "query",
+            "name": "sex",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "Male",
+                "Female"
+              ]
+            }
+          },
+          {
+            "in": "query",
+            "name": "ageLimit",
+            "schema": {
+              "type": "number",
+              "format": "double",
+              "maximum": 100,
+              "minimum": 15
+            }
+          },
+          {
+            "in": "query",
+            "name": "pets",
+            "schema": {
+              "description": "Array of **pet**'s or array of FK's when creating / updating / not populated",
+              "type": "array",
+              "items": {
+                "$ref": "#/components/schemas/pet"
+              }
+            },
+            "description": "Array of **pet**'s or array of FK's when creating / updating / not populated"
+          },
+          {
+            "in": "query",
+            "name": "favouritePet",
+            "schema": {
+              "description": "JSON dictionary representing the **pet** instance or FK when creating / updating / not populated",
+              "oneOf": [
+                {
+                  "$ref": "#/components/schemas/pet"
+                }
+              ]
+            },
+            "description": "JSON dictionary representing the **pet** instance or FK when creating / updating / not populated"
+          },
+          {
+            "in": "query",
+            "name": "neighboursPets",
+            "schema": {
+              "description": "Array of **pet**'s or array of FK's when creating / updating / not populated",
+              "type": "array",
+              "items": {
+                "$ref": "#/components/schemas/pet"
+              }
+            },
+            "description": "Array of **pet**'s or array of FK's when creating / updating / not populated"
           }
         ],
         "responses": {
@@ -1225,17 +1394,6 @@
           },
           "500": {
             "description": "Internal server error"
-          }
-        },
-        "requestBody": {
-          "description": "JSON dictionary representing the User instance to create.",
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/user"
-              }
-            }
           }
         }
       }
@@ -1301,36 +1459,27 @@
           },
           {
             "in": "path",
-            "name": "fk",
+            "name": "childid",
             "required": true,
             "schema": {
               "oneOf": [
                 {
-                  "type": "integer",
-                  "format": "int32",
-                  "description": "**User** record's foreign key value (**pets** association)\n\nNote Sails special attributes: autoIncrement",
+                  "type": "number",
+                  "format": "double",
+                  "description": "**User** record's foreign key values to use as the replacement for this collection (**pets** association)",
                   "uniqueItems": true,
                   "readOnly": true
                 },
                 {
-                  "type": "integer",
-                  "format": "int32",
-                  "description": "**User** record's foreign key value (**neighboursPets** association)\n\nNote Sails special attributes: autoIncrement",
+                  "type": "number",
+                  "format": "double",
+                  "description": "**User** record's foreign key values to use as the replacement for this collection (**neighboursPets** association)",
                   "uniqueItems": true,
                   "readOnly": true
                 }
               ]
             },
             "description": "The desired target association record's foreign key value"
-          },
-          {
-            "in": "path",
-            "name": "childid",
-            "required": true,
-            "schema": {
-              "type": "string"
-            },
-            "description": "Route pattern variable `childid`"
           }
         ],
         "responses": {
@@ -1356,7 +1505,7 @@
     "/user/{id}/{association}/replace": {
       "get": {
         "summary": "Replace for User *",
-        "description": "Replace all of the foreign **User** records in one of this record's collections.\n\n(\\*) Note that this is a [Sails blueprint shortcut route](https://sailsjs.com/documentation/concepts/blueprints/blueprint-routes#?shortcut-blueprint-routes) (recommended for **development-mode only**)",
+        "description": "Replace all of the child records in one of this **User** record's associations.\n\nOnly one of the query parameters, that matches the **association** path parameter, should be specified.\n\n(\\*) Note that this is a [Sails blueprint shortcut route](https://sailsjs.com/documentation/concepts/blueprints/blueprint-routes#?shortcut-blueprint-routes) (recommended for **development-mode only**)",
         "externalDocs": {
           "url": "https://somewhere.com/yep",
           "description": "Refer to these docs for more info"
@@ -1381,6 +1530,36 @@
               ]
             },
             "description": "The name of the association"
+          },
+          {
+            "in": "query",
+            "name": "pets",
+            "description": "**User** record's foreign key values to use as the replacement for this collection (**pets** association)",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "number",
+                "format": "double",
+                "description": "**User** record's foreign key values to use as the replacement for this collection (**pets** association)",
+                "uniqueItems": true,
+                "readOnly": true
+              }
+            }
+          },
+          {
+            "in": "query",
+            "name": "neighboursPets",
+            "description": "**User** record's foreign key values to use as the replacement for this collection (**neighboursPets** association)",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "number",
+                "format": "double",
+                "description": "**User** record's foreign key values to use as the replacement for this collection (**neighboursPets** association)",
+                "uniqueItems": true,
+                "readOnly": true
+              }
+            }
           }
         ],
         "responses": {
@@ -1399,35 +1578,6 @@
           },
           "500": {
             "description": "Internal server error"
-          }
-        },
-        "requestBody": {
-          "description": "The primary key values (usually IDs) of the child records to use as the new members of this collection",
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "type": "array",
-                "items": {
-                  "oneOf": [
-                    {
-                      "type": "integer",
-                      "format": "int32",
-                      "description": "**User** record's foreign key value (**pets** association)\n\nNote Sails special attributes: autoIncrement",
-                      "uniqueItems": true,
-                      "readOnly": true
-                    },
-                    {
-                      "type": "integer",
-                      "format": "int32",
-                      "description": "**User** record's foreign key value (**neighboursPets** association)\n\nNote Sails special attributes: autoIncrement",
-                      "uniqueItems": true,
-                      "readOnly": true
-                    }
-                  ]
-                }
-              }
-            }
           }
         }
       }
@@ -1463,36 +1613,27 @@
           },
           {
             "in": "path",
-            "name": "fk",
+            "name": "childid",
             "required": true,
             "schema": {
               "oneOf": [
                 {
-                  "type": "integer",
-                  "format": "int32",
-                  "description": "**User** record's foreign key value (**pets** association)\n\nNote Sails special attributes: autoIncrement",
+                  "type": "number",
+                  "format": "double",
+                  "description": "**User** record's foreign key values to use as the replacement for this collection (**pets** association)",
                   "uniqueItems": true,
                   "readOnly": true
                 },
                 {
-                  "type": "integer",
-                  "format": "int32",
-                  "description": "**User** record's foreign key value (**neighboursPets** association)\n\nNote Sails special attributes: autoIncrement",
+                  "type": "number",
+                  "format": "double",
+                  "description": "**User** record's foreign key values to use as the replacement for this collection (**neighboursPets** association)",
                   "uniqueItems": true,
                   "readOnly": true
                 }
               ]
             },
             "description": "The desired target association record's foreign key value"
-          },
-          {
-            "in": "path",
-            "name": "childid",
-            "required": true,
-            "schema": {
-              "type": "string"
-            },
-            "description": "Route pattern variable `childid`"
           }
         ],
         "responses": {
@@ -1937,7 +2078,7 @@
             "required": false,
             "schema": {
               "type": "string",
-              "example": "id,names,email,sex,ageLimit,pets,neighboursPets"
+              "example": "id,names,email,sex,ageLimit,pets,favouritePet,neighboursPets"
             },
             "description": "The attributes to include in the result, specified as a comma-delimited list. By default, all attributes are selected. Not valid for plural (“collection”) association attributes."
           },
@@ -1947,7 +2088,7 @@
             "required": false,
             "schema": {
               "type": "string",
-              "example": "id,names,email,sex,ageLimit,pets,neighboursPets"
+              "example": "id,names,email,sex,ageLimit,pets,favouritePet,neighboursPets"
             },
             "description": "The attributes to exclude from the result, specified as a comma-delimited list. Cannot be used in conjuction with `select`. Not valid for plural (“collection”) association attributes."
           },
@@ -1957,7 +2098,7 @@
             "required": false,
             "schema": {
               "type": "string",
-              "example": "false,pets,neighboursPets"
+              "example": "false,pets,favouritePet,neighboursPets"
             },
             "description": "If specified, overide the default automatic population process. Accepts a comma-separated list of attribute names for which to populate record values, or specify `false` to have no attributes populated."
           }
@@ -2133,36 +2274,27 @@
           },
           {
             "in": "path",
-            "name": "fk",
+            "name": "childid",
             "required": true,
             "schema": {
               "oneOf": [
                 {
-                  "type": "integer",
-                  "format": "int32",
-                  "description": "**User** record's foreign key value (**pets** association)\n\nNote Sails special attributes: autoIncrement",
+                  "type": "number",
+                  "format": "double",
+                  "description": "**User** record's foreign key values to use as the replacement for this collection (**pets** association)",
                   "uniqueItems": true,
                   "readOnly": true
                 },
                 {
-                  "type": "integer",
-                  "format": "int32",
-                  "description": "**User** record's foreign key value (**neighboursPets** association)\n\nNote Sails special attributes: autoIncrement",
+                  "type": "number",
+                  "format": "double",
+                  "description": "**User** record's foreign key values to use as the replacement for this collection (**neighboursPets** association)",
                   "uniqueItems": true,
                   "readOnly": true
                 }
               ]
             },
             "description": "The desired target association record's foreign key value"
-          },
-          {
-            "in": "path",
-            "name": "childid",
-            "required": true,
-            "schema": {
-              "type": "string"
-            },
-            "description": "Route pattern variable `childid`"
           }
         ],
         "responses": {
@@ -2214,36 +2346,27 @@
           },
           {
             "in": "path",
-            "name": "fk",
+            "name": "childid",
             "required": true,
             "schema": {
               "oneOf": [
                 {
-                  "type": "integer",
-                  "format": "int32",
-                  "description": "**User** record's foreign key value (**pets** association)\n\nNote Sails special attributes: autoIncrement",
+                  "type": "number",
+                  "format": "double",
+                  "description": "**User** record's foreign key values to use as the replacement for this collection (**pets** association)",
                   "uniqueItems": true,
                   "readOnly": true
                 },
                 {
-                  "type": "integer",
-                  "format": "int32",
-                  "description": "**User** record's foreign key value (**neighboursPets** association)\n\nNote Sails special attributes: autoIncrement",
+                  "type": "number",
+                  "format": "double",
+                  "description": "**User** record's foreign key values to use as the replacement for this collection (**neighboursPets** association)",
                   "uniqueItems": true,
                   "readOnly": true
                 }
               ]
             },
             "description": "The desired target association record's foreign key value"
-          },
-          {
-            "in": "path",
-            "name": "childid",
-            "required": true,
-            "schema": {
-              "type": "string"
-            },
-            "description": "Route pattern variable `childid`"
           }
         ],
         "responses": {
@@ -2269,7 +2392,7 @@
     "/user/{id}/{association}": {
       "put": {
         "summary": "Replace for User",
-        "description": "Replace all of the foreign **User** records in one of this record's collections.",
+        "description": "Replace all of the child records in one of this **User** record's associations.",
         "externalDocs": {
           "url": "https://somewhere.com/yep",
           "description": "Refer to these docs for more info"
@@ -2324,16 +2447,16 @@
                 "items": {
                   "oneOf": [
                     {
-                      "type": "integer",
-                      "format": "int32",
-                      "description": "**User** record's foreign key value (**pets** association)\n\nNote Sails special attributes: autoIncrement",
+                      "type": "number",
+                      "format": "double",
+                      "description": "**User** record's foreign key values to use as the replacement for this collection (**pets** association)",
                       "uniqueItems": true,
                       "readOnly": true
                     },
                     {
-                      "type": "integer",
-                      "format": "int32",
-                      "description": "**User** record's foreign key value (**neighboursPets** association)\n\nNote Sails special attributes: autoIncrement",
+                      "type": "number",
+                      "format": "double",
+                      "description": "**User** record's foreign key values to use as the replacement for this collection (**neighboursPets** association)",
                       "uniqueItems": true,
                       "readOnly": true
                     }
@@ -2367,6 +2490,7 @@
               "type": "string",
               "enum": [
                 "pets",
+                "favouritePet",
                 "neighboursPets"
               ]
             },
@@ -2390,7 +2514,7 @@
             "required": false,
             "schema": {
               "type": "string",
-              "example": "id,names,email,sex,ageLimit,pets,neighboursPets"
+              "example": "id,names,email,sex,ageLimit,pets,favouritePet,neighboursPets"
             },
             "description": "The attributes to include in the result, specified as a comma-delimited list. By default, all attributes are selected. Not valid for plural (“collection”) association attributes."
           },
@@ -2400,7 +2524,7 @@
             "required": false,
             "schema": {
               "type": "string",
-              "example": "id,names,email,sex,ageLimit,pets,neighboursPets"
+              "example": "id,names,email,sex,ageLimit,pets,favouritePet,neighboursPets"
             },
             "description": "The attributes to exclude from the result, specified as a comma-delimited list. Cannot be used in conjuction with `select`. Not valid for plural (“collection”) association attributes."
           }
@@ -2414,6 +2538,9 @@
                   "type": "array",
                   "items": {
                     "oneOf": [
+                      {
+                        "$ref": "#/components/schemas/pet"
+                      },
                       {
                         "$ref": "#/components/schemas/pet"
                       },
