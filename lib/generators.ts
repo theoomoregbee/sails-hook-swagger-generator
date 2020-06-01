@@ -12,7 +12,7 @@ import forEach from 'lodash/forEach';
 import { OpenApi } from '../types/openapi';
 import set from 'lodash/set';
 import { map, omit, isEqual, reduce, uniq } from 'lodash';
-import { attributeValidations, resolveRef, unrollSchema } from './utils';
+import { attributeValidations, resolveRef, unrollSchema, deriveSwaggerTypeFromExample } from './utils';
 
 
 /**
@@ -74,15 +74,16 @@ export const generateAttributeSchema = (attribute: Sails.AttributeDefinition): O
   } else if (type == 'boolean') {
     assign(schema, sts.boolean);
   } else if (type == 'json') {
-    assign(schema, sts.string);
+    assign(schema, deriveSwaggerTypeFromExample(ai.example));
   } else if (type == 'ref') {
-    let t = sts.string;
+    let t: OpenApi.UpdatedSchema | undefined;
     if (columnType) {
       const ct = columnType;
       if (ct.match(/timestamp/i)) t = sts.datetime;
       else if (ct.match(/datetime/i)) t = sts.datetime;
       else if (ct.match(/date/i)) t = sts.date;
     }
+    if(t === undefined) t = deriveSwaggerTypeFromExample(ai.example);
     assign(schema, t);
   } else { // includes =='string'
     assign(schema, sts.string);
@@ -294,6 +295,7 @@ export const generateSchemas = (models: NameKeyMap<SwaggerSailsModel>): NameKeyM
       }
 
       const schemaWithoutRequired: OpenApi.UpdatedSchema = {
+        type: 'object',
         description: model.swagger.modelSchema?.description || `Sails ORM Model **${model.globalId}**`,
         properties: {},
         ...omit(model.swagger?.modelSchema || {}, 'exclude', 'description', 'required', 'tags'),
@@ -316,6 +318,7 @@ export const generateSchemas = (models: NameKeyMap<SwaggerSailsModel>): NameKeyM
 
       const withoutRequiredName = `${model.identity}-without-required-constraint`;
       const schema: OpenApi.UpdatedSchema = {
+        type: 'object',
         allOf: [
           { '$ref': `#/components/schemas/${withoutRequiredName}` },
         ],
@@ -420,6 +423,9 @@ export const generatePaths = (routes: SwaggerRouteInfo[], templates: BlueprintAc
             validations: pick(_attribute, attributeValidations),
 
           } as Sails.AttributeDefinition;
+          if(!attribute.type && 'example' in attribute) { // derive type if not specified (optional for actions2)
+            defaults(attribute, deriveSwaggerTypeFromExample(attribute.example || attribute.defaultsTo));
+          }
           pathEntry.parameters.push({
             in: _in,
             name: key,
@@ -433,6 +439,9 @@ export const generatePaths = (routes: SwaggerRouteInfo[], templates: BlueprintAc
       if (route.actions2Machine?.exits) {
         const exitResponses: NameKeyMap<OpenApi.Response> = {};
 
+        // status to determine whether 'content' can be removed in simple cases
+        const defaultOnly: NameKeyMap<boolean> = {};
+
         // actions2 may specify more than one 'exit' per 'statusCode' --> use oneOf (and attempt to merge)
         forEach(route.actions2Machine.exits, (exit, exitName) => {
 
@@ -441,59 +450,68 @@ export const generatePaths = (routes: SwaggerRouteInfo[], templates: BlueprintAc
           }
 
           let { statusCode, description } = actions2Responses[exitName as keyof Action2Response] || actions2Responses.success;
+          const defaultDescription = description;
           statusCode = exit.statusCode || statusCode;
           description = exit.description || description;
 
-          // XXX TODO review support for responseType, viewTemplatePath, outputExample
-          // XXX TODO use deriveJsonSwaggerTypeFromExample() for 'content' otherwise don't use
+          const schema: OpenApi.UpdatedSchema = {
+            example: exit.outputExample,
+            ...deriveSwaggerTypeFromExample(exit.outputExample || ''),
+            description: description,
+          };
+
+          // XXX TODO review support for responseType, viewTemplatePath
+
+          const addToContentJsonSchemaOneOfIfDne = (): void => {
+            const r = exitResponses[statusCode];
+
+            // add to response if can do so cleanly
+            if (!r.content) r.content = {};
+            if (!r.content['application/json']) r.content['application/json'] = {};
+            if (!r.content['application/json'].schema) r.content['application/json'].schema = { oneOf: [] };
+
+            // if schema with 'oneOf' exists, add new schema content
+            const existingSchema = r.content?.['application/json']?.schema;
+            if (existingSchema && 'oneOf' in existingSchema) {
+              existingSchema.oneOf?.push(schema);
+            } else {
+              // skip --> custom schema overrides auto-generated
+            }
+          }
 
           if (exitResponses[statusCode]) {
 
-            // this statusCode already exists --> will contain 'oneOf' so add
-            const arr = (exitResponses[statusCode].content!['application/json'].schema as OpenApi.UpdatedSchema)!.oneOf;
-            arr!.push({ type: 'object', description: description });
+            // this statusCode already exists --> add as alternative if 'oneOf' present (or can be cleanly added)
+            addToContentJsonSchemaOneOfIfDne();
+            defaultOnly[statusCode] = false;
 
           } else if(pathEntry.responses[statusCode]) {
 
             // if not exists, check for response defined in source swagger and merge/massage to suit 'application/json' oneOf
-            const r = cloneDeep(pathEntry.responses[statusCode]);
-            if(!r.content) r.content = {};
-            if(!r.content['application/json']) r.content['application/json'] = {};
-            if(r.content['application/json'].schema) {
-              if (!(r.content['application/json'].schema as OpenApi.UpdatedSchema).oneOf) {
-                const s = r.content['application/json'].schema;
-                r.content['application/json'].schema = { oneOf: [s] };
-              }
-            } else {
-              r.content['application/json'].schema = { oneOf: [] };
-            }
-
-            // now add this exit to the merged/massaged response
-            const arr = (r.content!['application/json'].schema as OpenApi.UpdatedSchema)!.oneOf;
-            arr!.push({ type: 'object', description: description });
-            exitResponses[statusCode] = r;
+            exitResponses[statusCode] = cloneDeep(pathEntry.responses[statusCode]);
+            addToContentJsonSchemaOneOfIfDne();
+            defaultOnly[statusCode] = false;
 
           } else {
 
             // dne, so add
             exitResponses[statusCode] = {
-              description: description,
-              content: {
-                'application/json': {
-                  schema: { oneOf: [{ type: 'object', description: description }] }
-                }
-              }
+              description: defaultDescription,
+              content: { 'application/json': { schema: { oneOf: [schema] } }, }
             };
+            defaultOnly[statusCode] = exit.outputExample === undefined;
 
           }
         });
 
-        // remove oneOf for single entries
-        forEach(exitResponses, resp => {
+        // remove oneOf for single entries and move description back to top-level
+        forEach(exitResponses, (resp, statusCode) => {
           if ((resp.content?.['application/json'].schema as OpenApi.UpdatedSchema)?.oneOf) {
             const arr = (resp.content!['application/json'].schema as OpenApi.UpdatedSchema)!.oneOf;
             if (arr!.length === 1) {
               resp.content!['application/json'].schema = arr![0];
+              if ('description' in arr![0]) resp.description = arr![0].description as string;
+              if (defaultOnly[statusCode]) delete resp.content;
             }
           }
         });

@@ -70,6 +70,32 @@ module.exports = {
       min: 15,
       max: 100,
     },
+    advancedOptions: {
+      type: "json",
+      example: {
+        useDefaults: false,
+        customName: 'foobar',
+      },
+    },
+    advancedOptionsAny: {
+      type: "json",
+      example: {
+        useDefaults: false,
+        customName: 'foobar again',
+      },
+      meta: { swagger: { type: null } },
+    },
+    data: {
+      description: "Some custom JSON data",
+      type: "ref",
+      columnType: "MEDIUMBLOB",
+      example: {
+        lots: 'lot',
+        data: [3, 4, 5],
+        more: [3.3, 2.344],
+        andMore: ['mixed', 3, true],
+      }
+    },
     pets: {
       collection: "Pet",
       via: "owner",
@@ -80,6 +106,16 @@ module.exports = {
     neighboursPets: {
       collection: "Pet",
       via: "caredForBy",
+    },
+    createdAt: {
+      type: "ref",
+      columnType: "DATETIME",
+      autoCreatedAt: true,
+    },
+    updatedAt: {
+      type: "ref",
+      columnType: "DATETIME",
+      autoUpdatedAt: true,
     },
   },
 

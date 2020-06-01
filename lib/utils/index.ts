@@ -1,8 +1,10 @@
-import { BluePrintAction } from '../interfaces';
+import { BluePrintAction, NameKeyMap } from '../interfaces';
 import swaggerJSDoc from 'swagger-jsdoc';
 import { OpenApi } from '../../types/openapi';
-import { get, cloneDeep, defaultsDeep } from 'lodash';
+import { get, cloneDeep, defaultsDeep, isEqual, map } from 'lodash';
 import { Reference } from 'swagger-schema-official';
+import { swaggerTypes, SwaggerTypeAlias } from '../type-formatter';
+import mapKeys from 'lodash/mapKeys';
 
 export const blueprintActions: Array<BluePrintAction> = ['findone', 'find', 'create', 'update', 'destroy', 'populate', 'add', 'remove', 'replace'];
 
@@ -102,5 +104,88 @@ export const unrollSchema = (specification: OpenApi.OpenApi, schema: OpenApi.Upd
   }
 
   return ret;
+}
 
+/**
+ * Derive Swagger/OpenAPI schema from example value.
+ *
+ * Two specific use cases:
+ * 1. The Sails model attribute type 'json' may be best represented in
+ *    Swagger/OpenAPI as the type 'object' or an array of elements.
+ *    Let's attempt to determine this from the attribute property 'example'.
+ * 2. Actions2 outputs may include `outputExample` but do not specify a
+ *    type - use this method to derive a schema definition.
+ *
+ * @param {any} example
+ */
+export const deriveSwaggerTypeFromExample = (example: unknown, recurseToDepth = 4): OpenApi.UpdatedSchema => {
+
+  const deriveSimpleSwaggerType = (v: unknown): OpenApi.UpdatedSchema => {
+    // undefined,boolean,number,bigint,string,symbol,function,object
+    const t = typeof (v);
+    if (t === 'string' || t === 'symbol') {
+      return swaggerTypes.string;
+    } else if (t === 'number') {
+      return Number.isInteger(v as number) ? swaggerTypes.long : swaggerTypes.double;
+    } else if (t === 'bigint') {
+      return swaggerTypes.bigint;
+    } else if (t === 'boolean') {
+      return swaggerTypes.boolean;
+    } else if (t === 'object' || t === 'function') {
+      return swaggerTypes.any; // recursive evaluation of properties done outside
+    } else {
+      return swaggerTypes.any;
+    }
+  }
+
+  if (Array.isArray(example)) {
+
+    const types: OpenApi.UpdatedSchema[] = [];
+    example.map(v => {
+      const t = recurseToDepth > 1 ? deriveSwaggerTypeFromExample(v, recurseToDepth - 1) : deriveSimpleSwaggerType(v);
+      const existing = types.find(_t => isEqual(_t, t));
+      if (!existing) types.push(t);
+    });
+
+    if (types.length < 1) {
+      types.push(swaggerTypes.any);
+    }
+
+    if (types.length === 1) {
+      return {
+        type: 'array',
+        items: Array.from(types)[0],
+      };
+    } else {
+      return {
+        type: 'array',
+        items: {
+          anyOf: Array.from(types),
+        },
+      };
+    }
+
+  } else {
+
+    const t = typeof (example);
+    if (t === 'object' || t === 'function') {
+      if (recurseToDepth <= 1) {
+        return deriveSimpleSwaggerType(example);
+      }
+      const properties = {} as NameKeyMap<OpenApi.UpdatedSchema>;
+      map(example as object, (v, k) => {
+        properties[k] = {
+          example: v,
+          ...deriveSwaggerTypeFromExample(v, recurseToDepth - 1),
+        };
+      });
+      return {
+        type: 'object',
+        properties: properties,
+      };
+    } else {
+      return deriveSimpleSwaggerType(example);
+    }
+
+  }
 }
