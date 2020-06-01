@@ -74,7 +74,7 @@ export const generateAttributeSchema = (attribute: Sails.AttributeDefinition): O
   } else if (type == 'boolean') {
     assign(schema, sts.boolean);
   } else if (type == 'json') {
-    assign(schema, deriveSwaggerTypeFromExample(ai.example));
+    assign(schema, deriveSwaggerTypeFromExample(ai.example || ai.defaultsTo));
   } else if (type == 'ref') {
     let t: OpenApi.UpdatedSchema | undefined;
     if (columnType) {
@@ -83,7 +83,7 @@ export const generateAttributeSchema = (attribute: Sails.AttributeDefinition): O
       else if (ct.match(/datetime/i)) t = sts.datetime;
       else if (ct.match(/date/i)) t = sts.date;
     }
-    if(t === undefined) t = deriveSwaggerTypeFromExample(ai.example);
+    if(t === undefined) t = deriveSwaggerTypeFromExample(ai.example || ai.defaultsTo);
     assign(schema, t);
   } else { // includes =='string'
     assign(schema, sts.string);
