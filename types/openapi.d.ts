@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { Reference, Header, Tag, ExternalDocs, XML } from 'swagger-schema-official';
+import { Reference, Tag, ExternalDocs, XML } from 'swagger-schema-official';
 
 // This is simply building from  OpenApi Specification
 // see: https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.2.md
@@ -77,15 +77,31 @@ declare namespace OpenApi {
       enum?: any[];
     }
 
-    export interface Parameter {
-        name: string;
-        in: string;
-        description?: string;
-        required?: boolean;
-        deprecated?: boolean;
-        allowEmptyValue?: boolean;
-        schema?: UpdatedSchema | Reference;
+    export type ParameterLocation = 'query' | 'header' | 'path' | 'cookie';
+
+    export type ParameterStyle = 'matrix' | 'label' | 'form' | 'simple' | 'spaceDelimited' | 'pipeDelimited' | 'deepObject';
+
+    export interface ParameterCommon {
+      description?: string;
+      required?: boolean;
+      deprecated?: boolean;
+      allowEmptyValue?: boolean;
+
+      style?: ParameterStyle;
+      explode?: boolean;
+      allowReserved?: boolean;
+      schema?: UpdatedSchema | Reference;
+      examples?: Map<string, Example | Reference>;
+      example?: any;
+      content?: Record<string, MediaType>;
     }
+
+    export interface Parameter extends ParameterCommon {
+      name: string;
+      in: ParameterLocation;
+    }
+
+    export type Header = ParameterCommon
 
     export interface Example {
         summary?: string;
