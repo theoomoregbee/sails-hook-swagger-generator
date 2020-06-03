@@ -49,9 +49,6 @@
       },
       "pet": {
         "description": "Sails ORM Model **Pet**",
-        "required": [
-          "names"
-        ],
         "properties": {
           "petID": {
             "type": "integer",
@@ -80,13 +77,13 @@
               }
             ]
           }
-        }
+        },
+        "required": [
+          "names"
+        ]
       },
       "user": {
         "description": "You might write a short summary of how this **User** model works and what it represents here.\n",
-        "required": [
-          "names"
-        ],
         "properties": {
           "id": {
             "type": "integer",
@@ -138,7 +135,10 @@
               "$ref": "#/components/schemas/pet"
             }
           }
-        }
+        },
+        "required": [
+          "names"
+        ]
       }
     },
     "parameters": {
@@ -258,10 +258,27 @@
     },
     "/user": {
       "post": {
+        "summary": "Create User",
+        "description": "Create a new **User** record.",
+        "externalDocs": {
+          "url": "https://somewhere.com/yep",
+          "description": "Refer to these docs for more info"
+        },
+        "tags": [
+          "User (ORM duplicate)",
+          "User (ORM)"
+        ],
         "parameters": [],
         "responses": {
           "200": {
-            "description": "The requested resource"
+            "description": "Responds with a JSON dictionary representing the newly created **User** instance",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/user"
+                }
+              }
+            }
           },
           "404": {
             "description": "Resource not found"
@@ -270,10 +287,59 @@
             "description": "Internal server error"
           }
         },
-        "summary": "/user",
+        "requestBody": {
+          "description": "JSON dictionary representing the User instance to create.",
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/user"
+              }
+            }
+          }
+        }
+      },
+      "patch": {
+        "summary": "Create User",
+        "description": "Create a new **User** record.",
+        "externalDocs": {
+          "url": "https://somewhere.com/yep",
+          "description": "Refer to these docs for more info"
+        },
         "tags": [
-          "User"
-        ]
+          "User (ORM duplicate)",
+          "User (ORM)"
+        ],
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Responds with a JSON dictionary representing the newly created **User** instance",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/user"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Resource not found"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        },
+        "requestBody": {
+          "description": "JSON dictionary representing the User instance to create.",
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/user"
+              }
+            }
+          }
+        }
       },
       "get": {
         "summary": "List User (find where)",
@@ -1255,10 +1321,116 @@
     },
     "/user/create": {
       "get": {
-        "parameters": [],
+        "summary": "Create User *",
+        "description": "Create a new **User** record.\n\n(\\*) Note that this is a [Sails blueprint shortcut route](https://sailsjs.com/documentation/concepts/blueprints/blueprint-routes#?shortcut-blueprint-routes) (recommended for **development-mode only**)",
+        "externalDocs": {
+          "url": "https://somewhere.com/yep",
+          "description": "Refer to these docs for more info"
+        },
+        "tags": [
+          "User (ORM duplicate)",
+          "User (ORM)"
+        ],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "id",
+            "schema": {
+              "type": "integer",
+              "format": "int64",
+              "uniqueItems": true,
+              "description": "Note Sails special attributes: autoIncrement"
+            },
+            "description": "Note Sails special attributes: autoIncrement"
+          },
+          {
+            "in": "query",
+            "name": "names",
+            "schema": {
+              "type": "string",
+              "example": "First Middle Last"
+            },
+            "required": true
+          },
+          {
+            "in": "query",
+            "name": "email",
+            "schema": {
+              "type": "string",
+              "format": "email",
+              "description": "Just any old email"
+            },
+            "description": "Just any old email"
+          },
+          {
+            "in": "query",
+            "name": "sex",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "Male",
+                "Female"
+              ]
+            }
+          },
+          {
+            "in": "query",
+            "name": "ageLimit",
+            "schema": {
+              "type": "number",
+              "format": "double",
+              "maximum": 100,
+              "minimum": 15
+            }
+          },
+          {
+            "in": "query",
+            "name": "pets",
+            "schema": {
+              "description": "Array of **pet**'s or array of FK's when creating / updating / not populated",
+              "type": "array",
+              "items": {
+                "$ref": "#/components/schemas/pet"
+              }
+            },
+            "description": "Array of **pet**'s or array of FK's when creating / updating / not populated"
+          },
+          {
+            "in": "query",
+            "name": "favouritePet",
+            "schema": {
+              "description": "JSON dictionary representing the **pet** instance or FK when creating / updating / not populated",
+              "oneOf": [
+                {
+                  "$ref": "#/components/schemas/pet"
+                }
+              ]
+            },
+            "description": "JSON dictionary representing the **pet** instance or FK when creating / updating / not populated"
+          },
+          {
+            "in": "query",
+            "name": "neighboursPets",
+            "schema": {
+              "description": "Array of **pet**'s or array of FK's when creating / updating / not populated",
+              "type": "array",
+              "items": {
+                "$ref": "#/components/schemas/pet"
+              }
+            },
+            "description": "Array of **pet**'s or array of FK's when creating / updating / not populated"
+          }
+        ],
         "responses": {
           "200": {
-            "description": "The requested resource"
+            "description": "Responds with a JSON dictionary representing the newly created **User** instance",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/user"
+                }
+              }
+            }
           },
           "404": {
             "description": "Resource not found"
@@ -1266,11 +1438,7 @@
           "500": {
             "description": "Internal server error"
           }
-        },
-        "summary": "/user/create",
-        "tags": [
-          "User"
-        ]
+        }
       }
     },
     "/user/update/{_id}": {
@@ -1398,34 +1566,41 @@
         }
       }
     },
-    "/user/destroy/{id}": {
+    "/user/destroy/{_id}": {
       "get": {
+        "summary": "Delete User (destroy) *",
+        "description": "Delete the **User** record with the specified ID.\n\n(\\*) Note that this is a [Sails blueprint shortcut route](https://sailsjs.com/documentation/concepts/blueprints/blueprint-routes#?shortcut-blueprint-routes) (recommended for **development-mode only**)",
+        "externalDocs": {
+          "url": "https://somewhere.com/yep",
+          "description": "Refer to these docs for more info"
+        },
+        "tags": [
+          "User (ORM duplicate)",
+          "User (ORM)"
+        ],
         "parameters": [
           {
-            "in": "path",
-            "name": "id",
-            "required": true,
-            "schema": {
-              "type": "string"
-            },
-            "description": "Route pattern variable `id`"
+            "$ref": "#/components/parameters/ModelPKParam-user"
           }
         ],
         "responses": {
           "200": {
-            "description": "The requested resource"
+            "description": "Responds with a JSON dictionary representing the destroyed **User** instance",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/user"
+                }
+              }
+            }
           },
           "404": {
-            "description": "Resource not found"
+            "description": "Cannot destroy, **User** record with specified ID **NOT** found"
           },
           "500": {
             "description": "Internal server error"
           }
-        },
-        "summary": "/user/destroy/{id}",
-        "tags": [
-          "User"
-        ]
+        }
       }
     },
     "/user/{_id}/{association}/add/{childid}": {
@@ -2171,6 +2346,41 @@
           }
         }
       },
+      "delete": {
+        "summary": "Delete User (destroy)",
+        "description": "Delete the **User** record with the specified ID.",
+        "externalDocs": {
+          "url": "https://somewhere.com/yep",
+          "description": "Refer to these docs for more info"
+        },
+        "tags": [
+          "User (ORM duplicate)",
+          "User (ORM)"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/ModelPKParam-user"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Responds with a JSON dictionary representing the destroyed **User** instance",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/user"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Cannot destroy, **User** record with specified ID **NOT** found"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        }
+      },
       "put": {
         "summary": "Update User",
         "description": "Update an existing **User** record.",
@@ -2216,36 +2426,6 @@
             }
           }
         }
-      }
-    },
-    "/user/{id}": {
-      "delete": {
-        "parameters": [
-          {
-            "in": "path",
-            "name": "id",
-            "required": true,
-            "schema": {
-              "type": "string"
-            },
-            "description": "Route pattern variable `id`"
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "The requested resource"
-          },
-          "404": {
-            "description": "Resource not found"
-          },
-          "500": {
-            "description": "Internal server error"
-          }
-        },
-        "summary": "/user/{id}",
-        "tags": [
-          "User"
-        ]
       }
     },
     "/user/{_id}/{association}/{childid}": {
