@@ -1580,6 +1580,114 @@
           },
           {
             "in": "query",
+            "name": "advancedOptions",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "useDefaults": {
+                  "example": false,
+                  "type": "boolean"
+                },
+                "customName": {
+                  "example": "foobar",
+                  "type": "string"
+                }
+              },
+              "example": {
+                "useDefaults": false,
+                "customName": "foobar"
+              }
+            }
+          },
+          {
+            "in": "query",
+            "name": "advancedOptionsAny",
+            "schema": {
+              "example": {
+                "useDefaults": false,
+                "customName": "foobar again"
+              }
+            }
+          },
+          {
+            "in": "query",
+            "name": "data",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "lots": {
+                  "example": "lot",
+                  "type": "string"
+                },
+                "data": {
+                  "example": [
+                    3,
+                    4,
+                    5
+                  ],
+                  "type": "array",
+                  "items": {
+                    "type": "integer",
+                    "format": "int64"
+                  }
+                },
+                "more": {
+                  "example": [
+                    3.3,
+                    2.344
+                  ],
+                  "type": "array",
+                  "items": {
+                    "type": "number",
+                    "format": "double"
+                  }
+                },
+                "andMore": {
+                  "example": [
+                    "mixed",
+                    3,
+                    true
+                  ],
+                  "type": "array",
+                  "items": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "integer",
+                        "format": "int64"
+                      },
+                      {
+                        "type": "boolean"
+                      }
+                    ]
+                  }
+                }
+              },
+              "description": "Some custom JSON data",
+              "example": {
+                "lots": "lot",
+                "data": [
+                  3,
+                  4,
+                  5
+                ],
+                "more": [
+                  3.3,
+                  2.344
+                ],
+                "andMore": [
+                  "mixed",
+                  3,
+                  true
+                ]
+              }
+            },
+            "description": "Some custom JSON data"
+          },
+          {
+            "in": "query",
             "name": "pets",
             "schema": {
               "description": "Array of **pet**'s or array of FK's when creating / updating / not populated",
@@ -1614,6 +1722,26 @@
               }
             },
             "description": "Array of **pet**'s or array of FK's when creating / updating / not populated"
+          },
+          {
+            "in": "query",
+            "name": "createdAt",
+            "schema": {
+              "type": "string",
+              "format": "date-time",
+              "description": "Note Sails special attributes: autoCreatedAt"
+            },
+            "description": "Note Sails special attributes: autoCreatedAt"
+          },
+          {
+            "in": "query",
+            "name": "updatedAt",
+            "schema": {
+              "type": "string",
+              "format": "date-time",
+              "description": "Note Sails special attributes: autoUpdatedAt"
+            },
+            "description": "Note Sails special attributes: autoUpdatedAt"
           }
         ],
         "responses": {

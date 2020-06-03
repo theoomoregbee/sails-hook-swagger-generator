@@ -3,8 +3,7 @@ import swaggerJSDoc from 'swagger-jsdoc';
 import { OpenApi } from '../../types/openapi';
 import { get, cloneDeep, defaultsDeep, isEqual, map } from 'lodash';
 import { Reference } from 'swagger-schema-official';
-import { swaggerTypes, SwaggerTypeAlias } from '../type-formatter';
-import mapKeys from 'lodash/mapKeys';
+import { swaggerTypes } from '../type-formatter';
 
 export const blueprintActions: Array<BluePrintAction> = ['findone', 'find', 'create', 'update', 'destroy', 'populate', 'add', 'remove', 'replace'];
 
