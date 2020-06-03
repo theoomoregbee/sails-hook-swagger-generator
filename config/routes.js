@@ -58,6 +58,12 @@ module.exports.routes = {
   'POST /user': {
     controller: 'UserController',
     action: 'create',
+    dummy: true,
+  },
+
+  'patch /user': {
+    model: 'user',
+    action: 'user/create',
   },
 
   'post /user/login': {

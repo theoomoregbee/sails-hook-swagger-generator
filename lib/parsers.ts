@@ -89,6 +89,24 @@ export const parseBoundRoutes = (boundRoutes: Array<Sails.Route>,
     originalFn: { /*[Function] */ _middlewareType: 'BLUEPRINT: find' }
   };
 
+  /* example of standard blueprint route but with standard action overridden in controller */
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const standardBlueprintRouteWithOverriddenActionExampleForReference = {
+    path: '/user',
+    target: '[Function: routeTargetFnWrapper]',
+    verb: 'post',
+    options: {
+      model: 'user',
+      associations: [ /* [Object], [Object], [Object] */ ],
+      autoWatch: true,
+      detectedVerb: { verb: '', original: '/user', path: '/user' },
+      action: 'user/create',
+      _middlewareType: 'ACTION: user/create',
+      skipRegex: []
+    },
+    originalFn: /* [Function] */ { _middlewareType: 'ACTION: user/create' }
+  };
+
   /* example of Sails.Route for custom route targetting blueprint action */
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const customRouteTargettingBlueprintExampleForReference = {
@@ -259,6 +277,16 @@ export const parseBoundRoutes = (boundRoutes: Array<Sails.Route>,
 
       const parsedPath = parsePath(route.path);
       // let middlewareType, action, actionType;
+
+      if (_middlewareType === 'action' && routeOptions.action) {
+        const [modelIdentity, actionToCheck] = routeOptions.action.split('/');
+        if(modelIdentity === routeOptions.model) {
+          /* blueprint actions `{model}/{blueprintAction}` may be overriden by custom
+           * controller actions and thus annotated differently */
+          _middlewareType = 'blueprint';
+          mwtAction = actionToCheck;
+        }
+      }
 
       if (_middlewareType === 'action') {
 
