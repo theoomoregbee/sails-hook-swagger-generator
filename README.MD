@@ -16,13 +16,16 @@ The hook produces specification based upon OAS 3.0.
 $ npm install sails-hook-swagger-generator --save
 ```
 
+
+## Demo
+Copy the content of [generatedSwagger](test/fixtures/generatedSwagger.json) and paste it in [Swagger Online Editor](https://editor.swagger.io/).
+
+
 ## Usage
 Simply by lifting your sails app `sails lift`, after lifting or starting the app,there should be `swagger.json` within **./swagger** folder.
 
 > make sure ./swagger folder is already existing.
 
-
-## Example
 Check the **./swagger/swagger.json** for generated swagger documentation json, then head to [Swagger Editor](https://editor.swagger.io/).
 
 ## Generated Output
