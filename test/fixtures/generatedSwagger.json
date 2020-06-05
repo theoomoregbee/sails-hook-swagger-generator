@@ -1000,7 +1000,55 @@
         "tags": [
           "Pet"
         ],
-        "parameters": [],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "petID",
+            "schema": {
+              "type": "integer",
+              "format": "int64",
+              "uniqueItems": true,
+              "description": "Note Sails special attributes: autoIncrement",
+              "readOnly": true
+            },
+            "description": "Note Sails special attributes: autoIncrement"
+          },
+          {
+            "in": "query",
+            "name": "names",
+            "schema": {
+              "type": "string",
+              "example": "Pet's full name"
+            },
+            "required": true
+          },
+          {
+            "in": "query",
+            "name": "owner",
+            "schema": {
+              "description": "JSON dictionary representing the **user** instance or FK when creating / updating / not populated",
+              "oneOf": [
+                {
+                  "$ref": "#/components/schemas/user"
+                }
+              ]
+            },
+            "description": "JSON dictionary representing the **user** instance or FK when creating / updating / not populated"
+          },
+          {
+            "in": "query",
+            "name": "caredForBy",
+            "schema": {
+              "description": "JSON dictionary representing the **user** instance or FK when creating / updating / not populated",
+              "oneOf": [
+                {
+                  "$ref": "#/components/schemas/user"
+                }
+              ]
+            },
+            "description": "JSON dictionary representing the **user** instance or FK when creating / updating / not populated"
+          }
+        ],
         "responses": {
           "200": {
             "description": "Responds with a JSON dictionary representing the newly created **Pet** instance",
@@ -1300,7 +1348,96 @@
           "User (ORM duplicate)",
           "User (ORM)"
         ],
-        "parameters": [],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "id",
+            "schema": {
+              "type": "integer",
+              "format": "int64",
+              "uniqueItems": true,
+              "description": "Note Sails special attributes: autoIncrement"
+            },
+            "description": "Note Sails special attributes: autoIncrement"
+          },
+          {
+            "in": "query",
+            "name": "names",
+            "schema": {
+              "type": "string",
+              "example": "First Middle Last"
+            },
+            "required": true
+          },
+          {
+            "in": "query",
+            "name": "email",
+            "schema": {
+              "type": "string",
+              "format": "email",
+              "description": "Just any old email"
+            },
+            "description": "Just any old email"
+          },
+          {
+            "in": "query",
+            "name": "sex",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "Male",
+                "Female"
+              ]
+            }
+          },
+          {
+            "in": "query",
+            "name": "ageLimit",
+            "schema": {
+              "type": "number",
+              "format": "double",
+              "maximum": 100,
+              "minimum": 15
+            }
+          },
+          {
+            "in": "query",
+            "name": "pets",
+            "schema": {
+              "description": "Array of **pet**'s or array of FK's when creating / updating / not populated",
+              "type": "array",
+              "items": {
+                "$ref": "#/components/schemas/pet"
+              }
+            },
+            "description": "Array of **pet**'s or array of FK's when creating / updating / not populated"
+          },
+          {
+            "in": "query",
+            "name": "favouritePet",
+            "schema": {
+              "description": "JSON dictionary representing the **pet** instance or FK when creating / updating / not populated",
+              "oneOf": [
+                {
+                  "$ref": "#/components/schemas/pet"
+                }
+              ]
+            },
+            "description": "JSON dictionary representing the **pet** instance or FK when creating / updating / not populated"
+          },
+          {
+            "in": "query",
+            "name": "neighboursPets",
+            "schema": {
+              "description": "Array of **pet**'s or array of FK's when creating / updating / not populated",
+              "type": "array",
+              "items": {
+                "$ref": "#/components/schemas/pet"
+              }
+            },
+            "description": "Array of **pet**'s or array of FK's when creating / updating / not populated"
+          }
+        ],
         "responses": {
           "200": {
             "description": "Responds with a JSON dictionary representing the newly created **User** instance",
