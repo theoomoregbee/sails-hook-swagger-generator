@@ -585,6 +585,7 @@ Note that:
      - `addSelectQueryParam`
      - `addOmitQueryParam`
      - `addModelBodyParam`
+     - `addModelBodyParamUpdate`
      - `addResultOfArrayOfModels`
      - `addAssociationPathParam`
      - `addAssociationFKPathParam`

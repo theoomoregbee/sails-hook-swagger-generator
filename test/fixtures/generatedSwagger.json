@@ -48,6 +48,18 @@
         }
       },
       "pet": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/pet-without-required-constraint"
+          },
+          {
+            "required": [
+              "names"
+            ]
+          }
+        ]
+      },
+      "pet-without-required-constraint": {
         "description": "Sails ORM Model **Pet**",
         "properties": {
           "petID": {
@@ -77,12 +89,21 @@
               }
             ]
           }
-        },
-        "required": [
-          "names"
-        ]
+        }
       },
       "user": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/user-without-required-constraint"
+          },
+          {
+            "required": [
+              "names"
+            ]
+          }
+        ]
+      },
+      "user-without-required-constraint": {
         "description": "You might write a short summary of how this **User** model works and what it represents here.\n",
         "properties": {
           "id": {
@@ -135,10 +156,7 @@
               "$ref": "#/components/schemas/pet"
             }
           }
-        },
-        "required": [
-          "names"
-        ]
+        }
       }
     },
     "parameters": {
@@ -982,55 +1000,7 @@
         "tags": [
           "Pet"
         ],
-        "parameters": [
-          {
-            "in": "query",
-            "name": "petID",
-            "schema": {
-              "type": "integer",
-              "format": "int64",
-              "uniqueItems": true,
-              "description": "Note Sails special attributes: autoIncrement",
-              "readOnly": true
-            },
-            "description": "Note Sails special attributes: autoIncrement"
-          },
-          {
-            "in": "query",
-            "name": "names",
-            "schema": {
-              "type": "string",
-              "example": "Pet's full name"
-            },
-            "required": true
-          },
-          {
-            "in": "query",
-            "name": "owner",
-            "schema": {
-              "description": "JSON dictionary representing the **user** instance or FK when creating / updating / not populated",
-              "oneOf": [
-                {
-                  "$ref": "#/components/schemas/user"
-                }
-              ]
-            },
-            "description": "JSON dictionary representing the **user** instance or FK when creating / updating / not populated"
-          },
-          {
-            "in": "query",
-            "name": "caredForBy",
-            "schema": {
-              "description": "JSON dictionary representing the **user** instance or FK when creating / updating / not populated",
-              "oneOf": [
-                {
-                  "$ref": "#/components/schemas/user"
-                }
-              ]
-            },
-            "description": "JSON dictionary representing the **user** instance or FK when creating / updating / not populated"
-          }
-        ],
+        "parameters": [],
         "responses": {
           "200": {
             "description": "Responds with a JSON dictionary representing the newly created **Pet** instance",
@@ -1084,8 +1054,7 @@
             "schema": {
               "type": "string",
               "example": "Pet's full name"
-            },
-            "required": true
+            }
           },
           {
             "in": "query",
@@ -1331,96 +1300,7 @@
           "User (ORM duplicate)",
           "User (ORM)"
         ],
-        "parameters": [
-          {
-            "in": "query",
-            "name": "id",
-            "schema": {
-              "type": "integer",
-              "format": "int64",
-              "uniqueItems": true,
-              "description": "Note Sails special attributes: autoIncrement"
-            },
-            "description": "Note Sails special attributes: autoIncrement"
-          },
-          {
-            "in": "query",
-            "name": "names",
-            "schema": {
-              "type": "string",
-              "example": "First Middle Last"
-            },
-            "required": true
-          },
-          {
-            "in": "query",
-            "name": "email",
-            "schema": {
-              "type": "string",
-              "format": "email",
-              "description": "Just any old email"
-            },
-            "description": "Just any old email"
-          },
-          {
-            "in": "query",
-            "name": "sex",
-            "schema": {
-              "type": "string",
-              "enum": [
-                "Male",
-                "Female"
-              ]
-            }
-          },
-          {
-            "in": "query",
-            "name": "ageLimit",
-            "schema": {
-              "type": "number",
-              "format": "double",
-              "maximum": 100,
-              "minimum": 15
-            }
-          },
-          {
-            "in": "query",
-            "name": "pets",
-            "schema": {
-              "description": "Array of **pet**'s or array of FK's when creating / updating / not populated",
-              "type": "array",
-              "items": {
-                "$ref": "#/components/schemas/pet"
-              }
-            },
-            "description": "Array of **pet**'s or array of FK's when creating / updating / not populated"
-          },
-          {
-            "in": "query",
-            "name": "favouritePet",
-            "schema": {
-              "description": "JSON dictionary representing the **pet** instance or FK when creating / updating / not populated",
-              "oneOf": [
-                {
-                  "$ref": "#/components/schemas/pet"
-                }
-              ]
-            },
-            "description": "JSON dictionary representing the **pet** instance or FK when creating / updating / not populated"
-          },
-          {
-            "in": "query",
-            "name": "neighboursPets",
-            "schema": {
-              "description": "Array of **pet**'s or array of FK's when creating / updating / not populated",
-              "type": "array",
-              "items": {
-                "$ref": "#/components/schemas/pet"
-              }
-            },
-            "description": "Array of **pet**'s or array of FK's when creating / updating / not populated"
-          }
-        ],
+        "parameters": [],
         "responses": {
           "200": {
             "description": "Responds with a JSON dictionary representing the newly created **User** instance",
@@ -1474,8 +1354,7 @@
             "schema": {
               "type": "string",
               "example": "First Middle Last"
-            },
-            "required": true
+            }
           },
           {
             "in": "query",
@@ -2052,12 +1931,12 @@
           }
         },
         "requestBody": {
-          "description": "JSON dictionary representing the Pet instance to create.",
+          "description": "JSON dictionary representing the Pet instance to update.",
           "required": true,
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/pet"
+                "$ref": "#/components/schemas/pet-without-required-constraint"
               }
             }
           }
@@ -2131,12 +2010,12 @@
           }
         },
         "requestBody": {
-          "description": "JSON dictionary representing the Pet instance to create.",
+          "description": "JSON dictionary representing the Pet instance to update.",
           "required": true,
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/pet"
+                "$ref": "#/components/schemas/pet-without-required-constraint"
               }
             }
           }
@@ -2335,12 +2214,12 @@
           }
         },
         "requestBody": {
-          "description": "JSON dictionary representing the User instance to create.",
+          "description": "JSON dictionary representing the User instance to update.",
           "required": true,
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/user"
+                "$ref": "#/components/schemas/user-without-required-constraint"
               }
             }
           }
@@ -2416,12 +2295,12 @@
           }
         },
         "requestBody": {
-          "description": "JSON dictionary representing the User instance to create.",
+          "description": "JSON dictionary representing the User instance to update.",
           "required": true,
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/user"
+                "$ref": "#/components/schemas/user-without-required-constraint"
               }
             }
           }

@@ -11,8 +11,13 @@ describe('Generators', () => {
             const actual = generateSchemas({ user: { ...userModel, globalId: 'User', identity: 'user' } })
             const expected = {
                 user: {
+                  allOf: [
+                    { '$ref': '#/components/schemas/user-without-required-constraint' },
+                    { required: ['names'] },
+                  ]
+                },
+                'user-without-required-constraint': {
                     description: "Sails ORM Model **User**",
-                    required: ['names'],
                     properties: {
                         id: {
                             type: "number",

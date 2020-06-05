@@ -293,29 +293,44 @@ export const generateSchemas = (models: NameKeyMap<SwaggerSailsModel>): NameKeyM
         return schemas;
       }
 
-      const schema: OpenApi.UpdatedSchema = {
+      const schemaWithoutRequired: OpenApi.UpdatedSchema = {
         description: model.swagger.modelSchema?.description || `Sails ORM Model **${model.globalId}**`,
         properties: {},
-        required: [],
-        ...omit(model.swagger?.modelSchema || {}, 'exclude', 'description', 'tags'),
+        ...omit(model.swagger?.modelSchema || {}, 'exclude', 'description', 'required', 'tags'),
       }
+
+      let required: string[] = [];
 
       const attributes = model.attributes || {}
       defaults(
-        schema.properties,
+        schemaWithoutRequired.properties,
         Object.keys(attributes).reduce((props, attributeName) => {
           const attribute = model.attributes[attributeName];
           if (attribute.meta?.swagger?.exclude !== true) {
             props[attributeName] = generateAttributeSchema(attribute);
-            if (attribute.required) schema.required!.push(attributeName);
+            if (attribute.required) required!.push(attributeName);
           }
           return props
         }, {} as NameKeyMap<OpenApi.UpdatedSchema>)
       );
 
-      if (schema.required!.length <= 0) delete schema.required;
+      const withoutRequiredName = `${model.identity}-without-required-constraint`;
+      const schema: OpenApi.UpdatedSchema = {
+        allOf: [
+          { '$ref': `#/components/schemas/${withoutRequiredName}` },
+        ],
+      };
+
+      if(model.swagger?.modelSchema?.required) {
+        required = [ ...model.swagger.modelSchema.required ];
+      }
+
+      if(required.length > 0) {
+        schema.allOf!.push({ required: required });
+      }
 
       schemas[model.identity] = schema;
+      schemas[withoutRequiredName] = schemaWithoutRequired;
 
       return schemas
     }, {} as NameKeyMap<OpenApi.UpdatedSchema | Reference>)
@@ -478,10 +493,36 @@ export const generatePaths = (routes: SwaggerRouteInfo[], templates: BlueprintAc
               required: true,
               content: {
                 'application/json': {
-                  schema: { "$ref": "#/components/schemas/" + route.model!.identity }
+                  schema: { '$ref': `#/components/schemas/${route.model!.identity}` }
                 },
               },
             };
+          }
+        },
+
+        addModelBodyParamUpdate: () => {
+          if (route.actionType === 'shortcutBlueprint') {
+            const schema = specification!.components!.schemas?.[route.model!.identity+'-without-required-constraint'];
+            if (schema) {
+              const resolvedSchema = resolveRef(specification, schema);
+              if (resolvedSchema) {
+                generateSchemaAsQueryParameters(resolvedSchema as OpenApi.UpdatedSchema).map(p => {
+                  if (isParam('query', p.name)) return;
+                  pathEntry.parameters.push(p);
+                });
+              }
+            }
+          } else {
+            if (pathEntry.requestBody) return;
+            pathEntry.requestBody = {
+              description: subst('JSON dictionary representing the {globalId} instance to update.'),
+              required: true,
+              content: {
+                'application/json': {
+                  schema: { '$ref': `#/components/schemas/${route.model!.identity}-without-required-constraint` }
+                },
+              },
+            }
           }
         },
 
