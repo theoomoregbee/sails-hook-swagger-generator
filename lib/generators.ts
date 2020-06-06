@@ -12,7 +12,7 @@ import forEach from 'lodash/forEach';
 import { OpenApi } from '../types/openapi';
 import set from 'lodash/set';
 import { map, omit, isEqual, reduce } from 'lodash';
-import { attributeValidations, resolveRef } from './utils';
+import { attributeValidations, resolveRef, unrollSchema } from './utils';
 
 
 /**
@@ -478,7 +478,7 @@ export const generatePaths = (routes: SwaggerRouteInfo[], templates: BlueprintAc
           if(route.actionType === 'shortcutBlueprint') {
             const schema = specification!.components!.schemas?.[route.model!.identity];
             if (schema) {
-              const resolvedSchema = resolveRef(specification, schema);
+              const resolvedSchema = unrollSchema(specification, schema);
               if (resolvedSchema) {
                 generateSchemaAsQueryParameters(resolvedSchema as OpenApi.UpdatedSchema).map(p => {
                   if (isParam('query', p.name)) return;

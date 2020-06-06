@@ -1,7 +1,7 @@
 import { BluePrintAction } from '../interfaces';
 import swaggerJSDoc from 'swagger-jsdoc';
 import { OpenApi } from '../../types/openapi';
-import { get } from 'lodash';
+import { get, cloneDeep, defaultsDeep } from 'lodash';
 import { Reference } from 'swagger-schema-official';
 
 export const blueprintActions: Array<BluePrintAction> = ['findone', 'find', 'create', 'update', 'destroy', 'populate', 'add', 'remove', 'replace'];
@@ -71,5 +71,36 @@ export const resolveRef = (specification: OpenApi.OpenApi, obj: (Reference | unk
     return get(specification, pathElements);
   }
   return obj;
+
+}
+
+/**
+ * Provides limited dereferencing, or unrolling, of schemas.
+ *
+ * Background: The generator `generateSchemas()` produces two variants:
+ * 1. The `without-required-constraint` variant containing the properties but without
+ *    the specifying required fields (used for update blueprint).
+ * 2. A primary variant containing an `allOf` union of the variant above
+ *    and the `required` constraint (used for the create blueprint).
+ *
+ * This method handles this simple case, resolving references and unrolling
+ * into a simple cloned schema with directly contained properties.
+ *
+ * Otherwise, schema returned as clone but unmodified.
+ *
+ * @param specification
+ * @param schema
+ */
+export const unrollSchema = (specification: OpenApi.OpenApi, schema: OpenApi.UpdatedSchema | Reference): OpenApi.UpdatedSchema => {
+
+  const ret: OpenApi.UpdatedSchema = cloneDeep(resolveRef(specification, schema) as OpenApi.UpdatedSchema);
+
+  if(ret.allOf) {
+    const allOf = ret.allOf;
+    delete ret.allOf;
+    allOf.map(s => defaultsDeep(ret, resolveRef(specification, s)));
+  }
+
+  return ret;
 
 }
