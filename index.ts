@@ -30,7 +30,8 @@ module.exports = (sails: Sails.Sails): Sails.Hook<SwaggerGenerator> => {
             { url: 'http://localhost:1337/' }
           ],
           externalDocs: { url: 'https://theoomoregbee.github.io/' }
-        }
+        },
+        excludeDeprecatedPutBlueprintRoutes: true,
       }
     },
     // Run when sails loads-- be sure and call `next()`.

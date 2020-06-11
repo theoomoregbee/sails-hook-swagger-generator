@@ -3,13 +3,14 @@ import { OpenApi } from '../types/openapi';
 import { Reference, Tag, ExternalDocs } from 'swagger-schema-official';
 
 export interface SwaggerGenerator {
-    includeRoute?: (route: SwaggerRouteInfo) => boolean;
-    disabled?: boolean;
-    swaggerJsonPath: string;
-    swagger: Omit<OpenApi.OpenApi, 'paths'>;
-    updateBlueprintActionTemplates?: (template: BlueprintActionTemplates) => BlueprintActionTemplates;
-    defaults?: Defaults;
-    postProcess?: (specification: OpenApi.OpenApi) => void;
+  includeRoute?: (route: SwaggerRouteInfo) => boolean;
+  disabled?: boolean;
+  swaggerJsonPath: string;
+  swagger: Omit<OpenApi.OpenApi, 'paths'>;
+  updateBlueprintActionTemplates?: (template: BlueprintActionTemplates) => BlueprintActionTemplates;
+  defaults?: Defaults;
+  postProcess?: (specification: OpenApi.OpenApi) => void;
+  excludeDeprecatedPutBlueprintRoutes?: boolean;
 }
 
 /**

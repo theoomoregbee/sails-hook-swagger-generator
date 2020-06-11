@@ -2112,51 +2112,6 @@
             "description": "Internal server error"
           }
         }
-      },
-      "put": {
-        "summary": "Update Pet",
-        "description": "Update an existing **Pet** record.",
-        "externalDocs": {
-          "url": "https://sailsjs.com/documentation/reference/blueprint-api/update",
-          "description": "See https://sailsjs.com/documentation/reference/blueprint-api/update"
-        },
-        "tags": [
-          "Pet"
-        ],
-        "parameters": [
-          {
-            "$ref": "#/components/parameters/ModelPKParam-pet"
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Responds with the newly updated **Pet** record as a JSON dictionary",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/pet"
-                }
-              }
-            }
-          },
-          "404": {
-            "description": "Cannot update, **Pet** record with specified ID **NOT** found"
-          },
-          "500": {
-            "description": "Internal server error"
-          }
-        },
-        "requestBody": {
-          "description": "JSON dictionary representing the Pet instance to update.",
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/pet-without-required-constraint"
-              }
-            }
-          }
-        }
       }
     },
     "/pet/{_petID}/{association}": {
@@ -2394,52 +2349,6 @@
           },
           "500": {
             "description": "Internal server error"
-          }
-        }
-      },
-      "put": {
-        "summary": "Update User",
-        "description": "Update an existing **User** record.",
-        "externalDocs": {
-          "url": "https://somewhere.com/yep",
-          "description": "Refer to these docs for more info"
-        },
-        "tags": [
-          "User (ORM duplicate)",
-          "User (ORM)"
-        ],
-        "parameters": [
-          {
-            "$ref": "#/components/parameters/ModelPKParam-user"
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Responds with the newly updated **User** record as a JSON dictionary",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/user"
-                }
-              }
-            }
-          },
-          "404": {
-            "description": "Cannot update, **User** record with specified ID **NOT** found"
-          },
-          "500": {
-            "description": "Internal server error"
-          }
-        },
-        "requestBody": {
-          "description": "JSON dictionary representing the User instance to update.",
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/user-without-required-constraint"
-              }
-            }
           }
         }
       }

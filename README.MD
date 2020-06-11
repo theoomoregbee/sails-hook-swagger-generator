@@ -85,6 +85,7 @@ module.exports['swagger-generator'] = {
             '500': { description: 'Internal server error' }
         }
     },
+    excludeDeprecatedPutBlueprintRoutes: true,
     includeRoute: function(routeInfo) { return true; },
     updateBlueprintActionTemplates: function(blueprintActionTemplates) { ... },
     postProcess: function(specifications) { ... }
@@ -100,6 +101,9 @@ Notes on the use of configuration:
    Generally, this hook provides sensible defaults for as much as possible but you may
    override them in this location or in any of the mechanisms explained below.
 * `defaults` object should contain the `responses` element; defaults to the above if not specified.
+* `excludeDeprecatedPutBlueprintRoutes` should
+  [deprecated](https://sailsjs.com/documentation/reference/blueprint-api/update#?notes) `PUT` blueprint
+  routes be excluded from generated Swagger output; defaults to `true`.
 * `includeRoute` function used to filter routes to be included in generated Swagger output; see advanced section below.
 * `updateBlueprintActionTemplates` allows customisation of the templates used to generate Swagger for blueprints; see advanced section below.
 * `postProcess` allows modification of the generated Swagger output before it is written to the output file; see advanced section below.
