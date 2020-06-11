@@ -10,10 +10,6 @@ export interface SwaggerGenerator {
   updateBlueprintActionTemplates?: (template: BlueprintActionTemplates) => BlueprintActionTemplates;
   defaults?: Defaults;
   postProcess?: (specification: OpenApi.OpenApi) => void;
-  options?: SwaggerGeneratorOptions;
-}
-
-export interface SwaggerGeneratorOptions {
   excludeDeprecatedPutBlueprintRoutes?: boolean;
 }
 
