@@ -361,7 +361,7 @@
       },
       "get": {
         "summary": "List User (find where)",
-        "description": "Find a list of **User** records that match the specified criteria.",
+        "description": "_Alternate description_: Find a list of **User** records that match the specified criteria.\n",
         "externalDocs": {
           "url": "https://somewhere.com/yep",
           "description": "Refer to these docs for more info"
@@ -1190,7 +1190,7 @@
     "/user/find": {
       "get": {
         "summary": "List User (find where) *",
-        "description": "Find a list of **User** records that match the specified criteria.\n\n(\\*) Note that this is a [Sails blueprint shortcut route](https://sailsjs.com/documentation/concepts/blueprints/blueprint-routes#?shortcut-blueprint-routes) (recommended for **development-mode only**)",
+        "description": "_Alternate description_: Find a list of **User** records that match the specified criteria.\n\n\n(\\*) Note that this is a [Sails blueprint shortcut route](https://sailsjs.com/documentation/concepts/blueprints/blueprint-routes#?shortcut-blueprint-routes) (recommended for **development-mode only**)",
         "externalDocs": {
           "url": "https://somewhere.com/yep",
           "description": "Refer to these docs for more info"
@@ -1272,7 +1272,7 @@
     "/user/find/{_id}": {
       "get": {
         "summary": "Get User (find one) *",
-        "description": "Look up the **User** record with the specified ID.\n\n(\\*) Note that this is a [Sails blueprint shortcut route](https://sailsjs.com/documentation/concepts/blueprints/blueprint-routes#?shortcut-blueprint-routes) (recommended for **development-mode only**)",
+        "description": "_Alternate description_: Look up the **User** record with the specified ID.\n\n(\\*) Note that this is a [Sails blueprint shortcut route](https://sailsjs.com/documentation/concepts/blueprints/blueprint-routes#?shortcut-blueprint-routes) (recommended for **development-mode only**)",
         "externalDocs": {
           "url": "https://somewhere.com/yep",
           "description": "Refer to these docs for more info"
@@ -2208,7 +2208,7 @@
     "/user/{_id}": {
       "get": {
         "summary": "Get User (find one)",
-        "description": "Look up the **User** record with the specified ID.",
+        "description": "_Alternate description_: Look up the **User** record with the specified ID.",
         "externalDocs": {
           "url": "https://somewhere.com/yep",
           "description": "Refer to these docs for more info"

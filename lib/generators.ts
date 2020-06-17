@@ -412,7 +412,10 @@ export const generatePaths = (routes: SwaggerRouteInfo[], templates: BlueprintAc
         tags: route.swagger?.tags || route.model.swagger.modelSchema?.tags || route.model.swagger.actions?.allactions?.tags || [route.model.globalId],
         parameters,
         responses: cloneDeep(defaultsValues.responses || {}),
-        ...cloneDeep(omit(route.model.swagger.actions?.allactions || {}, 'exclude')),
+        ...cloneDeep(omit({
+          ...route.model.swagger.actions?.allactions || {},
+          ...route.model.swagger.actions?.[route.action] || {},
+        }, 'exclude')),
         ...cloneDeep(omit(route.swagger || {}, 'exclude')),
       };
 
