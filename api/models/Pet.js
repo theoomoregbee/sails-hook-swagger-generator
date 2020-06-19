@@ -5,6 +5,14 @@
  * @docs        :: http://sailsjs.org/documentation/concepts/models-and-orm/models
  */
 
+/**
+ * @swagger
+ *
+ * /create:
+ *   exclude: true
+ *
+ */
+
 module.exports = {
 
   primaryKey: 'petID',

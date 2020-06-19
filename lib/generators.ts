@@ -376,7 +376,8 @@ export const generatePaths = (routes: SwaggerRouteInfo[], templates: BlueprintAc
 
     if (route.middlewareType === MiddlewareType.BLUEPRINT && route.model) {
 
-      if(route.model.swagger?.modelSchema?.exclude === true) {
+      if (route.model.swagger?.modelSchema?.exclude === true
+        || route.model.swagger.actions?.[route.action]?.exclude === true) {
         return;
       }
 

@@ -989,86 +989,6 @@
         }
       }
     },
-    "/pet/create": {
-      "get": {
-        "summary": "Create Pet *",
-        "description": "Create a new **Pet** record.\n\n(\\*) Note that this is a [Sails blueprint shortcut route](https://sailsjs.com/documentation/concepts/blueprints/blueprint-routes#?shortcut-blueprint-routes) (recommended for **development-mode only**)",
-        "externalDocs": {
-          "url": "https://sailsjs.com/documentation/reference/blueprint-api/create",
-          "description": "See https://sailsjs.com/documentation/reference/blueprint-api/create"
-        },
-        "tags": [
-          "Pet"
-        ],
-        "parameters": [
-          {
-            "in": "query",
-            "name": "petID",
-            "schema": {
-              "type": "integer",
-              "format": "int64",
-              "uniqueItems": true,
-              "description": "Note Sails special attributes: autoIncrement",
-              "readOnly": true
-            },
-            "description": "Note Sails special attributes: autoIncrement"
-          },
-          {
-            "in": "query",
-            "name": "names",
-            "schema": {
-              "type": "string",
-              "example": "Pet's full name"
-            },
-            "required": true
-          },
-          {
-            "in": "query",
-            "name": "owner",
-            "schema": {
-              "description": "JSON dictionary representing the **user** instance or FK when creating / updating / not populated",
-              "oneOf": [
-                {
-                  "$ref": "#/components/schemas/user"
-                }
-              ]
-            },
-            "description": "JSON dictionary representing the **user** instance or FK when creating / updating / not populated"
-          },
-          {
-            "in": "query",
-            "name": "caredForBy",
-            "schema": {
-              "description": "JSON dictionary representing the **user** instance or FK when creating / updating / not populated",
-              "oneOf": [
-                {
-                  "$ref": "#/components/schemas/user"
-                }
-              ]
-            },
-            "description": "JSON dictionary representing the **user** instance or FK when creating / updating / not populated"
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Responds with a JSON dictionary representing the newly created **Pet** instance",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/pet"
-                }
-              }
-            }
-          },
-          "404": {
-            "description": "Resource not found"
-          },
-          "500": {
-            "description": "Internal server error"
-          }
-        }
-      }
-    },
     "/pet/update/{_petID}": {
       "get": {
         "summary": "Update Pet *",
@@ -1924,47 +1844,6 @@
           },
           "500": {
             "description": "Internal server error"
-          }
-        }
-      },
-      "post": {
-        "summary": "Create Pet",
-        "description": "Create a new **Pet** record.",
-        "externalDocs": {
-          "url": "https://sailsjs.com/documentation/reference/blueprint-api/create",
-          "description": "See https://sailsjs.com/documentation/reference/blueprint-api/create"
-        },
-        "tags": [
-          "Pet"
-        ],
-        "parameters": [],
-        "responses": {
-          "200": {
-            "description": "Responds with a JSON dictionary representing the newly created **Pet** instance",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/pet"
-                }
-              }
-            }
-          },
-          "404": {
-            "description": "Resource not found"
-          },
-          "500": {
-            "description": "Internal server error"
-          }
-        },
-        "requestBody": {
-          "description": "JSON dictionary representing the Pet instance to create.",
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/pet"
-              }
-            }
           }
         }
       }
