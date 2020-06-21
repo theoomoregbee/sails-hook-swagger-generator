@@ -1498,15 +1498,7 @@
             }
           },
           "404": {
-            "description": "No user with the specified ID was found in the database (actions2 version)",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "description": "No user with the specified ID was found in the database (actions2 version)"
-                }
-              }
-            }
+            "description": "No user with the specified ID was found in the database (actions2 version)"
           },
           "500": {
             "description": "Internal server error"
@@ -2670,15 +2662,7 @@
             }
           },
           "404": {
-            "description": "No user with the specified ID was found in the database (actions2 version)",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "description": "No user with the specified ID was found in the database (actions2 version)"
-                }
-              }
-            }
+            "description": "No user with the specified ID was found in the database (actions2 version)"
           },
           "500": {
             "description": "Internal server error"
