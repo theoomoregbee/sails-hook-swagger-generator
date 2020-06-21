@@ -160,6 +160,18 @@
       }
     },
     "parameters": {
+      "ModelPKParam-user": {
+        "in": "path",
+        "name": "_id",
+        "required": true,
+        "schema": {
+          "type": "integer",
+          "format": "int64",
+          "uniqueItems": true,
+          "description": "Note Sails special attributes: autoIncrement"
+        },
+        "description": "The desired **User** record's primary key value"
+      },
       "ModelPKParam-pet": {
         "in": "path",
         "name": "_petID",
@@ -172,18 +184,6 @@
           "readOnly": true
         },
         "description": "The desired **Pet** record's primary key value"
-      },
-      "ModelPKParam-user": {
-        "in": "path",
-        "name": "_id",
-        "required": true,
-        "schema": {
-          "type": "integer",
-          "format": "int64",
-          "uniqueItems": true,
-          "description": "Note Sails special attributes: autoIncrement"
-        },
-        "description": "The desired **User** record's primary key value"
       },
       "AttributeFilterParam": {
         "in": "query",
@@ -442,6 +442,11 @@
     },
     "/actions2": {
       "get": {
+        "summary": "Friendly",
+        "description": "Return a user list",
+        "tags": [
+          "Actions2 Group"
+        ],
         "parameters": [
           {
             "in": "query",
@@ -500,16 +505,16 @@
           "500": {
             "description": "An unexpected error occurred"
           }
-        },
-        "tags": [
-          "Actions2 Group"
-        ],
-        "description": "Return a user list",
-        "summary": "Friendly"
+        }
       }
     },
     "/twofind": {
       "get": {
+        "summary": "Example only",
+        "description": "You would not usually apply the same summary/description to all actions/paths :)",
+        "tags": [
+          "NomodelTwo"
+        ],
         "parameters": [],
         "responses": {
           "200": {
@@ -521,16 +526,16 @@
           "500": {
             "description": "Internal server error"
           }
-        },
-        "summary": "Example only",
-        "description": "You would not usually apply the same summary/description to all actions/paths :)",
-        "tags": [
-          "NomodelTwo"
-        ]
+        }
       }
     },
     "/twoclear": {
       "get": {
+        "summary": "Example only",
+        "description": "You would not usually apply the same summary/description to all actions/paths :)",
+        "tags": [
+          "NomodelTwo"
+        ],
         "parameters": [],
         "responses": {
           "200": {
@@ -542,24 +547,22 @@
           "500": {
             "description": "Internal server error"
           }
-        },
-        "summary": "Example only",
-        "description": "You would not usually apply the same summary/description to all actions/paths :)",
-        "tags": [
-          "NomodelTwo"
-        ]
+        }
       }
     },
     "/user/login": {
       "post": {
+        "summary": "Authentication",
+        "description": "This is for authentication of any user",
+        "tags": [
+          "User"
+        ],
         "parameters": [],
         "responses": {
           "200": {
             "description": "Success"
           }
         },
-        "summary": "Authentication",
-        "description": "This is for authentication of any user",
         "requestBody": {
           "content": {
             "application/json": {
@@ -580,14 +583,16 @@
               }
             }
           }
-        },
-        "tags": [
-          "User"
-        ]
+        }
       }
     },
     "/user/logout": {
       "get": {
+        "summary": "Perform Logout",
+        "description": "Logout of the application",
+        "tags": [
+          "Auth Mgt"
+        ],
         "parameters": [
           {
             "name": "example-only",
@@ -612,16 +617,16 @@
           "200": {
             "description": "logout result"
           }
-        },
-        "summary": "Perform Logout",
-        "description": "Logout of the application",
-        "tags": [
-          "Auth Mgt"
-        ]
+        }
       }
     },
     "/user/list": {
       "get": {
+        "summary": "/user/list",
+        "description": "Return a user list",
+        "tags": [
+          "User List"
+        ],
         "parameters": [],
         "responses": {
           "200": {
@@ -633,16 +638,16 @@
           "500": {
             "description": "Internal server error"
           }
-        },
-        "tags": [
-          "User List"
-        ],
-        "description": "Return a user list",
-        "summary": "/user/list"
+        }
       }
     },
     "/user/list2": {
       "get": {
+        "summary": "/user/list2",
+        "description": "Return a user list (alternate)",
+        "tags": [
+          "User List"
+        ],
         "parameters": [],
         "responses": {
           "200": {
@@ -654,16 +659,15 @@
           "500": {
             "description": "Internal server error"
           }
-        },
-        "tags": [
-          "User List"
-        ],
-        "description": "Return a user list (alternate)",
-        "summary": "/user/list2"
+        }
       }
     },
     "/user/upload": {
       "get": {
+        "summary": "/user/upload",
+        "tags": [
+          "User"
+        ],
         "parameters": [
           {
             "in": "query",
@@ -679,25 +683,21 @@
           "200": {
             "description": "Success"
           }
-        },
-        "summary": "/user/upload",
-        "tags": [
-          "User"
-        ]
+        }
       }
     },
     "/user/roles": {
       "put": {
+        "summary": "update user roles",
+        "tags": [
+          "User (Extra)"
+        ],
         "parameters": [],
         "responses": {
           "200": {
             "description": "Success"
           }
         },
-        "summary": "update user roles",
-        "tags": [
-          "User (Extra)"
-        ],
         "requestBody": {
           "content": {
             "application/json": {
@@ -721,6 +721,10 @@
     },
     "/nomodel/deep-url/more/find": {
       "get": {
+        "summary": "/nomodel/deep-url/more/find",
+        "tags": [
+          "No Model Example"
+        ],
         "parameters": [],
         "responses": {
           "200": {
@@ -732,15 +736,15 @@
           "500": {
             "description": "Internal server error"
           }
-        },
-        "tags": [
-          "No Model Example"
-        ],
-        "summary": "/nomodel/deep-url/more/find"
+        }
       }
     },
     "/nomodel/deep-url/more/clear": {
       "get": {
+        "summary": "/nomodel/deep-url/more/clear",
+        "tags": [
+          "No Model Example"
+        ],
         "parameters": [],
         "responses": {
           "200": {
@@ -752,15 +756,16 @@
           "500": {
             "description": "Internal server error"
           }
-        },
-        "tags": [
-          "No Model Example"
-        ],
-        "summary": "/nomodel/deep-url/more/clear"
+        }
       }
     },
     "/user/test/{phoneNumber}": {
       "get": {
+        "summary": "Phone No. Logout",
+        "description": "Alternate description (of no real significance)",
+        "tags": [
+          "Auth Mgt"
+        ],
         "parameters": [
           {
             "name": "example-only",
@@ -795,12 +800,7 @@
             "description": "logout result"
           }
         },
-        "summary": "Phone No. Logout",
-        "description": "Alternate description (of no real significance)",
-        "operationId": "user/logout",
-        "tags": [
-          "Auth Mgt"
-        ]
+        "operationId": "user/logout"
       }
     },
     "/clients/{client_id}/user/{id}": {
