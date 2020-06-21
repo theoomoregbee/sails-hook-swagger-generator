@@ -298,6 +298,9 @@
               }
             }
           },
+          "400": {
+            "description": "Validation errors; details in JSON response"
+          },
           "404": {
             "description": "Resource not found"
           },
@@ -339,6 +342,9 @@
                 }
               }
             }
+          },
+          "400": {
+            "description": "Validation errors; details in JSON response"
           },
           "404": {
             "description": "Resource not found"
@@ -566,6 +572,9 @@
           "200": {
             "description": "Success"
           },
+          "404": {
+            "description": "Resource not found"
+          },
           "500": {
             "description": "Internal server error"
           }
@@ -627,6 +636,9 @@
         "responses": {
           "200": {
             "description": "logout result"
+          },
+          "404": {
+            "description": "Resource not found"
           },
           "500": {
             "description": "Internal server error"
@@ -709,6 +721,9 @@
           "200": {
             "description": "Success"
           },
+          "404": {
+            "description": "Resource not found"
+          },
           "500": {
             "description": "Internal server error"
           }
@@ -729,6 +744,9 @@
         "responses": {
           "200": {
             "description": "Success"
+          },
+          "404": {
+            "description": "Resource not found"
           },
           "500": {
             "description": "Internal server error"
@@ -803,6 +821,7 @@
           "url": "https://somewhere.com/yep",
           "description": "Refer to these docs for more info"
         },
+        "operationId": "user/logout",
         "tags": [
           "Auth Mgt"
         ],
@@ -839,11 +858,13 @@
           "200": {
             "description": "logout result"
           },
+          "404": {
+            "description": "Resource not found"
+          },
           "500": {
             "description": "Internal server error"
           }
-        },
-        "operationId": "user/logout"
+        }
       }
     },
     "/clients/{client_id}/user/{_id}": {
@@ -1111,6 +1132,9 @@
               }
             }
           },
+          "400": {
+            "description": "Validation errors; details in JSON response"
+          },
           "404": {
             "description": "Cannot update, **Pet** record with specified ID **NOT** found"
           },
@@ -1240,8 +1264,8 @@
     },
     "/user/find/{_id}": {
       "get": {
-        "summary": "Get User (find one) *",
-        "description": "_Alternate description_: Look up the **User** record with the specified ID.\n\n(\\*) Note that this is a [Sails blueprint shortcut route](https://sailsjs.com/documentation/concepts/blueprints/blueprint-routes#?shortcut-blueprint-routes) (recommended for **development-mode only**)",
+        "summary": "Get User (find one) (A2) *",
+        "description": "**Actions2** override of blueprint action: Look up the **User** record with the specified ID.\n\n(\\*) Note that this is a [Sails blueprint shortcut route](https://sailsjs.com/documentation/concepts/blueprints/blueprint-routes#?shortcut-blueprint-routes) (recommended for **development-mode only**)",
         "externalDocs": {
           "url": "https://somewhere.com/yep",
           "description": "Refer to these docs for more info"
@@ -1252,7 +1276,15 @@
         ],
         "parameters": [
           {
-            "$ref": "#/components/parameters/ModelPKParam-user"
+            "in": "path",
+            "name": "_id",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64",
+              "readOnly": true
+            },
+            "description": "The ID of the user to look up (actions2 version)"
           },
           {
             "in": "query",
@@ -1297,7 +1329,15 @@
             }
           },
           "404": {
-            "description": "Response denoting **User** record with specified ID **NOT** found"
+            "description": "No user with the specified ID was found in the database (actions2 version)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "description": "No user with the specified ID was found in the database (actions2 version)"
+                }
+              }
+            }
           },
           "500": {
             "description": "Internal server error"
@@ -1417,6 +1457,9 @@
                 }
               }
             }
+          },
+          "400": {
+            "description": "Validation errors; details in JSON response"
           },
           "404": {
             "description": "Resource not found"
@@ -1541,6 +1584,9 @@
                 }
               }
             }
+          },
+          "400": {
+            "description": "Validation errors; details in JSON response"
           },
           "404": {
             "description": "Cannot update, **User** record with specified ID **NOT** found"
@@ -1987,6 +2033,9 @@
               }
             }
           },
+          "400": {
+            "description": "Validation errors; details in JSON response"
+          },
           "404": {
             "description": "Cannot update, **Pet** record with specified ID **NOT** found"
           },
@@ -2113,9 +2162,6 @@
                     "oneOf": [
                       {
                         "$ref": "#/components/schemas/user"
-                      },
-                      {
-                        "$ref": "#/components/schemas/user"
                       }
                     ]
                   }
@@ -2134,8 +2180,8 @@
     },
     "/user/{_id}": {
       "get": {
-        "summary": "Get User (find one)",
-        "description": "_Alternate description_: Look up the **User** record with the specified ID.",
+        "summary": "Get User (find one) (A2)",
+        "description": "**Actions2** override of blueprint action: Look up the **User** record with the specified ID.",
         "externalDocs": {
           "url": "https://somewhere.com/yep",
           "description": "Refer to these docs for more info"
@@ -2146,7 +2192,15 @@
         ],
         "parameters": [
           {
-            "$ref": "#/components/parameters/ModelPKParam-user"
+            "in": "path",
+            "name": "_id",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64",
+              "readOnly": true
+            },
+            "description": "The ID of the user to look up (actions2 version)"
           },
           {
             "in": "query",
@@ -2191,7 +2245,15 @@
             }
           },
           "404": {
-            "description": "Response denoting **User** record with specified ID **NOT** found"
+            "description": "No user with the specified ID was found in the database (actions2 version)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "description": "No user with the specified ID was found in the database (actions2 version)"
+                }
+              }
+            }
           },
           "500": {
             "description": "Internal server error"
@@ -2224,6 +2286,9 @@
                 }
               }
             }
+          },
+          "400": {
+            "description": "Validation errors; details in JSON response"
           },
           "404": {
             "description": "Cannot update, **User** record with specified ID **NOT** found"
@@ -2574,12 +2639,6 @@
                   "type": "array",
                   "items": {
                     "oneOf": [
-                      {
-                        "$ref": "#/components/schemas/pet"
-                      },
-                      {
-                        "$ref": "#/components/schemas/pet"
-                      },
                       {
                         "$ref": "#/components/schemas/pet"
                       }
