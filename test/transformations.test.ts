@@ -70,6 +70,7 @@ describe('Transformations', () => {
 
       const expectedOutputPaths = [
         '/user',
+        '/user',
         '/actions2',
         '/twofind',
         '/twoclear',
@@ -83,7 +84,7 @@ describe('Transformations', () => {
         '/nomodel/deep-url/more/clear',
         '/nomodel/deep-url/more/should_be_excluded',
         '/user/test/{phoneNumber}',
-        '/clients/{client_id}/user/{id}',
+        '/clients/{client_id}/user/{_id}',
         '/oldpet/find',
         '/oldpet/find/{_petID}',
         '/oldpet/create',
@@ -98,7 +99,7 @@ describe('Transformations', () => {
         '/user/find/{_id}',
         '/user/create',
         '/user/update/{_id}',
-        '/user/destroy/{id}',
+        '/user/destroy/{_id}',
         '/user/{_id}/{association}/add/{childid}',
         '/user/{_id}/{association}/replace',
         '/user/{_id}/{association}/remove/{childid}',
@@ -119,7 +120,7 @@ describe('Transformations', () => {
         '/user',
         '/user/{_id}',
         '/user/{_id}',
-        '/user/{id}', // note UserController overrides destroy action
+        '/user/{_id}',
         '/user/{_id}',
         '/user/{_id}/{association}/{childid}',
         '/user/{_id}/{association}',
