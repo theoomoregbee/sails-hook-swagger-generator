@@ -18,7 +18,7 @@ export interface SwaggerGenerator {
  *
  * @see https://sailsjs.com/documentation/concepts/routes/custom-routes
  */
-export type ActionType = 'blueprint' | 'shortcutBlueprint' | 'controller' | 'standalone' | 'actions2' | 'function';
+export type ActionType = 'controller' | 'standalone' | 'actions2' | 'function';
 
 /**
  * Sails blueprint action types.
@@ -176,8 +176,8 @@ export type Action2Response = {
 export type HTTPMethodVerb = 'all' | 'get' | 'post' | 'put' | 'patch' | 'delete'
 
 export enum MiddlewareType {
-    BLUEPRINT = 'BLUEPRINT',
-    ACTION = 'ACTION'
+    BLUEPRINT = 'BLUEPRINT', //< Sails built-in blueprint middleware
+    ACTION = 'ACTION', //< custom action (may include specific per-model blueprint action overrides or custom blueprint actions)
 }
 
 /**
@@ -191,12 +191,14 @@ export interface SwaggerRouteInfo {
   variables: string[]; //< list of ALL variables extracted from path e.g. `/pet/:id` --> `id`
   optionalVariables: string[]; //< list of optional variables from path e.g. `/pet/:id?` // XXX TODO make Variable type
 
-  action: string; //< either blueprint action (e.g. 'find') or action identity (e.g. 'subdir/reporting/run')
-  actionType: ActionType; //< one of blueprint|shortcutBlueprint|controller|standalone|actions2|function
+  action: string; //< either blueprint action (e.g. 'user/find') or action identity (e.g. 'subdir/reporting/run')
+  actionType: ActionType; //< one of controller|standalone|actions2|function
   actions2Machine?: SwaggerSailsActions2Machine; //< for actionType === 'actions2', details of the action2 machine
 
-  model?: SwaggerSailsModel; //< reference to Sails Model (blueprints only)
+  model?: SwaggerSailsModel; //< reference to Sails Model (blueprints or custom model action only)
   associationAliases?: string[]; //< association attribute names (relevant blueprint routes only)
+  blueprintAction?: string; //< blueprint action (or custom model action) without model identity reference e.g. 'find' (only where model defined)
+  isShortcutBlueprintRoute?: boolean; //< true if the route matches a shortcut blueprint route
 
   defaultTagName?: string; //< default tag name for route, if any, based on Sails Model or Controller
 
