@@ -1,4 +1,4 @@
-import { NameKeyMap, SwaggerSailsModel, SwaggerModelAttribute, SwaggerSailsControllers, SwaggerControllerAttribute, SwaggerRouteInfo, BluePrintAction, MiddlewareType, SwaggerActionAttribute } from "./interfaces";
+import { NameKeyMap, SwaggerSailsModel, SwaggerModelAttribute, SwaggerSailsControllers, SwaggerControllerAttribute, SwaggerRouteInfo, BluePrintAction, SwaggerActionAttribute } from "./interfaces";
 import { forEach, defaults, cloneDeep, groupBy, mapValues, map } from "lodash";
 import { Tag } from "swagger-schema-official";
 import { OpenApi } from "../types/openapi";
@@ -268,10 +268,6 @@ export const mergeControllerSwaggerIntoRouteInfo = (sails: Sails.Sails, routes: 
   controllers: SwaggerSailsControllers, controllersJsDoc: NameKeyMap<SwaggerControllerAttribute>): void => {
 
   routes.map(route => {
-
-    if(route.middlewareType !== MiddlewareType.ACTION) {
-      return;
-    }
 
     const mergeIntoDest = (source: SwaggerActionAttribute | undefined) => {
       if(!source) { return; }
