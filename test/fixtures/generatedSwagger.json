@@ -276,7 +276,7 @@
     },
     "/user": {
       "post": {
-        "summary": "Create User",
+        "summary": "Create User (**)",
         "description": "Create a new **User** record.",
         "externalDocs": {
           "url": "https://somewhere.com/yep",
@@ -318,7 +318,7 @@
         }
       },
       "patch": {
-        "summary": "Create User",
+        "summary": "Create User (**)",
         "description": "Create a new **User** record.",
         "externalDocs": {
           "url": "https://somewhere.com/yep",
@@ -554,6 +554,10 @@
       "post": {
         "summary": "Authentication",
         "description": "This is for authentication of any user",
+        "externalDocs": {
+          "url": "https://somewhere.com/yep",
+          "description": "Refer to these docs for more info"
+        },
         "tags": [
           "User"
         ],
@@ -561,6 +565,9 @@
         "responses": {
           "200": {
             "description": "Success"
+          },
+          "500": {
+            "description": "Internal server error"
           }
         },
         "requestBody": {
@@ -590,6 +597,10 @@
       "get": {
         "summary": "Perform Logout",
         "description": "Logout of the application",
+        "externalDocs": {
+          "url": "https://somewhere.com/yep",
+          "description": "Refer to these docs for more info"
+        },
         "tags": [
           "Auth Mgt"
         ],
@@ -616,6 +627,9 @@
         "responses": {
           "200": {
             "description": "logout result"
+          },
+          "500": {
+            "description": "Internal server error"
           }
         }
       }
@@ -624,6 +638,10 @@
       "get": {
         "summary": "/user/list",
         "description": "Return a user list",
+        "externalDocs": {
+          "url": "https://somewhere.com/yep",
+          "description": "Refer to these docs for more info"
+        },
         "tags": [
           "User List"
         ],
@@ -645,6 +663,10 @@
       "get": {
         "summary": "/user/list2",
         "description": "Return a user list (alternate)",
+        "externalDocs": {
+          "url": "https://somewhere.com/yep",
+          "description": "Refer to these docs for more info"
+        },
         "tags": [
           "User List"
         ],
@@ -665,6 +687,10 @@
     "/user/upload": {
       "get": {
         "summary": "/user/upload",
+        "externalDocs": {
+          "url": "https://somewhere.com/yep",
+          "description": "Refer to these docs for more info"
+        },
         "tags": [
           "User"
         ],
@@ -682,6 +708,9 @@
         "responses": {
           "200": {
             "description": "Success"
+          },
+          "500": {
+            "description": "Internal server error"
           }
         }
       }
@@ -689,6 +718,10 @@
     "/user/roles": {
       "put": {
         "summary": "update user roles",
+        "externalDocs": {
+          "url": "https://somewhere.com/yep",
+          "description": "Refer to these docs for more info"
+        },
         "tags": [
           "User (Extra)"
         ],
@@ -696,6 +729,9 @@
         "responses": {
           "200": {
             "description": "Success"
+          },
+          "500": {
+            "description": "Internal server error"
           }
         },
         "requestBody": {
@@ -763,6 +799,10 @@
       "get": {
         "summary": "Phone No. Logout",
         "description": "Alternate description (of no real significance)",
+        "externalDocs": {
+          "url": "https://somewhere.com/yep",
+          "description": "Refer to these docs for more info"
+        },
         "tags": [
           "Auth Mgt"
         ],
@@ -798,14 +838,29 @@
         "responses": {
           "200": {
             "description": "logout result"
+          },
+          "500": {
+            "description": "Internal server error"
           }
         },
         "operationId": "user/logout"
       }
     },
-    "/clients/{client_id}/user/{id}": {
+    "/clients/{client_id}/user/{_id}": {
       "delete": {
+        "summary": "Delete User (destroy)",
+        "description": "Delete the **User** record with the specified ID.",
+        "externalDocs": {
+          "url": "https://somewhere.com/yep",
+          "description": "Refer to these docs for more info"
+        },
+        "tags": [
+          "User"
+        ],
         "parameters": [
+          {
+            "$ref": "#/components/parameters/ModelPKParam-user"
+          },
           {
             "in": "path",
             "name": "client_id",
@@ -814,32 +869,26 @@
               "type": "string"
             },
             "description": "Route pattern variable `client_id`"
-          },
-          {
-            "in": "path",
-            "name": "id",
-            "required": true,
-            "schema": {
-              "type": "string"
-            },
-            "description": "Route pattern variable `id`"
           }
         ],
         "responses": {
           "200": {
-            "description": "The requested resource"
+            "description": "Responds with a JSON dictionary representing the destroyed **User** instance",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/user"
+                }
+              }
+            }
           },
           "404": {
-            "description": "Resource not found"
+            "description": "Cannot destroy, **User** record with specified ID **NOT** found"
           },
           "500": {
             "description": "Internal server error"
           }
-        },
-        "summary": "/clients/{client_id}/user/{id}",
-        "tags": [
-          "User"
-        ]
+        }
       }
     },
     "/pet/find": {
@@ -1258,7 +1307,7 @@
     },
     "/user/create": {
       "get": {
-        "summary": "Create User *",
+        "summary": "Create User (**) *",
         "description": "Create a new **User** record.\n\n(\\*) Note that this is a [Sails blueprint shortcut route](https://sailsjs.com/documentation/concepts/blueprints/blueprint-routes#?shortcut-blueprint-routes) (recommended for **development-mode only**)",
         "externalDocs": {
           "url": "https://somewhere.com/yep",
@@ -1511,8 +1560,7 @@
           "description": "Refer to these docs for more info"
         },
         "tags": [
-          "User (ORM duplicate)",
-          "User (ORM)"
+          "User"
         ],
         "parameters": [
           {
@@ -2204,8 +2252,7 @@
           "description": "Refer to these docs for more info"
         },
         "tags": [
-          "User (ORM duplicate)",
-          "User (ORM)"
+          "User"
         ],
         "parameters": [
           {
