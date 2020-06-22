@@ -754,7 +754,6 @@ export const generatePaths = (routes: SwaggerRouteInfo[], templates: BlueprintAc
               },
             }
           });
-          console.log('YYY', pathEntry);
         },
 
         addResultOfModel: () => {
