@@ -1,4 +1,4 @@
-import { NameKeyMap, SwaggerSailsModel, SwaggerModelAttribute, SwaggerSailsControllers, SwaggerControllerAttribute, SwaggerRouteInfo, BluePrintAction, SwaggerActionAttribute } from "./interfaces";
+import { NameKeyMap, SwaggerSailsModel, SwaggerModelAttribute, SwaggerSailsControllers, SwaggerControllerAttribute, SwaggerRouteInfo, BluePrintAction, SwaggerActionAttribute, MiddlewareType } from "./interfaces";
 import { forEach, defaults, cloneDeep, groupBy, mapValues, map } from "lodash";
 import { Tag } from "swagger-schema-official";
 import { OpenApi } from "../types/openapi";
@@ -324,7 +324,9 @@ export const mergeControllerSwaggerIntoRouteInfo = (sails: Sails.Sails, routes: 
       }
 
     } else {
-      sails.log.error(`ERROR: sails-hook-swagger-generator: Error resolving/loading controller action '${route.action}' source file`);
+      if(route.middlewareType === MiddlewareType.ACTION) {
+        sails.log.error(`ERROR: sails-hook-swagger-generator: Error resolving/loading controller action '${route.action}' source file`);
+      }
     }
 
   });
