@@ -151,7 +151,7 @@ export const generateAttributeSchema = (attribute: Sails.AttributeDefinition): O
   // finally, overwrite in custom swagger
   if(ai.meta?.swagger) {
     // note: 'type' handled above
-    assign(schema, omit(ai.meta.swagger, 'exclude', 'type'));
+    assign(schema, omit(ai.meta.swagger, 'exclude', 'type', 'in'));
   }
 
   return schema;
@@ -410,30 +410,67 @@ export const generatePaths = (routes: SwaggerRouteInfo[], templates: BlueprintAc
       const patternVariables = route.variables || [];
       if (route.actions2Machine?.inputs) {
         forEach(route.actions2Machine.inputs, (value, key) => {
+
           if(value.meta?.swagger?.exclude === true) {
             return;
           }
-          const _in = patternVariables.indexOf(key) >= 0 ? 'path' : 'query';
-          if(isParam(_in, key)) {
-            return;
+
+          let _in = value.meta?.swagger?.in;
+          if(!_in) {
+            _in = patternVariables.indexOf(key) >= 0 ? 'path' : 'query';
           }
+
+          // compose attribute definition
           const { description, ..._attribute } = value;
           const attribute = {
             ...omit(_attribute, attributeValidations),
             validations: pick(_attribute, attributeValidations),
-
           } as Sails.AttributeDefinition;
           if(!attribute.type && 'example' in attribute) { // derive type if not specified (optional for actions2)
             defaults(attribute, deriveSwaggerTypeFromExample(attribute.example || attribute.defaultsTo));
           }
-          pathEntry.parameters.push({
-            in: _in,
-            name: key,
-            required: value.required || false,
-            schema: generateAttributeSchema(attribute),
-            description
-          })
-        })
+
+          if(_in === 'body') {
+
+            // add to request body if we can do so cleanly
+            if(!pathEntry.requestBody) {
+              pathEntry.requestBody = { content: {} };
+            }
+            if (!('content' in pathEntry.requestBody)) {
+              return; // could be reference --> in which case do not override
+            }
+
+            const rbc = pathEntry.requestBody.content;
+            if (!rbc['application/json']) { rbc['application/json'] = {}; }
+            if (!rbc['application/json'].schema) { rbc['application/json'].schema = { type:'object', properties:{} }; }
+
+            if ('type' in rbc['application/json'].schema
+              && rbc['application/json'].schema.type === 'object'
+              && rbc['application/json'].schema.properties) {
+                // if not reference and of type 'object' --> consider adding new property (but don't overwrite)
+                defaults(
+                  rbc['application/json'].schema.properties,
+                  { [key]: generateAttributeSchema(attribute) }
+                );
+            }
+
+          } else {
+
+            // otherwise, handle path|query|cookie|header parameters
+            if (isParam(_in, key)) {
+              return;
+            }
+            pathEntry.parameters.push({
+              in: _in,
+              name: key,
+              required: value.required || false,
+              schema: generateAttributeSchema(attribute),
+              description
+            });
+
+          }
+
+        });
       }
 
       if (route.actions2Machine?.exits) {

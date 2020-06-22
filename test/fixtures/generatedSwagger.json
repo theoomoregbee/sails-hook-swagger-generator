@@ -683,6 +683,80 @@
         }
       }
     },
+    "/actions2-rb": {
+      "get": {
+        "summary": "Friendly (RB)",
+        "tags": [
+          "Actions2 Group"
+        ],
+        "parameters": [
+          {
+            "in": "header",
+            "name": "dummyHeader",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "example": "why-not"
+            },
+            "description": "A value for the request header"
+          },
+          {
+            "in": "cookie",
+            "name": "dummyCookie",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "example": "why-not-indeed"
+            },
+            "description": "A cookie"
+          },
+          {
+            "in": "query",
+            "name": "verbose",
+            "required": false,
+            "schema": {
+              "type": "boolean"
+            },
+            "description": "Should we provide verbose output"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "A successful result"
+          },
+          "404": {
+            "description": "Resource not found"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        },
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "userId": {
+                    "type": "integer",
+                    "format": "int64",
+                    "example": 123456
+                  },
+                  "userName": {
+                    "type": "string",
+                    "example": "John Smith"
+                  },
+                  "addExtra": {
+                    "type": "boolean",
+                    "example": true
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/twofind": {
       "get": {
         "summary": "Example only",
