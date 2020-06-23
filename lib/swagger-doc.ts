@@ -64,7 +64,7 @@ export default async (sails: Sails.Sails, sailsRoutes: Array<Sails.Route>, conte
    * @see https://github.com/balderdashy/sails/blob/master/lib/hooks/blueprints/index.js#L401
    */
   if(hookConfig.excludeDeprecatedPutBlueprintRoutes) {
-    routes = routes.filter(route => !(route.model && route.blueprintAction === 'update' && route.verb === 'put'));
+    routes = routes.filter(route => !(route.blueprintAction === 'update' && route.verb === 'put'));
   }
 
   mergeModelJsDoc(models, modelsJsDoc);
