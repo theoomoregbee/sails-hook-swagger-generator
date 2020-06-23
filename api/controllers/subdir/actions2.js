@@ -31,7 +31,12 @@ module.exports = {
       type: 'number',
       isInteger: true,
       required: true,
+      example: 123456,
       meta: { swagger: { readOnly: true } },
+    },
+    addExtra: {
+      description: 'Should extra details be reported',
+      example: true,
     },
     excludedUserId: {
       description: 'The ID of the user to look up (should be excluded from Swagger)',
@@ -44,8 +49,15 @@ module.exports = {
 
   exits: {
     success: {
-      description: 'Another success',
-      outputExample: 'Some dynamic message like this.'
+      description: 'A successful result',
+    },
+    alternateSuccess: {
+      description: 'Alternate success',
+      outputExample: 'Some dynamic message like this.',
+    },
+    alternateSuccess2: {
+      description: 'Alternate success (2)',
+      outputExample: 93.45,
     },
     excludedSuccess: {
       description: 'Another success (should be excluded from Swagger)',
@@ -53,13 +65,14 @@ module.exports = {
       meta: { swagger: { exclude: true } },
     },
     successAgain: {
-      description: 'Another success (2)',
+      description: 'Another success (partial content)',
       outputExample: {
         weatherPerson: 'Joaquin',
         days: [
           { tempCelsius: 21, windSpeedMph: 392 }
         ]
-      }
+      },
+      // statusCode: 206,
     },
     notFound: {
       description: 'No user with the specified ID was found in the database',
@@ -74,8 +87,8 @@ module.exports = {
         tags: ['Actions2 Group'],
         description: 'Return a user list',
         responses: {
-          '200': {
-            description: 'Done/Success',
+          '206': {
+            description: 'Done/Success (partial)',
             content: {
               'text/html': {
                 schema: { type: 'string', description: 'Human readable result', },

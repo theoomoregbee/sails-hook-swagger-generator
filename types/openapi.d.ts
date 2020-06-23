@@ -156,7 +156,7 @@ declare namespace OpenApi {
         operationId?: string;
         parameters: Array<Parameter | Reference>;
         requestBody?: RequestBody | Reference;
-        responses: Record<string, Response>;
+        responses: Record<string, Response>; // index is statusCode
         servers?: Array<Server>;
         security?: SecuritySchemeRefPlusScopes[];
     }

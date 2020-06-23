@@ -48,6 +48,7 @@
         }
       },
       "pet": {
+        "type": "object",
         "allOf": [
           {
             "$ref": "#/components/schemas/pet-without-required-constraint"
@@ -60,6 +61,7 @@
         ]
       },
       "pet-without-required-constraint": {
+        "type": "object",
         "description": "Sails ORM Model **Pet**",
         "properties": {
           "petID": {
@@ -92,6 +94,7 @@
         }
       },
       "user": {
+        "type": "object",
         "allOf": [
           {
             "$ref": "#/components/schemas/user-without-required-constraint"
@@ -104,6 +107,7 @@
         ]
       },
       "user-without-required-constraint": {
+        "type": "object",
         "description": "You might write a short summary of how this **User** model works and what it represents here.\n",
         "properties": {
           "id": {
@@ -134,6 +138,101 @@
             "maximum": 100,
             "minimum": 15
           },
+          "advancedOptions": {
+            "type": "object",
+            "properties": {
+              "useDefaults": {
+                "example": false,
+                "type": "boolean"
+              },
+              "customName": {
+                "example": "foobar",
+                "type": "string"
+              }
+            },
+            "example": {
+              "useDefaults": false,
+              "customName": "foobar"
+            }
+          },
+          "advancedOptionsAny": {
+            "example": {
+              "useDefaults": false,
+              "customName": "foobar again"
+            }
+          },
+          "data": {
+            "type": "object",
+            "properties": {
+              "lots": {
+                "example": "lot",
+                "type": "string"
+              },
+              "data": {
+                "example": [
+                  3,
+                  4,
+                  5
+                ],
+                "type": "array",
+                "items": {
+                  "type": "integer",
+                  "format": "int64"
+                }
+              },
+              "more": {
+                "example": [
+                  3.3,
+                  2.344
+                ],
+                "type": "array",
+                "items": {
+                  "type": "number",
+                  "format": "double"
+                }
+              },
+              "andMore": {
+                "example": [
+                  "mixed",
+                  3,
+                  true
+                ],
+                "type": "array",
+                "items": {
+                  "anyOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "integer",
+                      "format": "int64"
+                    },
+                    {
+                      "type": "boolean"
+                    }
+                  ]
+                }
+              }
+            },
+            "description": "Some custom JSON data",
+            "example": {
+              "lots": "lot",
+              "data": [
+                3,
+                4,
+                5
+              ],
+              "more": [
+                3.3,
+                2.344
+              ],
+              "andMore": [
+                "mixed",
+                3,
+                true
+              ]
+            }
+          },
           "pets": {
             "description": "Array of **pet**'s or array of FK's when creating / updating / not populated",
             "type": "array",
@@ -155,6 +254,16 @@
             "items": {
               "$ref": "#/components/schemas/pet"
             }
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Note Sails special attributes: autoCreatedAt"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Note Sails special attributes: autoUpdatedAt"
           }
         }
       }
@@ -398,7 +507,7 @@
             "required": false,
             "schema": {
               "type": "string",
-              "example": "id,names,email,sex,ageLimit,pets,favouritePet,neighboursPets"
+              "example": "id,names,email,sex,ageLimit,advancedOptions,advancedOptionsAny,data,pets,favouritePet,neighboursPets,createdAt,updatedAt"
             },
             "description": "The attributes to include in the result, specified as a comma-delimited list. By default, all attributes are selected. Not valid for plural (“collection”) association attributes."
           },
@@ -408,7 +517,7 @@
             "required": false,
             "schema": {
               "type": "string",
-              "example": "id,names,email,sex,ageLimit,pets,favouritePet,neighboursPets"
+              "example": "id,names,email,sex,ageLimit,advancedOptions,advancedOptionsAny,data,pets,favouritePet,neighboursPets,createdAt,updatedAt"
             },
             "description": "The attributes to exclude from the result, specified as a comma-delimited list. Cannot be used in conjuction with `select`. Not valid for plural (“collection”) association attributes."
           },
@@ -461,14 +570,94 @@
             "schema": {
               "type": "integer",
               "format": "int64",
+              "example": 123456,
               "readOnly": true
             },
             "description": "The ID of the user to look up"
+          },
+          {
+            "in": "query",
+            "name": "addExtra",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "example": true
+            },
+            "description": "Should extra details be reported"
           }
         ],
         "responses": {
           "200": {
-            "description": "Done/Success",
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "oneOf": [
+                    {
+                      "type": "string",
+                      "description": "A successful result"
+                    },
+                    {
+                      "example": "Some dynamic message like this.",
+                      "type": "string",
+                      "description": "Alternate success"
+                    },
+                    {
+                      "example": 93.45,
+                      "type": "number",
+                      "format": "double",
+                      "description": "Alternate success (2)"
+                    },
+                    {
+                      "example": {
+                        "weatherPerson": "Joaquin",
+                        "days": [
+                          {
+                            "tempCelsius": 21,
+                            "windSpeedMph": 392
+                          }
+                        ]
+                      },
+                      "type": "object",
+                      "properties": {
+                        "weatherPerson": {
+                          "example": "Joaquin",
+                          "type": "string"
+                        },
+                        "days": {
+                          "example": [
+                            {
+                              "tempCelsius": 21,
+                              "windSpeedMph": 392
+                            }
+                          ],
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "tempCelsius": {
+                                "example": 21,
+                                "type": "integer",
+                                "format": "int64"
+                              },
+                              "windSpeedMph": {
+                                "example": 392,
+                                "type": "integer",
+                                "format": "int64"
+                              }
+                            }
+                          }
+                        }
+                      },
+                      "description": "Another success (partial content)"
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "206": {
+            "description": "Done/Success (partial)",
             "content": {
               "text/html": {
                 "schema": {
@@ -478,38 +667,92 @@
               },
               "application/json": {
                 "schema": {
-                  "oneOf": [
-                    {
-                      "type": "number",
-                      "default": 123,
-                      "description": "The **123** result"
-                    },
-                    {
-                      "type": "object",
-                      "description": "Another success"
-                    },
-                    {
-                      "type": "object",
-                      "description": "Another success (2)"
-                    }
-                  ]
+                  "type": "number",
+                  "default": 123,
+                  "description": "The **123** result"
                 }
               }
             }
           },
           "404": {
-            "description": "No user with the specified ID was found in the database",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "description": "No user with the specified ID was found in the database"
-                }
-              }
-            }
+            "description": "No user with the specified ID was found in the database"
           },
           "500": {
             "description": "An unexpected error occurred"
+          }
+        }
+      }
+    },
+    "/actions2-rb": {
+      "post": {
+        "summary": "Friendly (RB)",
+        "tags": [
+          "Actions2 Group"
+        ],
+        "parameters": [
+          {
+            "in": "header",
+            "name": "dummyHeader",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "example": "why-not"
+            },
+            "description": "A value for the request header"
+          },
+          {
+            "in": "cookie",
+            "name": "dummyCookie",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "example": "why-not-indeed"
+            },
+            "description": "A cookie"
+          },
+          {
+            "in": "query",
+            "name": "verbose",
+            "required": false,
+            "schema": {
+              "type": "boolean"
+            },
+            "description": "Should we provide verbose output"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "A successful result"
+          },
+          "404": {
+            "description": "Resource not found"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        },
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "userId": {
+                    "type": "integer",
+                    "format": "int64",
+                    "example": 123456
+                  },
+                  "userName": {
+                    "type": "string",
+                    "example": "John Smith"
+                  },
+                  "addExtra": {
+                    "type": "boolean",
+                    "example": true
+                  }
+                }
+              }
+            }
           }
         }
       }
@@ -1214,7 +1457,7 @@
             "required": false,
             "schema": {
               "type": "string",
-              "example": "id,names,email,sex,ageLimit,pets,favouritePet,neighboursPets"
+              "example": "id,names,email,sex,ageLimit,advancedOptions,advancedOptionsAny,data,pets,favouritePet,neighboursPets,createdAt,updatedAt"
             },
             "description": "The attributes to include in the result, specified as a comma-delimited list. By default, all attributes are selected. Not valid for plural (“collection”) association attributes."
           },
@@ -1224,7 +1467,7 @@
             "required": false,
             "schema": {
               "type": "string",
-              "example": "id,names,email,sex,ageLimit,pets,favouritePet,neighboursPets"
+              "example": "id,names,email,sex,ageLimit,advancedOptions,advancedOptionsAny,data,pets,favouritePet,neighboursPets,createdAt,updatedAt"
             },
             "description": "The attributes to exclude from the result, specified as a comma-delimited list. Cannot be used in conjuction with `select`. Not valid for plural (“collection”) association attributes."
           },
@@ -1292,7 +1535,7 @@
             "required": false,
             "schema": {
               "type": "string",
-              "example": "id,names,email,sex,ageLimit,pets,favouritePet,neighboursPets"
+              "example": "id,names,email,sex,ageLimit,advancedOptions,advancedOptionsAny,data,pets,favouritePet,neighboursPets,createdAt,updatedAt"
             },
             "description": "The attributes to include in the result, specified as a comma-delimited list. By default, all attributes are selected. Not valid for plural (“collection”) association attributes."
           },
@@ -1302,7 +1545,7 @@
             "required": false,
             "schema": {
               "type": "string",
-              "example": "id,names,email,sex,ageLimit,pets,favouritePet,neighboursPets"
+              "example": "id,names,email,sex,ageLimit,advancedOptions,advancedOptionsAny,data,pets,favouritePet,neighboursPets,createdAt,updatedAt"
             },
             "description": "The attributes to exclude from the result, specified as a comma-delimited list. Cannot be used in conjuction with `select`. Not valid for plural (“collection”) association attributes."
           },
@@ -1329,15 +1572,7 @@
             }
           },
           "404": {
-            "description": "No user with the specified ID was found in the database (actions2 version)",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "description": "No user with the specified ID was found in the database (actions2 version)"
-                }
-              }
-            }
+            "description": "No user with the specified ID was found in the database (actions2 version)"
           },
           "500": {
             "description": "Internal server error"
@@ -1411,6 +1646,114 @@
           },
           {
             "in": "query",
+            "name": "advancedOptions",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "useDefaults": {
+                  "example": false,
+                  "type": "boolean"
+                },
+                "customName": {
+                  "example": "foobar",
+                  "type": "string"
+                }
+              },
+              "example": {
+                "useDefaults": false,
+                "customName": "foobar"
+              }
+            }
+          },
+          {
+            "in": "query",
+            "name": "advancedOptionsAny",
+            "schema": {
+              "example": {
+                "useDefaults": false,
+                "customName": "foobar again"
+              }
+            }
+          },
+          {
+            "in": "query",
+            "name": "data",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "lots": {
+                  "example": "lot",
+                  "type": "string"
+                },
+                "data": {
+                  "example": [
+                    3,
+                    4,
+                    5
+                  ],
+                  "type": "array",
+                  "items": {
+                    "type": "integer",
+                    "format": "int64"
+                  }
+                },
+                "more": {
+                  "example": [
+                    3.3,
+                    2.344
+                  ],
+                  "type": "array",
+                  "items": {
+                    "type": "number",
+                    "format": "double"
+                  }
+                },
+                "andMore": {
+                  "example": [
+                    "mixed",
+                    3,
+                    true
+                  ],
+                  "type": "array",
+                  "items": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "integer",
+                        "format": "int64"
+                      },
+                      {
+                        "type": "boolean"
+                      }
+                    ]
+                  }
+                }
+              },
+              "description": "Some custom JSON data",
+              "example": {
+                "lots": "lot",
+                "data": [
+                  3,
+                  4,
+                  5
+                ],
+                "more": [
+                  3.3,
+                  2.344
+                ],
+                "andMore": [
+                  "mixed",
+                  3,
+                  true
+                ]
+              }
+            },
+            "description": "Some custom JSON data"
+          },
+          {
+            "in": "query",
             "name": "pets",
             "schema": {
               "description": "Array of **pet**'s or array of FK's when creating / updating / not populated",
@@ -1445,6 +1788,26 @@
               }
             },
             "description": "Array of **pet**'s or array of FK's when creating / updating / not populated"
+          },
+          {
+            "in": "query",
+            "name": "createdAt",
+            "schema": {
+              "type": "string",
+              "format": "date-time",
+              "description": "Note Sails special attributes: autoCreatedAt"
+            },
+            "description": "Note Sails special attributes: autoCreatedAt"
+          },
+          {
+            "in": "query",
+            "name": "updatedAt",
+            "schema": {
+              "type": "string",
+              "format": "date-time",
+              "description": "Note Sails special attributes: autoUpdatedAt"
+            },
+            "description": "Note Sails special attributes: autoUpdatedAt"
           }
         ],
         "responses": {
@@ -1538,6 +1901,114 @@
           },
           {
             "in": "query",
+            "name": "advancedOptions",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "useDefaults": {
+                  "example": false,
+                  "type": "boolean"
+                },
+                "customName": {
+                  "example": "foobar",
+                  "type": "string"
+                }
+              },
+              "example": {
+                "useDefaults": false,
+                "customName": "foobar"
+              }
+            }
+          },
+          {
+            "in": "query",
+            "name": "advancedOptionsAny",
+            "schema": {
+              "example": {
+                "useDefaults": false,
+                "customName": "foobar again"
+              }
+            }
+          },
+          {
+            "in": "query",
+            "name": "data",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "lots": {
+                  "example": "lot",
+                  "type": "string"
+                },
+                "data": {
+                  "example": [
+                    3,
+                    4,
+                    5
+                  ],
+                  "type": "array",
+                  "items": {
+                    "type": "integer",
+                    "format": "int64"
+                  }
+                },
+                "more": {
+                  "example": [
+                    3.3,
+                    2.344
+                  ],
+                  "type": "array",
+                  "items": {
+                    "type": "number",
+                    "format": "double"
+                  }
+                },
+                "andMore": {
+                  "example": [
+                    "mixed",
+                    3,
+                    true
+                  ],
+                  "type": "array",
+                  "items": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "integer",
+                        "format": "int64"
+                      },
+                      {
+                        "type": "boolean"
+                      }
+                    ]
+                  }
+                }
+              },
+              "description": "Some custom JSON data",
+              "example": {
+                "lots": "lot",
+                "data": [
+                  3,
+                  4,
+                  5
+                ],
+                "more": [
+                  3.3,
+                  2.344
+                ],
+                "andMore": [
+                  "mixed",
+                  3,
+                  true
+                ]
+              }
+            },
+            "description": "Some custom JSON data"
+          },
+          {
+            "in": "query",
             "name": "pets",
             "schema": {
               "description": "Array of **pet**'s or array of FK's when creating / updating / not populated",
@@ -1572,6 +2043,26 @@
               }
             },
             "description": "Array of **pet**'s or array of FK's when creating / updating / not populated"
+          },
+          {
+            "in": "query",
+            "name": "createdAt",
+            "schema": {
+              "type": "string",
+              "format": "date-time",
+              "description": "Note Sails special attributes: autoCreatedAt"
+            },
+            "description": "Note Sails special attributes: autoCreatedAt"
+          },
+          {
+            "in": "query",
+            "name": "updatedAt",
+            "schema": {
+              "type": "string",
+              "format": "date-time",
+              "description": "Note Sails special attributes: autoUpdatedAt"
+            },
+            "description": "Note Sails special attributes: autoUpdatedAt"
           }
         ],
         "responses": {
@@ -2208,7 +2699,7 @@
             "required": false,
             "schema": {
               "type": "string",
-              "example": "id,names,email,sex,ageLimit,pets,favouritePet,neighboursPets"
+              "example": "id,names,email,sex,ageLimit,advancedOptions,advancedOptionsAny,data,pets,favouritePet,neighboursPets,createdAt,updatedAt"
             },
             "description": "The attributes to include in the result, specified as a comma-delimited list. By default, all attributes are selected. Not valid for plural (“collection”) association attributes."
           },
@@ -2218,7 +2709,7 @@
             "required": false,
             "schema": {
               "type": "string",
-              "example": "id,names,email,sex,ageLimit,pets,favouritePet,neighboursPets"
+              "example": "id,names,email,sex,ageLimit,advancedOptions,advancedOptionsAny,data,pets,favouritePet,neighboursPets,createdAt,updatedAt"
             },
             "description": "The attributes to exclude from the result, specified as a comma-delimited list. Cannot be used in conjuction with `select`. Not valid for plural (“collection”) association attributes."
           },
@@ -2245,15 +2736,7 @@
             }
           },
           "404": {
-            "description": "No user with the specified ID was found in the database (actions2 version)",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "description": "No user with the specified ID was found in the database (actions2 version)"
-                }
-              }
-            }
+            "description": "No user with the specified ID was found in the database (actions2 version)"
           },
           "500": {
             "description": "Internal server error"
@@ -2615,7 +3098,7 @@
             "required": false,
             "schema": {
               "type": "string",
-              "example": "id,names,email,sex,ageLimit,pets,favouritePet,neighboursPets"
+              "example": "id,names,email,sex,ageLimit,advancedOptions,advancedOptionsAny,data,pets,favouritePet,neighboursPets,createdAt,updatedAt"
             },
             "description": "The attributes to include in the result, specified as a comma-delimited list. By default, all attributes are selected. Not valid for plural (“collection”) association attributes."
           },
@@ -2625,7 +3108,7 @@
             "required": false,
             "schema": {
               "type": "string",
-              "example": "id,names,email,sex,ageLimit,pets,favouritePet,neighboursPets"
+              "example": "id,names,email,sex,ageLimit,advancedOptions,advancedOptionsAny,data,pets,favouritePet,neighboursPets,createdAt,updatedAt"
             },
             "description": "The attributes to exclude from the result, specified as a comma-delimited list. Cannot be used in conjuction with `select`. Not valid for plural (“collection”) association attributes."
           }
