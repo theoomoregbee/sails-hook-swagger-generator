@@ -92,7 +92,7 @@ export default async (sails: Sails.Sails, sailsRoutes: Array<Sails.Route>, conte
   mergeComponents(specifications.components!, /* routesJsDoc, */ models, modelsJsDoc, controllers, controllersJsDoc);
   mergeTags(specifications.tags!, /* routesJsDoc, */ models, modelsJsDoc, controllers, controllersJsDoc, defaultModelTags);
 
-  defaults(specifications.paths, generatePaths(routes, blueprintActionTemplates, theDefaults, specifications, models));
+  defaults(specifications.paths, generatePaths(routes, blueprintActionTemplates, theDefaults, specifications, models, sails));
 
   defaults(specifications.components!.parameters, blueprintParameterTemplates);
 

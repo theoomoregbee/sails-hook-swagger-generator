@@ -353,7 +353,7 @@ export const generateSchemas = (models: NameKeyMap<SwaggerSailsModel>): NameKeyM
  */
 export const generatePaths = (routes: SwaggerRouteInfo[], templates: BlueprintActionTemplates,
   defaultsValues: Defaults, specification: OpenApi.OpenApi,
-  models: NameKeyMap<SwaggerSailsModel>): OpenApi.Paths => {
+  models: NameKeyMap<SwaggerSailsModel>, sails: Sails.Sails): OpenApi.Paths => {
 
   const paths = {};
   const tags = specification.tags!;
@@ -431,6 +431,11 @@ export const generatePaths = (routes: SwaggerRouteInfo[], templates: BlueprintAc
           }
 
           if(_in === 'body') {
+
+            if(!['put', 'post', 'patch'].includes(route.verb)) {
+              sails.log.warn(`WARNING: sails-hook-swagger-generator: Route '${route.verb} ${route.path}' cannot contain 'requestBody'; ignoring input '${key} for generated Swagger`);
+              return;
+            }
 
             // add to request body if we can do so cleanly
             if(!pathEntry.requestBody) {
@@ -809,7 +814,6 @@ export const generatePaths = (routes: SwaggerRouteInfo[], templates: BlueprintAc
               },
             }
           });
-          console.log('YYY', pathEntry);
         },
 
         addResultOfModel: () => {

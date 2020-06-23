@@ -684,7 +684,7 @@
       }
     },
     "/actions2-rb": {
-      "get": {
+      "post": {
         "summary": "Friendly (RB)",
         "tags": [
           "Actions2 Group"

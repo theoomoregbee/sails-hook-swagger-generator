@@ -91,7 +91,7 @@ module.exports.routes = {
   'all /user/list3': 'user.list3',
 
   'get /actions2': 'subdir/actions2',
-  'get /actions2-rb': 'subdir/actions2-requestbody',
+  'post /actions2-rb': 'subdir/actions2-requestbody',
 
   // 'get /user/test/:phoneNumber': 'UserController.logout',
 
