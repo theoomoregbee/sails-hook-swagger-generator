@@ -228,6 +228,10 @@ above taking precedence over later.
    Swagger/OpenAPI **schema** associated with the input value. See example in
    [actions2.js](./api/controllers/subdir/actions2.js).
 5. Inputs may be excluded from the generated Swagger by setting `meta.swagger.exclude` to `true`.
+6. Inputs may specify *where* the input should be included within the generated Swagger using the key 
+   `meta.swagger.in`. The values `query`/`header`/`path`/`cookie` may be used to produce Swagger operation
+   parameters and the value `body` may be used to produce `requestBody` schema properties
+   (valid for PUT/POST/PATCH operations only).
 
 For example, for a route configured as:
 ```javascript
