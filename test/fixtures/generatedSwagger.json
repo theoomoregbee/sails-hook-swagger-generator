@@ -160,6 +160,18 @@
       }
     },
     "parameters": {
+      "ModelPKParam-user": {
+        "in": "path",
+        "name": "_id",
+        "required": true,
+        "schema": {
+          "type": "integer",
+          "format": "int64",
+          "uniqueItems": true,
+          "description": "Note Sails special attributes: autoIncrement"
+        },
+        "description": "The desired **User** record's primary key value"
+      },
       "ModelPKParam-pet": {
         "in": "path",
         "name": "_petID",
@@ -172,18 +184,6 @@
           "readOnly": true
         },
         "description": "The desired **Pet** record's primary key value"
-      },
-      "ModelPKParam-user": {
-        "in": "path",
-        "name": "_id",
-        "required": true,
-        "schema": {
-          "type": "integer",
-          "format": "int64",
-          "uniqueItems": true,
-          "description": "Note Sails special attributes: autoIncrement"
-        },
-        "description": "The desired **User** record's primary key value"
       },
       "AttributeFilterParam": {
         "in": "query",
@@ -276,7 +276,7 @@
     },
     "/user": {
       "post": {
-        "summary": "Create User",
+        "summary": "Create User (**)",
         "description": "Create a new **User** record.",
         "externalDocs": {
           "url": "https://somewhere.com/yep",
@@ -297,6 +297,9 @@
                 }
               }
             }
+          },
+          "400": {
+            "description": "Validation errors; details in JSON response"
           },
           "404": {
             "description": "Resource not found"
@@ -318,7 +321,7 @@
         }
       },
       "patch": {
-        "summary": "Create User",
+        "summary": "Create User (**)",
         "description": "Create a new **User** record.",
         "externalDocs": {
           "url": "https://somewhere.com/yep",
@@ -339,6 +342,9 @@
                 }
               }
             }
+          },
+          "400": {
+            "description": "Validation errors; details in JSON response"
           },
           "404": {
             "description": "Resource not found"
@@ -442,6 +448,11 @@
     },
     "/actions2": {
       "get": {
+        "summary": "Friendly",
+        "description": "Return a user list",
+        "tags": [
+          "Actions2 Group"
+        ],
         "parameters": [
           {
             "in": "query",
@@ -500,16 +511,16 @@
           "500": {
             "description": "An unexpected error occurred"
           }
-        },
-        "tags": [
-          "Actions2 Group"
-        ],
-        "description": "Return a user list",
-        "summary": "Friendly"
+        }
       }
     },
     "/twofind": {
       "get": {
+        "summary": "Example only",
+        "description": "You would not usually apply the same summary/description to all actions/paths :)",
+        "tags": [
+          "NomodelTwo"
+        ],
         "parameters": [],
         "responses": {
           "200": {
@@ -521,16 +532,16 @@
           "500": {
             "description": "Internal server error"
           }
-        },
-        "summary": "Example only",
-        "description": "You would not usually apply the same summary/description to all actions/paths :)",
-        "tags": [
-          "NomodelTwo"
-        ]
+        }
       }
     },
     "/twoclear": {
       "get": {
+        "summary": "Example only",
+        "description": "You would not usually apply the same summary/description to all actions/paths :)",
+        "tags": [
+          "NomodelTwo"
+        ],
         "parameters": [],
         "responses": {
           "200": {
@@ -542,24 +553,32 @@
           "500": {
             "description": "Internal server error"
           }
-        },
-        "summary": "Example only",
-        "description": "You would not usually apply the same summary/description to all actions/paths :)",
-        "tags": [
-          "NomodelTwo"
-        ]
+        }
       }
     },
     "/user/login": {
       "post": {
+        "summary": "Authentication",
+        "description": "This is for authentication of any user",
+        "externalDocs": {
+          "url": "https://somewhere.com/yep",
+          "description": "Refer to these docs for more info"
+        },
+        "tags": [
+          "User"
+        ],
         "parameters": [],
         "responses": {
           "200": {
             "description": "Success"
+          },
+          "404": {
+            "description": "Resource not found"
+          },
+          "500": {
+            "description": "Internal server error"
           }
         },
-        "summary": "Authentication",
-        "description": "This is for authentication of any user",
         "requestBody": {
           "content": {
             "application/json": {
@@ -580,14 +599,20 @@
               }
             }
           }
-        },
-        "tags": [
-          "User"
-        ]
+        }
       }
     },
     "/user/logout": {
       "get": {
+        "summary": "Perform Logout",
+        "description": "Logout of the application",
+        "externalDocs": {
+          "url": "https://somewhere.com/yep",
+          "description": "Refer to these docs for more info"
+        },
+        "tags": [
+          "Auth Mgt"
+        ],
         "parameters": [
           {
             "name": "example-only",
@@ -611,17 +636,27 @@
         "responses": {
           "200": {
             "description": "logout result"
+          },
+          "404": {
+            "description": "Resource not found"
+          },
+          "500": {
+            "description": "Internal server error"
           }
-        },
-        "summary": "Perform Logout",
-        "description": "Logout of the application",
-        "tags": [
-          "Auth Mgt"
-        ]
+        }
       }
     },
     "/user/list": {
       "get": {
+        "summary": "/user/list",
+        "description": "Return a user list",
+        "externalDocs": {
+          "url": "https://somewhere.com/yep",
+          "description": "Refer to these docs for more info"
+        },
+        "tags": [
+          "User List"
+        ],
         "parameters": [],
         "responses": {
           "200": {
@@ -633,16 +668,20 @@
           "500": {
             "description": "Internal server error"
           }
-        },
-        "tags": [
-          "User List"
-        ],
-        "description": "Return a user list",
-        "summary": "/user/list"
+        }
       }
     },
     "/user/list2": {
       "get": {
+        "summary": "/user/list2",
+        "description": "Return a user list (alternate)",
+        "externalDocs": {
+          "url": "https://somewhere.com/yep",
+          "description": "Refer to these docs for more info"
+        },
+        "tags": [
+          "User List"
+        ],
         "parameters": [],
         "responses": {
           "200": {
@@ -654,16 +693,19 @@
           "500": {
             "description": "Internal server error"
           }
-        },
-        "tags": [
-          "User List"
-        ],
-        "description": "Return a user list (alternate)",
-        "summary": "/user/list2"
+        }
       }
     },
     "/user/upload": {
       "get": {
+        "summary": "/user/upload",
+        "externalDocs": {
+          "url": "https://somewhere.com/yep",
+          "description": "Refer to these docs for more info"
+        },
+        "tags": [
+          "User"
+        ],
         "parameters": [
           {
             "in": "query",
@@ -678,26 +720,38 @@
         "responses": {
           "200": {
             "description": "Success"
+          },
+          "404": {
+            "description": "Resource not found"
+          },
+          "500": {
+            "description": "Internal server error"
           }
-        },
-        "summary": "/user/upload",
-        "tags": [
-          "User"
-        ]
+        }
       }
     },
     "/user/roles": {
       "put": {
+        "summary": "update user roles",
+        "externalDocs": {
+          "url": "https://somewhere.com/yep",
+          "description": "Refer to these docs for more info"
+        },
+        "tags": [
+          "User (Extra)"
+        ],
         "parameters": [],
         "responses": {
           "200": {
             "description": "Success"
+          },
+          "404": {
+            "description": "Resource not found"
+          },
+          "500": {
+            "description": "Internal server error"
           }
         },
-        "summary": "update user roles",
-        "tags": [
-          "User (Extra)"
-        ],
         "requestBody": {
           "content": {
             "application/json": {
@@ -721,6 +775,10 @@
     },
     "/nomodel/deep-url/more/find": {
       "get": {
+        "summary": "/nomodel/deep-url/more/find",
+        "tags": [
+          "No Model Example"
+        ],
         "parameters": [],
         "responses": {
           "200": {
@@ -732,15 +790,15 @@
           "500": {
             "description": "Internal server error"
           }
-        },
-        "tags": [
-          "No Model Example"
-        ],
-        "summary": "/nomodel/deep-url/more/find"
+        }
       }
     },
     "/nomodel/deep-url/more/clear": {
       "get": {
+        "summary": "/nomodel/deep-url/more/clear",
+        "tags": [
+          "No Model Example"
+        ],
         "parameters": [],
         "responses": {
           "200": {
@@ -752,15 +810,21 @@
           "500": {
             "description": "Internal server error"
           }
-        },
-        "tags": [
-          "No Model Example"
-        ],
-        "summary": "/nomodel/deep-url/more/clear"
+        }
       }
     },
     "/user/test/{phoneNumber}": {
       "get": {
+        "summary": "Phone No. Logout",
+        "description": "Alternate description (of no real significance)",
+        "externalDocs": {
+          "url": "https://somewhere.com/yep",
+          "description": "Refer to these docs for more info"
+        },
+        "operationId": "user/logout",
+        "tags": [
+          "Auth Mgt"
+        ],
         "parameters": [
           {
             "name": "example-only",
@@ -793,19 +857,31 @@
         "responses": {
           "200": {
             "description": "logout result"
+          },
+          "404": {
+            "description": "Resource not found"
+          },
+          "500": {
+            "description": "Internal server error"
           }
-        },
-        "summary": "Phone No. Logout",
-        "description": "Alternate description (of no real significance)",
-        "operationId": "user/logout",
-        "tags": [
-          "Auth Mgt"
-        ]
+        }
       }
     },
-    "/clients/{client_id}/user/{id}": {
+    "/clients/{client_id}/user/{_id}": {
       "delete": {
+        "summary": "Delete User (destroy)",
+        "description": "Delete the **User** record with the specified ID.",
+        "externalDocs": {
+          "url": "https://somewhere.com/yep",
+          "description": "Refer to these docs for more info"
+        },
+        "tags": [
+          "User"
+        ],
         "parameters": [
+          {
+            "$ref": "#/components/parameters/ModelPKParam-user"
+          },
           {
             "in": "path",
             "name": "client_id",
@@ -814,32 +890,26 @@
               "type": "string"
             },
             "description": "Route pattern variable `client_id`"
-          },
-          {
-            "in": "path",
-            "name": "id",
-            "required": true,
-            "schema": {
-              "type": "string"
-            },
-            "description": "Route pattern variable `id`"
           }
         ],
         "responses": {
           "200": {
-            "description": "The requested resource"
+            "description": "Responds with a JSON dictionary representing the destroyed **User** instance",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/user"
+                }
+              }
+            }
           },
           "404": {
-            "description": "Resource not found"
+            "description": "Cannot destroy, **User** record with specified ID **NOT** found"
           },
           "500": {
             "description": "Internal server error"
           }
-        },
-        "summary": "/clients/{client_id}/user/{id}",
-        "tags": [
-          "User"
-        ]
+        }
       }
     },
     "/pet/find": {
@@ -1062,6 +1132,9 @@
               }
             }
           },
+          "400": {
+            "description": "Validation errors; details in JSON response"
+          },
           "404": {
             "description": "Cannot update, **Pet** record with specified ID **NOT** found"
           },
@@ -1191,8 +1264,8 @@
     },
     "/user/find/{_id}": {
       "get": {
-        "summary": "Get User (find one) *",
-        "description": "_Alternate description_: Look up the **User** record with the specified ID.\n\n(\\*) Note that this is a [Sails blueprint shortcut route](https://sailsjs.com/documentation/concepts/blueprints/blueprint-routes#?shortcut-blueprint-routes) (recommended for **development-mode only**)",
+        "summary": "Get User (find one) (A2) *",
+        "description": "**Actions2** override of blueprint action: Look up the **User** record with the specified ID.\n\n(\\*) Note that this is a [Sails blueprint shortcut route](https://sailsjs.com/documentation/concepts/blueprints/blueprint-routes#?shortcut-blueprint-routes) (recommended for **development-mode only**)",
         "externalDocs": {
           "url": "https://somewhere.com/yep",
           "description": "Refer to these docs for more info"
@@ -1203,7 +1276,15 @@
         ],
         "parameters": [
           {
-            "$ref": "#/components/parameters/ModelPKParam-user"
+            "in": "path",
+            "name": "_id",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64",
+              "readOnly": true
+            },
+            "description": "The ID of the user to look up (actions2 version)"
           },
           {
             "in": "query",
@@ -1248,7 +1329,15 @@
             }
           },
           "404": {
-            "description": "Response denoting **User** record with specified ID **NOT** found"
+            "description": "No user with the specified ID was found in the database (actions2 version)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "description": "No user with the specified ID was found in the database (actions2 version)"
+                }
+              }
+            }
           },
           "500": {
             "description": "Internal server error"
@@ -1258,7 +1347,7 @@
     },
     "/user/create": {
       "get": {
-        "summary": "Create User *",
+        "summary": "Create User (**) *",
         "description": "Create a new **User** record.\n\n(\\*) Note that this is a [Sails blueprint shortcut route](https://sailsjs.com/documentation/concepts/blueprints/blueprint-routes#?shortcut-blueprint-routes) (recommended for **development-mode only**)",
         "externalDocs": {
           "url": "https://somewhere.com/yep",
@@ -1368,6 +1457,9 @@
                 }
               }
             }
+          },
+          "400": {
+            "description": "Validation errors; details in JSON response"
           },
           "404": {
             "description": "Resource not found"
@@ -1493,6 +1585,9 @@
               }
             }
           },
+          "400": {
+            "description": "Validation errors; details in JSON response"
+          },
           "404": {
             "description": "Cannot update, **User** record with specified ID **NOT** found"
           },
@@ -1511,8 +1606,7 @@
           "description": "Refer to these docs for more info"
         },
         "tags": [
-          "User (ORM duplicate)",
-          "User (ORM)"
+          "User"
         ],
         "parameters": [
           {
@@ -1939,6 +2033,9 @@
               }
             }
           },
+          "400": {
+            "description": "Validation errors; details in JSON response"
+          },
           "404": {
             "description": "Cannot update, **Pet** record with specified ID **NOT** found"
           },
@@ -2065,9 +2162,6 @@
                     "oneOf": [
                       {
                         "$ref": "#/components/schemas/user"
-                      },
-                      {
-                        "$ref": "#/components/schemas/user"
                       }
                     ]
                   }
@@ -2086,8 +2180,8 @@
     },
     "/user/{_id}": {
       "get": {
-        "summary": "Get User (find one)",
-        "description": "_Alternate description_: Look up the **User** record with the specified ID.",
+        "summary": "Get User (find one) (A2)",
+        "description": "**Actions2** override of blueprint action: Look up the **User** record with the specified ID.",
         "externalDocs": {
           "url": "https://somewhere.com/yep",
           "description": "Refer to these docs for more info"
@@ -2098,7 +2192,15 @@
         ],
         "parameters": [
           {
-            "$ref": "#/components/parameters/ModelPKParam-user"
+            "in": "path",
+            "name": "_id",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64",
+              "readOnly": true
+            },
+            "description": "The ID of the user to look up (actions2 version)"
           },
           {
             "in": "query",
@@ -2143,7 +2245,15 @@
             }
           },
           "404": {
-            "description": "Response denoting **User** record with specified ID **NOT** found"
+            "description": "No user with the specified ID was found in the database (actions2 version)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "description": "No user with the specified ID was found in the database (actions2 version)"
+                }
+              }
+            }
           },
           "500": {
             "description": "Internal server error"
@@ -2177,6 +2287,9 @@
               }
             }
           },
+          "400": {
+            "description": "Validation errors; details in JSON response"
+          },
           "404": {
             "description": "Cannot update, **User** record with specified ID **NOT** found"
           },
@@ -2204,8 +2317,7 @@
           "description": "Refer to these docs for more info"
         },
         "tags": [
-          "User (ORM duplicate)",
-          "User (ORM)"
+          "User"
         ],
         "parameters": [
           {
@@ -2527,12 +2639,6 @@
                   "type": "array",
                   "items": {
                     "oneOf": [
-                      {
-                        "$ref": "#/components/schemas/pet"
-                      },
-                      {
-                        "$ref": "#/components/schemas/pet"
-                      },
                       {
                         "$ref": "#/components/schemas/pet"
                       }

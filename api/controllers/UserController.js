@@ -7,6 +7,9 @@
 
 /**
  * @swagger
+ * /allActions:
+ *   tags:
+ *     - User
  * tags:
  *   name: Auth Mgt
  *   description: User management and login
@@ -73,6 +76,15 @@ module.exports = {
   list2: list2,
 
   // override User blueprint
+  /**
+   * @swagger
+   *
+   * /create:
+   *   summary: Create User (**)
+   *   tags:
+   *     - User (ORM)
+   *     - User (ORM duplicate)
+   */
   create: (req, res) => {
     return res.json({ in: 'create' });
   },

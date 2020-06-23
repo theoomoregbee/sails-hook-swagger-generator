@@ -187,10 +187,15 @@ export const parseBoundRoutes = (boundRoutes: Array<Sails.Route>,
    * - alias - for blueprint actions that directly involve an association, indicates the name of the associating attribute
    * - associations - copy of `sails.models[identity].associations`
    *
+   * Whilst automatic blueprints `options.model` is set (see above), Sails `parseBlueprintOptions()`
+   * (see below) uses the model identity parsed from the action 'user/find' --> model 'User', blueprint action 'find'.
+   * This rule (parsing from action) is used below.
+   *
    * We can pick up `swagger` objects from either custom routes or hook routes.
    *
    * @see https://sailsjs.com/documentation/reference/request-req/req-options
    * @see https://sailsjs.com/documentation/concepts/extending-sails/hooks/hook-specification/routes
+   * @see https://github.com/balderdashy/sails/blob/master/lib/hooks/blueprints/parse-blueprint-options.js#L58
    */
 
   /*
@@ -275,80 +280,66 @@ export const parseBoundRoutes = (boundRoutes: Array<Sails.Route>,
         return undefined;
       }
 
+      const middlewareType = _middlewareType === 'blueprint' ? MiddlewareType.BLUEPRINT : MiddlewareType.ACTION;
       const parsedPath = parsePath(route.path);
-      // let middlewareType, action, actionType;
 
-      if (_middlewareType === 'action' && routeOptions.action) {
-        const [modelIdentity, actionToCheck] = routeOptions.action.split('/');
-        if(modelIdentity === routeOptions.model) {
-          /* blueprint actions `{model}/{blueprintAction}` may be overriden by custom
-           * controller actions and thus annotated differently */
-          _middlewareType = 'blueprint';
-          mwtAction = actionToCheck;
-        }
-      }
-
-      if (_middlewareType === 'action') {
-
-        return {
-          middlewareType: MiddlewareType.ACTION,
-          verb: verb as HTTPMethodVerb,
-          ...parsedPath, // path & variables
-          action: routeOptions.action || mwtAction || '_unknown',
-          actionType: 'function',
-          swagger: routeOptions.swagger,
-        } as SwaggerRouteInfo;
-
-      } else { // _middlewareType === 'blueprint'
-
-        let actionType: ActionType = 'blueprint';
-
-        // test for shortcut blueprint routes
-        if (verb === 'get') {
-          // 1:prefix, 2:identity, 3:shortcut-action, 4:id
-          const re = /^(\/.+)?\/([^/]+)\/(find|create|update|destroy)(\/:id)?$/;
-
-          // 1:prefix, 2:identity, 3:id, 4:association, 5:shortcut-action, 6:id
-          const re2 = /^(\/.+)?\/([^/]+)\/(:parentid)\/([^/]+)\/(add|remove|replace)(\/:childid)?$/;
-
-          if (route.path.match(re) || route.path.match(re2)) {
-            actionType = 'shortcutBlueprint';
-          }
-        }
-
-        let modelIdentity = routeOptions.model;
-        if (!modelIdentity && routeOptions.action) {
-          // custom blueprint actions may not have model name explicitly specified --> extract from action
-          let actionToCheck: string;
-          [modelIdentity, actionToCheck] = routeOptions.action.split('/');
-          if(!actionToCheck) {
-            sails.log.warn(`WARNING: sails-hook-swagger-generator: Bound route '${route.verb} ${route.path}' has missing blueprint action '${routeOptions.action}' (ignoring)`);
-          } else if(mwtAction !== actionToCheck) {
-            sails.log.warn(`WARNING: sails-hook-swagger-generator: Bound route '${route.verb} ${route.path}' has blueprint action mismatch '${actionToCheck}' != '${routeOptions._middlewareType}' (ignoring)`);
-          }
-        }
+      // model-based (blueprint or other) actions (of the form `{modelIdentity}/{action}`)
+      const [modelIdentity, blueprintAction, ...tail] = routeOptions.action.split('/');
+      if (tail.length === 0) {
 
         const model = models[modelIdentity!];
-        if (!model) {
-          sails.log.warn(`WARNING: sails-hook-swagger-generator: Ignoring unregconised shadow/implicit route ${route.path} bound to middleware with unrecognised type '${routeOptions._middlewareType}' referencing unknown model ${modelIdentity}`);
-          return undefined;
+        if (model) { // blueprint / model-based action
+
+          if (middlewareType === MiddlewareType.BLUEPRINT && mwtAction !== blueprintAction) {
+            sails.log.warn(`WARNING: sails-hook-swagger-generator: Bound route '${route.verb} ${route.path}' has blueprint action mismatch '${blueprintAction}' != '${routeOptions._middlewareType}' (ignoring)`);
+          }
+
+          let isShortcutBlueprintRoute = false;
+
+          // test for shortcut blueprint routes
+          if (verb === 'get') {
+            // 1:prefix, 2:identity, 3:shortcut-action, 4:id
+            const re = /^(\/.+)?\/([^/]+)\/(find|create|update|destroy)(\/:id)?$/;
+
+            // 1:prefix, 2:identity, 3:id, 4:association, 5:shortcut-action, 6:id
+            const re2 = /^(\/.+)?\/([^/]+)\/(:parentid)\/([^/]+)\/(add|remove|replace)(\/:childid)?$/;
+
+            if (route.path.match(re) || route.path.match(re2)) {
+              // XXX TODO check identity & shortcut-action matches action
+              isShortcutBlueprintRoute = true;
+            }
+          }
+
+          return {
+            middlewareType,
+            verb: verb as HTTPMethodVerb,
+            ...parsedPath, // path & variables
+            action: routeOptions.action,
+            actionType: 'function',
+            model,
+            associationAliases: routeOptions.alias ? [routeOptions.alias] : [],
+            blueprintAction,
+            isShortcutBlueprintRoute,
+            swagger: routeOptions.swagger,
+          } as SwaggerRouteInfo;
+
         }
 
-        return {
-          middlewareType: MiddlewareType.BLUEPRINT,
-          verb: verb as HTTPMethodVerb,
-          ...parsedPath, // path & variables
-          action: mwtAction,
-          actionType,
-          model,
-          associationAliases: routeOptions.alias ? [routeOptions.alias] : [],
-          swagger: routeOptions.swagger,
-        } as SwaggerRouteInfo;
+      }
 
-    }
+      // fall-through --> non-model based action
 
-  })
-  .filter(route => !!route) as SwaggerRouteInfo[];
+      return {
+        middlewareType,
+        verb: verb as HTTPMethodVerb,
+        ...parsedPath, // path & variables
+        action: routeOptions.action || mwtAction || '_unknown',
+        actionType: 'function',
+        swagger: routeOptions.swagger,
+      } as SwaggerRouteInfo;
+
+    })
+    .filter(route => !!route) as SwaggerRouteInfo[];
 
 }
 

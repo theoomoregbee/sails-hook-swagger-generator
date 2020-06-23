@@ -201,7 +201,7 @@ describe ('Parsers', () => {
             expect(actual.map(r => r.path)).to.deep.equal(expectedPaths);
             expect(actual.every(route => {
               if(route.middlewareType === MiddlewareType.BLUEPRINT) {
-                return blueprintActions.includes(route.action as BluePrintAction);
+                return blueprintActions.includes(route.blueprintAction as BluePrintAction);
               } else {
                 return route.middlewareType === MiddlewareType.ACTION;
               }
@@ -213,7 +213,7 @@ describe ('Parsers', () => {
             const actual = parseBoundRoutes(boundRoutes as unknown as Sails.Route[], parsedModels, sails);
             const expectedPaths = [ '/user', '/user/:id', '/user/:id' ];
             expect(actual.filter(route => route.middlewareType == MiddlewareType.BLUEPRINT && !!route.model).map(r => r.path), 'should return model for all blueprint routes').to.deep.equal(expectedPaths);
-            const updateUserRoute = actual.find(route => route.action === 'update');
+            const updateUserRoute = actual.find(route => route.blueprintAction === 'update');
             expect(!!updateUserRoute?.model, 'should parse blueprint routes and auto add model to routes without model (based on action)').to.be.true;
         })
 

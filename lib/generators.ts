@@ -1,6 +1,6 @@
-import { SwaggerSailsModel, NameKeyMap, SwaggerRouteInfo, BlueprintActionTemplates, Defaults, MiddlewareType, Action2Response } from './interfaces';
+import { SwaggerSailsModel, NameKeyMap, SwaggerRouteInfo, BlueprintActionTemplates, Defaults, Action2Response } from './interfaces';
 import { Reference, Tag } from 'swagger-schema-official';
-import { swaggerTypes, sailsAttributePropertiesMap, validationsMap, actions2Responses } from './type-formatter';
+import { swaggerTypes, sailsAttributePropertiesMap, validationsMap, actions2Responses, blueprintParameterTemplates } from './type-formatter';
 import assign from 'lodash/assign';
 import defaults from 'lodash/defaults';
 import mapKeys from 'lodash/mapKeys';
@@ -11,7 +11,7 @@ import isFunction from 'lodash/isFunction';
 import forEach from 'lodash/forEach';
 import { OpenApi } from '../types/openapi';
 import set from 'lodash/set';
-import { map, omit, isEqual, reduce } from 'lodash';
+import { map, omit, isEqual, reduce, uniq } from 'lodash';
 import { attributeValidations, resolveRef, unrollSchema } from './utils';
 
 
@@ -366,59 +366,216 @@ export const generatePaths = (routes: SwaggerRouteInfo[], templates: BlueprintAc
       return;
     }
 
-    let pathEntry: OpenApi.Operation;
+    /* overwrite: summary, description, externalDocs, operationId, tags, requestBody, servers, security
+     * merge: parameters (by in+name), responses (by statusCode) */
+    const pathEntry: OpenApi.Operation = {
+      summary: undefined,
+      description: undefined,
+      externalDocs: undefined,
+      operationId: undefined,
+      tags: undefined,
+      parameters: [],
+      responses: {},
+      ...cloneDeep(omit(route.swagger || {}, 'exclude')),
+    };
 
+    const resolveParameterRef = (p: OpenApi.Parameter | Reference): OpenApi.Parameter | Reference => {
+      const specWithDefaultParametersToBeMerged = {
+        components: { parameters: blueprintParameterTemplates }
+      } as OpenApi.OpenApi;
+      // resolve first with current spec, then try template params to be added later
+      return (resolveRef(specification, p) || resolveRef(specWithDefaultParametersToBeMerged, p)) as OpenApi.Parameter | Reference;
+    };
     const isParam = (inType: string, name: string): boolean => {
       return !!pathEntry.parameters
-        .map(parameter => resolveRef(specification, parameter) as OpenApi.Parameter)
+        .map(parameter => resolveParameterRef(parameter))
         .find(parameter => parameter && 'in' in parameter && parameter.in == inType && parameter.name == name);
-    }
+    };
+    const addParamIfDne = (p: OpenApi.Parameter | Reference) => {
+      const resolved = resolveParameterRef(p);
+      if (resolved && 'in' in resolved) {
+        if (!isParam(resolved.in, resolved.name)) {
+          pathEntry.parameters.push(p);
+        }
+      }
+    };
 
-    if (route.middlewareType === MiddlewareType.BLUEPRINT && route.model) {
+    if (route.actionType === 'actions2') {
+
+      // note: check before blueprint template as these may override template for specific action(s)
+
+      const patternVariables = route.variables || [];
+      if (route.actions2Machine?.inputs) {
+        forEach(route.actions2Machine.inputs, (value, key) => {
+          if(value.meta?.swagger?.exclude === true) {
+            return;
+          }
+          const _in = patternVariables.indexOf(key) >= 0 ? 'path' : 'query';
+          if(isParam(_in, key)) {
+            return;
+          }
+          const { description, ..._attribute } = value;
+          const attribute = {
+            ...omit(_attribute, attributeValidations),
+            validations: pick(_attribute, attributeValidations),
+
+          } as Sails.AttributeDefinition;
+          pathEntry.parameters.push({
+            in: _in,
+            name: key,
+            required: value.required || false,
+            schema: generateAttributeSchema(attribute),
+            description
+          })
+        })
+      }
+
+      if (route.actions2Machine?.exits) {
+        const exitResponses: NameKeyMap<OpenApi.Response> = {};
+
+        // actions2 may specify more than one 'exit' per 'statusCode' --> use oneOf (and attempt to merge)
+        forEach(route.actions2Machine.exits, (exit, exitName) => {
+
+          if(exit.meta?.swagger?.exclude === true) {
+            return;
+          }
+
+          let { statusCode, description } = actions2Responses[exitName as keyof Action2Response] || actions2Responses.success;
+          statusCode = exit.statusCode || statusCode;
+          description = exit.description || description;
+
+          // XXX TODO review support for responseType, viewTemplatePath, outputExample
+          // XXX TODO use deriveJsonSwaggerTypeFromExample() for 'content' otherwise don't use
+
+          if (exitResponses[statusCode]) {
+
+            // this statusCode already exists --> will contain 'oneOf' so add
+            const arr = (exitResponses[statusCode].content!['application/json'].schema as OpenApi.UpdatedSchema)!.oneOf;
+            arr!.push({ type: 'object', description: description });
+
+          } else if(pathEntry.responses[statusCode]) {
+
+            // if not exists, check for response defined in source swagger and merge/massage to suit 'application/json' oneOf
+            const r = cloneDeep(pathEntry.responses[statusCode]);
+            if(!r.content) r.content = {};
+            if(!r.content['application/json']) r.content['application/json'] = {};
+            if(r.content['application/json'].schema) {
+              if (!(r.content['application/json'].schema as OpenApi.UpdatedSchema).oneOf) {
+                const s = r.content['application/json'].schema;
+                r.content['application/json'].schema = { oneOf: [s] };
+              }
+            } else {
+              r.content['application/json'].schema = { oneOf: [] };
+            }
+
+            // now add this exit to the merged/massaged response
+            const arr = (r.content!['application/json'].schema as OpenApi.UpdatedSchema)!.oneOf;
+            arr!.push({ type: 'object', description: description });
+            exitResponses[statusCode] = r;
+
+          } else {
+
+            // dne, so add
+            exitResponses[statusCode] = {
+              description: description,
+              content: {
+                'application/json': {
+                  schema: { oneOf: [{ type: 'object', description: description }] }
+                }
+              }
+            };
+
+          }
+        });
+
+        // remove oneOf for single entries
+        forEach(exitResponses, resp => {
+          if ((resp.content?.['application/json'].schema as OpenApi.UpdatedSchema)?.oneOf) {
+            const arr = (resp.content!['application/json'].schema as OpenApi.UpdatedSchema)!.oneOf;
+            if (arr!.length === 1) {
+              resp.content!['application/json'].schema = arr![0];
+            }
+          }
+        });
+
+        pathEntry.responses = {
+          ...pathEntry.responses,
+          ...exitResponses,
+        }
+        forEach(pathEntry.responses, (resp, statusCode) => { // ensure description
+          if (!resp.description) resp.description =  exitResponses[statusCode]?.description || '-';
+        });
+      }
+
+      // merge actions2 summary and description
+      defaults(
+        pathEntry,
+        {
+          summary: route.actions2Machine?.friendlyName || undefined,
+          description: route.actions2Machine?.description || undefined,
+        }
+      );
+
+    } // of if(actions2)
+
+    // handle blueprint actions and related documentation (from model and blueprint template)
+    if (route.model && route.blueprintAction) {
 
       if (route.model.swagger?.modelSchema?.exclude === true
-        || route.model.swagger.actions?.[route.action]?.exclude === true) {
+        || route.model.swagger.actions?.[route.blueprintAction]?.exclude === true) {
         return;
       }
 
-      const template = templates[route.action as keyof BlueprintActionTemplates] || {};
+      const template = templates[route.blueprintAction as keyof BlueprintActionTemplates] || {};
 
-      const subst = (str: string) => str ? str.replace('{globalId}', route.model!.globalId) : '';
+      const subst = (str: string) => str ? str.replace('{globalId}', route.model!.globalId) : undefined;
 
-      // handle special case of PK parameter
-      const parameters = [...(template.parameters || [])]
-        .map(parameter => {
-          if (parameter === 'primaryKeyPathParameter') {
-            const primaryKey = route.model!.primaryKey;
-            const attributeInfo = route.model!.attributes[primaryKey];
-            const pname = 'ModelPKParam-' + route.model!.identity;
-            if (components.parameters && !components.parameters[pname]) {
-              components.parameters[pname] = {
-                in: 'path',
-                name: '_' + primaryKey, // note '_' as per transformSailsPathsToSwaggerPaths()
-                required: true,
-                schema: generateAttributeSchema(attributeInfo),
-                description: subst('The desired **{globalId}** record\'s primary key value'),
-              };
-            }
-            return { $ref: '#/components/parameters/' + pname };
+      /* overwrite: summary, description, externalDocs, operationId, tags, requestBody, servers, security
+       * merge: parameters (by in+name), responses (by statusCode) */
+      defaults(
+        pathEntry,
+        {
+          summary: subst(template.summary),
+          description: subst(template.description),
+          externalDocs: template.externalDocs || undefined,
+          tags: route.model.swagger.modelSchema?.tags || route.model.swagger.actions?.allactions?.tags || [route.model.globalId],
+          ...cloneDeep(omit({
+            ...route.model.swagger.actions?.allactions || {},
+            ...route.model.swagger.actions?.[route.blueprintAction] || {},
+          }, 'exclude')),
+        }
+      );
+
+      // merge parameters from model actions and template (in that order)
+      (route.model.swagger.actions?.[route.blueprintAction]?.parameters || []).map(p => addParamIfDne(p));
+      (route.model.swagger.actions?.allactions?.parameters || []).map(p => addParamIfDne(p));
+
+      (template.parameters || []).map(parameter => {
+        // handle special case of PK parameter
+        if (parameter === 'primaryKeyPathParameter') {
+          const primaryKey = route.model!.primaryKey;
+          const attributeInfo = route.model!.attributes[primaryKey];
+          const pname = 'ModelPKParam-' + route.model!.identity;
+          if (components.parameters && !components.parameters[pname]) {
+            components.parameters[pname] = {
+              in: 'path',
+              name: '_' + primaryKey, // note '_' as per transformSailsPathsToSwaggerPaths()
+              required: true,
+              schema: generateAttributeSchema(attributeInfo),
+              description: subst('The desired **{globalId}** record\'s primary key value'),
+            };
           }
-          return parameter;
-        }) as Array<OpenApi.Parameter>;
+          parameter = { $ref: '#/components/parameters/' + pname };
+        }
+        addParamIfDne(parameter);
+      });
 
-      pathEntry = {
-        summary: subst(template.summary),
-        description: subst(template.description),
-        externalDocs: template.externalDocs || undefined,
-        tags: route.swagger?.tags || route.model.swagger.modelSchema?.tags || route.model.swagger.actions?.allactions?.tags || [route.model.globalId],
-        parameters,
-        responses: cloneDeep(defaultsValues.responses || {}),
-        ...cloneDeep(omit({
-          ...route.model.swagger.actions?.allactions || {},
-          ...route.model.swagger.actions?.[route.action] || {},
-        }, 'exclude')),
-        ...cloneDeep(omit(route.swagger || {}, 'exclude')),
-      };
+      // merge responses from model actions
+      defaults(
+        pathEntry.responses,
+        (route.model.swagger.actions?.[route.blueprintAction]?.responses || {}),
+        (route.model.swagger.actions?.allactions?.responses || {}),
+      );
 
       const modifiers = {
 
@@ -479,7 +636,7 @@ export const generatePaths = (routes: SwaggerRouteInfo[], templates: BlueprintAc
         },
 
         addModelBodyParam: () => {
-          if(route.actionType === 'shortcutBlueprint') {
+          if(route.isShortcutBlueprintRoute) {
             const schema = specification!.components!.schemas?.[route.model!.identity];
             if (schema) {
               const resolvedSchema = unrollSchema(specification, schema);
@@ -493,7 +650,7 @@ export const generatePaths = (routes: SwaggerRouteInfo[], templates: BlueprintAc
           } else {
             if (pathEntry.requestBody) return;
             pathEntry.requestBody = {
-              description: subst('JSON dictionary representing the {globalId} instance to create.'),
+              description: subst('JSON dictionary representing the {globalId} instance to create.'), // XXX TODO Incorporate model description?
               required: true,
               content: {
                 'application/json': {
@@ -505,7 +662,7 @@ export const generatePaths = (routes: SwaggerRouteInfo[], templates: BlueprintAc
         },
 
         addModelBodyParamUpdate: () => {
-          if (route.actionType === 'shortcutBlueprint') {
+          if (route.isShortcutBlueprintRoute) {
             const schema = specification!.components!.schemas?.[route.model!.identity+'-without-required-constraint'];
             if (schema) {
               const resolvedSchema = resolveRef(specification, schema);
@@ -519,7 +676,7 @@ export const generatePaths = (routes: SwaggerRouteInfo[], templates: BlueprintAc
           } else {
             if (pathEntry.requestBody) return;
             pathEntry.requestBody = {
-              description: subst('JSON dictionary representing the {globalId} instance to update.'),
+              description: subst('JSON dictionary representing the {globalId} instance to update.'), // XXX TODO Incorporate model description?
               required: true,
               content: {
                 'application/json': {
@@ -531,16 +688,18 @@ export const generatePaths = (routes: SwaggerRouteInfo[], templates: BlueprintAc
         },
 
         addResultOfArrayOfModels: () => {
-          assign(pathEntry.responses['200'], {
-            description: subst(template.resultDescription),
-            content: {
-              'application/json': {
-                schema: {
-                  type: 'array',
-                  items: { '$ref': '#/components/schemas/' + route.model!.identity },
+          defaults(pathEntry.responses, {
+            '200': {
+              description: subst(template.resultDescription || 'Array of **{globalId}** records'),
+              content: {
+                'application/json': {
+                  schema: {
+                    type: 'array',
+                    items: { '$ref': '#/components/schemas/' + route.model!.identity },
+                  },
                 },
               },
-            },
+            }
           });
         },
 
@@ -577,49 +736,53 @@ export const generatePaths = (routes: SwaggerRouteInfo[], templates: BlueprintAc
             const assoc = associations.find(_assoc => _assoc.alias == a);
             return assoc ? (assoc.collection || assoc.model) : a;
           });
-          assign(pathEntry.responses['200'], {
-            description: subst(template.resultDescription),
-            content: {
-              'application/json': {
-                schema: {
-                  type: 'array',
-                  // items: { type: 'any' },
-                  items: {
-                    oneOf: models.map(model => {
-                      return { '$ref': '#/components/schemas/' + model };
-                    }),
+          defaults(pathEntry.responses, {
+            '200': {
+              description: subst(template.resultDescription),
+              content: {
+                'application/json': {
+                  schema: {
+                    type: 'array',
+                    // items: { type: 'any' },
+                    items: {
+                      oneOf: uniq(models).map(model => {
+                        return { '$ref': '#/components/schemas/' + model };
+                      }),
+                    },
                   },
                 },
               },
-            },
+            }
           });
         },
 
         addResultOfModel: () => {
-          assign(pathEntry.responses['200'], {
-            description: subst(template.resultDescription),
-            content: {
-              'application/json': {
-                schema: { '$ref': '#/components/schemas/' + route.model!.identity },
+          defaults(pathEntry.responses, {
+            '200': {
+              description: subst(template.resultDescription || '**{globalId}** record'),
+              content: {
+                'application/json': {
+                  schema: { '$ref': '#/components/schemas/' + route.model!.identity },
+                },
               },
-            },
+            }
           });
         },
 
         addResultNotFound: () => {
-          assign(pathEntry.responses['404'], {
-            description: subst(template.notFoundDescription || 'Not found'),
+          defaults(pathEntry.responses, {
+            '404': { description: subst(template.notFoundDescription || 'Not found'), }
           });
         },
 
         addResultValidationError: () => {
-          assign(pathEntry.responses['400'], {
-            description: subst('Validation errors; details in JSON response'),
+          defaults(pathEntry.responses, {
+            '400': { description: subst('Validation errors; details in JSON response'), }
           });
         },
 
         addFksBodyParam: () => {
-          if(route.actionType === 'shortcutBlueprint') {
+          if(route.isShortcutBlueprintRoute) {
             generateModelAssociationFKAttributeParameters(route.model!, route.associationAliases, models).map(p => {
               if(!route.associationAliases || route.associationAliases.indexOf(p.name) < 0) return;
               if (isParam('query', p.name)) return;
@@ -645,9 +808,9 @@ export const generatePaths = (routes: SwaggerRouteInfo[], templates: BlueprintAc
         },
 
         addShortCutBlueprintRouteNote: () => {
-          if(route.actionType !== 'shortcutBlueprint') { return; }
+          if(!route.isShortcutBlueprintRoute) { return; }
           pathEntry.summary += ' *';
-          if(route.action === 'replace') {
+          if(route.blueprintAction === 'replace') {
             pathEntry.description += `\n\nOnly one of the query parameters, that matches the **association** path parameter, should be specified.`;
           }
           pathEntry.description += `\n\n(\\*) Note that this is a`
@@ -663,151 +826,25 @@ export const generatePaths = (routes: SwaggerRouteInfo[], templates: BlueprintAc
         else modifiers[modifier](); // standard modifier
       });
 
-      defaults(pathEntry.responses, {
-        '500': {
-          description: 'Internal server error',
-        }
-      });
+    } // of if (route.model && route.blueprintAction)
 
-    } else { // otherwise action
-
-      pathEntry = {
-        parameters: [],
-        responses: cloneDeep(defaultsValues.responses || {}),
-        ...cloneDeep(omit(route.swagger || {}, 'exclude')),
+    // final populate noting others above
+    defaults(
+      pathEntry,
+      {
+        summary: route.path || '',
+        tags: [route.actions2Machine?.friendlyName || route.defaultTagName],
       }
+    );
 
-      if (route.actionType === 'actions2') {
+    defaults(
+      pathEntry.responses,
+      defaultsValues.responses,
+      { '500': { description: 'Internal server error' } },
+    );
 
-        const patternVariables = route.variables || [];
-        if (route.actions2Machine?.inputs) {
-          forEach(route.actions2Machine.inputs, (value, key) => {
-            if(value.meta?.swagger?.exclude === true) {
-              return;
-            }
-            const _in = patternVariables.indexOf(key) >= 0 ? 'path' : 'query';
-            const isExisting = pathEntry.parameters.find(p => 'in' in p && p.in === _in && p.name === key)
-            if (isExisting) {
-              return
-            }
-            const { description, ..._attribute } = value;
-            const attribute = {
-              ...omit(_attribute, attributeValidations),
-              validations: pick(_attribute, attributeValidations),
-
-            } as Sails.AttributeDefinition;
-            pathEntry.parameters.push({
-              in: _in,
-              name: key,
-              required: value.required || false,
-              schema: generateAttributeSchema(attribute),
-              description
-            })
-          })
-        }
-
-        if (route.actions2Machine?.exits) {
-          const exitResponses: NameKeyMap<OpenApi.Response> = {};
-
-          // actions2 may specify more than one 'exit' per 'statusCode' --> use oneOf (and attempt to merge)
-          forEach(route.actions2Machine.exits, (exit, exitName) => {
-
-            if(exit.meta?.swagger?.exclude === true) {
-              return;
-            }
-
-            let { statusCode, description } = actions2Responses[exitName as keyof Action2Response] || actions2Responses.success;
-            statusCode = exit.statusCode || statusCode;
-            description = exit.description || description;
-
-            // XXX TODO review support for responseType, viewTemplatePath, outputExample
-            // XXX TODO use deriveJsonSwaggerTypeFromExample() for 'content' otherwise don't use
-
-            if (exitResponses[statusCode]) {
-
-              // this statusCode already exists --> will contain 'oneOf' so add
-              const arr = (exitResponses[statusCode].content!['application/json'].schema as OpenApi.UpdatedSchema)!.oneOf;
-              arr!.push({ type: 'object', description: description });
-
-            } else if(pathEntry.responses[statusCode]) {
-
-              // if not exists, check for response defined in source swagger and merge/massage to suit 'application/json' oneOf
-              const r = cloneDeep(pathEntry.responses[statusCode]);
-              if(!r.content) r.content = {};
-              if(!r.content['application/json']) r.content['application/json'] = {};
-              if(r.content['application/json'].schema) {
-                if (!(r.content['application/json'].schema as OpenApi.UpdatedSchema).oneOf) {
-                  const s = r.content['application/json'].schema;
-                  r.content['application/json'].schema = { oneOf: [s] };
-                }
-              } else {
-                r.content['application/json'].schema = { oneOf: [] };
-              }
-
-              // now add this exit to the merged/massaged response
-              const arr = (r.content!['application/json'].schema as OpenApi.UpdatedSchema)!.oneOf;
-              arr!.push({ type: 'object', description: description });
-              exitResponses[statusCode] = r;
-
-            } else {
-
-              // dne, so add
-              exitResponses[statusCode] = {
-                description: description,
-                content: {
-                  'application/json': {
-                    schema: { oneOf: [{ type: 'object', description: description }] }
-                  }
-                }
-              };
-
-            }
-          });
-
-          // remove oneOf for single entries
-          forEach(exitResponses, resp => {
-            if ((resp.content?.['application/json'].schema as OpenApi.UpdatedSchema)?.oneOf) {
-              const arr = (resp.content!['application/json'].schema as OpenApi.UpdatedSchema)!.oneOf;
-              if (arr!.length === 1) {
-                resp.content!['application/json'].schema = arr![0];
-              }
-            }
-          });
-
-          pathEntry.responses = {
-            ...pathEntry.responses,
-            ...exitResponses,
-          }
-          forEach(pathEntry.responses, (resp, statusCode) => { // ensure description
-            if (!resp.description) resp.description =  exitResponses[statusCode]?.description || '-';
-          });
-        }
-
-        // actions2 summary and description
-        defaults(
-          pathEntry,
-          {
-            summary: route.actions2Machine?.friendlyName || route.path || '',
-            description: route.actions2Machine?.description || undefined,
-            tags: route.swagger?.tags || [route.actions2Machine?.friendlyName || route.defaultTagName],
-          }
-        );
-
-      } // of if(actions2)
-
-      // final populate noting others above
-      defaults(
-        pathEntry,
-        {
-          summary: route.path || '',
-          tags: route.swagger?.tags || [route.defaultTagName],
-        }
-      );
-
-      // catch the case where defaultTagName not defined
-      if(isEqual(pathEntry.tags, [undefined])) pathEntry.tags = [];
-
-    }
+    // catch the case where defaultTagName not defined
+    if (isEqual(pathEntry.tags, [undefined])) pathEntry.tags = [];
 
     if (route.variables) {
       // now add patternVariables that don't already exist

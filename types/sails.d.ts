@@ -118,7 +118,7 @@ declare namespace Sails {
     export interface AttributeDefinition {
 
       // basic semantics
-      type: AttributeType;
+      type?: AttributeType;
       required?: boolean;
       defaultsTo?: any;
       allowNull?: boolean;

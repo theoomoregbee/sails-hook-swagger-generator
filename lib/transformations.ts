@@ -1,4 +1,4 @@
-import { NameKeyMap, SwaggerSailsModel, SwaggerModelAttribute, SwaggerSailsControllers, SwaggerControllerAttribute, SwaggerRouteInfo, BluePrintAction, MiddlewareType, SwaggerActionAttribute } from "./interfaces";
+import { NameKeyMap, SwaggerSailsModel, SwaggerModelAttribute, SwaggerSailsControllers, SwaggerControllerAttribute, SwaggerRouteInfo, BluePrintAction, SwaggerActionAttribute, MiddlewareType } from "./interfaces";
 import { forEach, defaults, cloneDeep, groupBy, mapValues, map } from "lodash";
 import { Tag } from "swagger-schema-official";
 import { OpenApi } from "../types/openapi";
@@ -84,7 +84,7 @@ export const transformSailsPathsToSwaggerPaths = (routes: SwaggerRouteInfo[]): v
   // step 1: filter to include path matched blueprint actions with a single association alias defined
   const routesToBeAggregated = boundRoutes.map(route => {
 
-    if (route.middlewareType === MiddlewareType.BLUEPRINT && actions.indexOf(route.action as BluePrintAction) >= 0
+    if (route.blueprintAction && actions.indexOf(route.blueprintAction as BluePrintAction) >= 0
       && route.associationAliases && route.associationAliases.length === 1) {
       const match = route.path.match(re);
       if (match && route.associationAliases[0]===match[2]) {
@@ -99,7 +99,7 @@ export const transformSailsPathsToSwaggerPaths = (routes: SwaggerRouteInfo[]): v
   const groupedByVerb = groupBy(routesToBeAggregated, r => r.route.verb);
   const thenByPathPrefix = mapValues(groupedByVerb, verbGroup => groupBy(verbGroup, r => r.match[1]));
   const thenByModelIdentity = mapValues(thenByPathPrefix, verbGroup => mapValues(verbGroup, prefixGroup => groupBy(prefixGroup, r => r.route.model!.identity)));
-  const thenByAction = mapValues(thenByModelIdentity, verbGroup => mapValues(verbGroup, prefixGroup => mapValues(prefixGroup, modelGroup => groupBy(modelGroup, r => r.route.action))));
+  const thenByAction = mapValues(thenByModelIdentity, verbGroup => mapValues(verbGroup, prefixGroup => mapValues(prefixGroup, modelGroup => groupBy(modelGroup, r => r.route.blueprintAction))));
 
   // const example = {
   //   get: { // <-- verb groups
@@ -269,10 +269,6 @@ export const mergeControllerSwaggerIntoRouteInfo = (sails: Sails.Sails, routes: 
 
   routes.map(route => {
 
-    if(route.middlewareType !== MiddlewareType.ACTION) {
-      return;
-    }
-
     const mergeIntoDest = (source: SwaggerActionAttribute | undefined) => {
       if(!source) { return; }
       if(!route.swagger) {
@@ -328,7 +324,9 @@ export const mergeControllerSwaggerIntoRouteInfo = (sails: Sails.Sails, routes: 
       }
 
     } else {
-      sails.log.error(`ERROR: sails-hook-swagger-generator: Error resolving/loading controller action '${route.action}' source file`);
+      if(route.middlewareType === MiddlewareType.ACTION) {
+        sails.log.error(`ERROR: sails-hook-swagger-generator: Error resolving/loading controller action '${route.action}' source file`);
+      }
     }
 
   });

@@ -47,12 +47,6 @@ module.exports.routes = {
    *                                                                          *
    ***************************************************************************/
 
-  /** @swagger
-   * /clients/:client_id/user/:id:
-   *   delete:
-   *     summary: Client Op
-   *     description: This is not really useful - example only :)
-   */
   'delete /clients/:client_id/user/:id': 'UserController.destroy',
 
   'POST /user': {
@@ -62,7 +56,7 @@ module.exports.routes = {
   },
 
   'patch /user': {
-    model: 'user',
+    // model: 'user', // can be specified (consistent with default blueprints) but not necessary
     action: 'user/create',
   },
 

@@ -1,4 +1,6 @@
 import { BlueprintActionTemplates, Modifiers, Action2Response, Defaults } from './interfaces';
+import { OpenApi } from '../types/openapi';
+import { Reference } from 'swagger-schema-official';
 
 /* eslint-disable @typescript-eslint/camelcase */
 /**
@@ -205,7 +207,7 @@ export const blueprintActionTemplates: BlueprintActionTemplates = {
 /**
  * Defines standard parameters for generated Swagger for each Sails blueprint action routes.
  */
-export const blueprintParameterTemplates = {
+export const blueprintParameterTemplates: Record<string, OpenApi.Parameter | Reference> = {
   AttributeFilterParam: {
     in: 'query',
     name: '_*_',
