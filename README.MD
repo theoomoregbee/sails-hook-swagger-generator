@@ -40,6 +40,10 @@ By default, the Swagger Generator Sails Hook generates:
    for custom routes without additional information being provided - see below).
 1. Creation of default tags for paths based upon Sails Model and Controller `globalId`'s.
 
+## Use with [Swagger UI](https://github.com/swagger-api/swagger-ui)
+
+See [#28](https://github.com/theoomoregbee/sails-hook-swagger-generator/issues/28) 
+
 ## Adding/Customising Generated Output
 
 Documentation detail and customisation of most aspects of the generated Swagger can be achieved by adding:
