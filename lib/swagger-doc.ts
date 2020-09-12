@@ -96,7 +96,9 @@ export default async (sails: Sails.Sails, sailsRoutes: Array<Sails.Route>, conte
 
   defaults(specifications.components!.parameters, blueprintParameterTemplates);
 
-  if (hookConfig.postProcess) hookConfig.postProcess(specifications);
+  if (hookConfig.postProcess) {
+    hookConfig.postProcess(specifications);
+  }
 
   // clean up of specification, removing unreferenced tags
   const referencedTags = getUniqueTagsFromPath(specifications.paths);
@@ -118,11 +120,17 @@ export default async (sails: Sails.Sails, sailsRoutes: Array<Sails.Route>, conte
     }
   });
 
+  if (hookConfig.saveSwagger) {
+    hookConfig.saveSwagger(specifications);
+  }
+
   const destPath = hookConfig.swaggerJsonPath;
-  try {
-    fs.writeFileSync(destPath, JSON.stringify(specifications, null, 2));
-  } catch (e) {
-    sails.log.error(`ERROR: sails-hook-swagger-generator: Error writing ${destPath}: ${e.message}`, e);
+  if (destPath) {
+    try {
+      fs.writeFileSync(destPath, JSON.stringify(specifications, null, 2));
+    } catch (e) {
+      sails.log.error(`ERROR: sails-hook-swagger-generator: Error writing ${destPath}: ${e.message}`, e);
+    }
   }
 
   sails.log.info('Swagger generated successfully');

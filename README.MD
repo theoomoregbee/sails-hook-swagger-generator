@@ -93,7 +93,8 @@ module.exports['swagger-generator'] = {
     excludeDeprecatedPutBlueprintRoutes: true,
     includeRoute: function(routeInfo) { return true; },
     updateBlueprintActionTemplates: function(blueprintActionTemplates) { ... },
-    postProcess: function(specifications) { ... }
+    postProcess: function(specifications) { ... },
+    saveSwagger: function(specifications) { ... }
 };
 ```
 
@@ -495,6 +496,7 @@ Three mechanisms are provided to enable advancing filtering of the Swagger gener
 1. An `includeRoute()` function used to filter routes to be included in generated Swagger output.
 1. An `updateBlueprintActionTemplates()` function allows customisation of the templates used to generate Swagger for blueprints.
 1. A `postProcess()` function allows modification of the generated Swagger output before it is written to the output file.
+1. A `saveSwagger()` function allows an alternate mechanism for saving the generated Swagger to be specified.
 
 Each is configured in `config/swaggergenerator.js`.
 
@@ -621,6 +623,10 @@ Note that:
 The final generated Swagger output may be post-processed before it is written to
 the output file using a post-processing function specified as the `postProcess` config option.
 
+Note that a final *clean-up* phase is run after post-processing, which performs the following:
+1. Removal of unreferenced tags; and
+2. Creation of tags referenced but are not defined.
+
 For example:
 ```javascript
 module.exports['swagger-generator'] = {
@@ -629,6 +635,25 @@ module.exports['swagger-generator'] = {
     Object.keys(sch).map(k => {
       sch[k].description = sck[k].description.toUpperCase();
     });
+  }
+}
+```
+
+### Alternate Save Method for Generated Swagger Output
+
+For situations where saving the generated swagger documentation JSON to a file is
+not desired/appropriate, the `saveSwagger` config option may be used to specify
+an alternate save mechanism via a callback function.
+
+Note that:
+1. If `swaggerJsonPath` is empty/null/undefined, if will be ignored; and
+2. If both `swaggerJsonPath` and `saveSwagger` are specified, both mechanisms will be used.
+
+For example:
+```javascript
+module.exports['swagger-generator'] = {
+  saveSwagger: function(specifications) {
+    // save specifications to database rather than file...
   }
 }
 ```
