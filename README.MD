@@ -113,7 +113,7 @@ Notes on the use of configuration:
 * `includeRoute` function used to filter routes to be included in generated Swagger output; see advanced section below.
 * `updateBlueprintActionTemplates` allows customisation of the templates used to generate Swagger for blueprints; see advanced section below.
 * `postProcess` allows modification of the generated Swagger output before it is written to the output file; see advanced section below.
-*. `saveSwagger` allows an alternate mechanism for saving the generated Swagger to be specified; see advanced section below.
+* `saveSwagger` allows an alternate mechanism for saving the generated Swagger to be specified; see advanced section below.
 
 
 ## Custom Route Configuration
