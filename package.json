@@ -36,6 +36,7 @@
     "@types/mocha": "^7.0.1",
     "@types/node": "^13.7.4",
     "@types/swagger-jsdoc": "^3.0.2",
+    "@types/swagger-schema-official": "^2.0.20",
     "@typescript-eslint/eslint-plugin": "^2.19.2",
     "@typescript-eslint/parser": "^2.19.2",
     "chai": "^4.1.1",
@@ -50,7 +51,6 @@
     "typescript": "^3.8.2"
   },
   "dependencies": {
-    "@types/swagger-schema-official": "^2.0.20",
     "include-all": "^4.0.3",
     "lodash": "^4.17.4",
     "nodemon": "^2.0.2",
