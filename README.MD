@@ -93,8 +93,7 @@ module.exports['swagger-generator'] = {
     excludeDeprecatedPutBlueprintRoutes: true,
     includeRoute: function(routeInfo) { return true; },
     updateBlueprintActionTemplates: function(blueprintActionTemplates) { ... },
-    postProcess: function(specifications) { ... },
-    saveSwagger: function(specifications) { ... }
+    postProcess: function(specifications) { ... }
 };
 ```
 
