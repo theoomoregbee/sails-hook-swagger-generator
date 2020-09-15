@@ -101,7 +101,8 @@ module.exports['swagger-generator'] = {
 Notes on the use of configuration:
 
 * `disabled` attribute is used to disable the module (e.g you may want to disable it on production).
-* `swaggerJsonPath` where to generate the `swagger.json` file to; defaults to `sails.config.appPath + '/swagger/swagger.json'`.
+* `swaggerJsonPath` where to generate the `swagger.json` file to; defaults to `sails.config.appPath + '/swagger/swagger.json'`
+   and output file will not be written if empty/null/undefined (see `postProcess` below for alternate save mechanism).
 * `swagger` object is template for the Swagger/OpenAPI output. It defaults to the minimal content above.
    Check Swagger/OpenAPI specification for more, in case you want to extend it.
    Generally, this hook provides sensible defaults for as much as possible but you may
@@ -112,8 +113,8 @@ Notes on the use of configuration:
   routes be excluded from generated Swagger output; defaults to `true`.
 * `includeRoute` function used to filter routes to be included in generated Swagger output; see advanced section below.
 * `updateBlueprintActionTemplates` allows customisation of the templates used to generate Swagger for blueprints; see advanced section below.
-* `postProcess` allows modification of the generated Swagger output before it is written to the output file; see advanced section below.
-* `saveSwagger` allows an alternate mechanism for saving the generated Swagger to be specified; see advanced section below.
+* `postProcess` allows an alternate mechanism for saving and/or modification of the generated Swagger output before it is written to
+   the output file; see advanced section below.
 
 
 ## Custom Route Configuration
@@ -456,6 +457,10 @@ Tags are added to the top-level Swagger/OpenAPI definitions as follows:
 1. Where a tag with the specified name **does** exist, elements _of that tag_ that do not exist are added
    e.g. `description` and `externalDocs` elements.
 
+Note that a final *clean-up* phase is run after processing, which performs the following:
+1. Removal of unreferenced tags; and
+2. Creation of tags referenced but are not defined.
+
 ### Component Element Handling
 
 Elements of components are added to the top-level Swagger/OpenAPI definitions as follows:
@@ -496,8 +501,7 @@ let componentDefinitionReference = {
 Three mechanisms are provided to enable advancing filtering of the Swagger generation process:
 1. An `includeRoute()` function used to filter routes to be included in generated Swagger output.
 1. An `updateBlueprintActionTemplates()` function allows customisation of the templates used to generate Swagger for blueprints.
-1. A `postProcess()` function allows modification of the generated Swagger output before it is written to the output file.
-1. A `saveSwagger()` function allows an alternate mechanism for saving the generated Swagger to be specified.
+1. A `postProcess()` function allows an alternate mechanism for saving and/or modification of the generated Swagger output before it is written to the output file.
 
 Each is configured in `config/swaggergenerator.js`.
 
@@ -624,9 +628,11 @@ Note that:
 The final generated Swagger output may be post-processed before it is written to
 the output file using a post-processing function specified as the `postProcess` config option.
 
-Note that a final *clean-up* phase is run after post-processing, which performs the following:
-1. Removal of unreferenced tags; and
-2. Creation of tags referenced but are not defined.
+For situations where saving the generated swagger documentation JSON to a file is
+not desired/appropriate, the `postProcess` config option may be used to specify
+an alternate save mechanism.
+
+Note that if `swaggerJsonPath` config option is empty/null/undefined the output file will not be written.
 
 For example:
 ```javascript
@@ -636,25 +642,6 @@ module.exports['swagger-generator'] = {
     Object.keys(sch).map(k => {
       sch[k].description = sck[k].description.toUpperCase();
     });
-  }
-}
-```
-
-### Alternate Save Method for Generated Swagger Output
-
-For situations where saving the generated swagger documentation JSON to a file is
-not desired/appropriate, the `saveSwagger` config option may be used to specify
-an alternate save mechanism via a callback function.
-
-Note that:
-1. If `swaggerJsonPath` is empty/null/undefined, if will be ignored; and
-2. If both `swaggerJsonPath` and `saveSwagger` are specified, both mechanisms will be used.
-
-For example:
-```javascript
-module.exports['swagger-generator'] = {
-  saveSwagger: function(specifications) {
-    // save specifications to database rather than file...
   }
 }
 ```

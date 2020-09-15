@@ -96,10 +96,6 @@ export default async (sails: Sails.Sails, sailsRoutes: Array<Sails.Route>, conte
 
   defaults(specifications.components!.parameters, blueprintParameterTemplates);
 
-  if (hookConfig.postProcess) {
-    hookConfig.postProcess(specifications);
-  }
-
   // clean up of specification, removing unreferenced tags
   const referencedTags = getUniqueTagsFromPath(specifications.paths);
 
@@ -120,8 +116,8 @@ export default async (sails: Sails.Sails, sailsRoutes: Array<Sails.Route>, conte
     }
   });
 
-  if (hookConfig.saveSwagger) {
-    hookConfig.saveSwagger(specifications);
+  if (hookConfig.postProcess) {
+    hookConfig.postProcess(specifications);
   }
 
   const destPath = hookConfig.swaggerJsonPath;
