@@ -81,7 +81,7 @@ module.exports['swagger-generator'] = {
         servers: [
             { url: 'http://localhost:1337/' }
         ],
-        externalDocs: {url: 'http://theophilus.ziippii.com'}
+        externalDocs: {url: 'https://theoomoregbee.github.io/'}
     },
     defaults: {
         responses: {
