@@ -45,7 +45,7 @@
     "sails": "^1.2.4",
     "sails-disk": "^1.1.2",
     "sails-hook-orm": "^2.1.1",
-    "semantic-release": "^17.0.7",
+    "semantic-release": "^19.0.3",
     "travis-deploy-once": "^4.3.4",
     "tslib": "^1.10.0",
     "typescript": "^3.8.2"
